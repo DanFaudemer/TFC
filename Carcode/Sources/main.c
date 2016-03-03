@@ -3,9 +3,6 @@
 #include "constants.h"
 #include "PID.h"
 #include "signalProcessing.h"
-#include "logger.h"
-
-#include "./distantio.h"
 
 
 
@@ -55,17 +52,15 @@ int main(void)
 	
 	
 	
-		TFC_Init();
+	TFC_Init();
 
-	
-    init_serial();
-    init_protocol();
-	init_distantio();
+
+
 		
 	/* Main Loop */
 	
 	//Read only register -> 0
-	register_scalar(&Run_F, UINT8, 1, "Run_F");
+/*	register_scalar(&Run_F, UINT8, 1, "Run_F");
 	register_scalar(&vitesseG, INT16,0, "VitesseG");
 	register_scalar(&vitesseD, INT16,0, "VitesseD");
     register_scalar(&pid_speedCopy, INT16,0,"PID Speed");
@@ -102,7 +97,7 @@ int main(void)
 	register_scalar(&vit_max,INT16,1, "vit_max");
 	register_scalar(&vit_min,INT16,1, "vit_min");
 	register_scalar(&seuil_detection,UINT16,1, "seuil_detection");
-
+*/
 	
 	             
 	for(;;)
@@ -225,7 +220,6 @@ void State_Debug(void)
 		/* Transmit Vitesse */
 		//TERMINAL_PRINTF(" vitD: %d, vitG: %d\n\r", (int)vitesseD,(int)vitesseG);
 
-		update_distantio();
 	}
 	
 	Update_LED();
@@ -313,7 +307,6 @@ void State_Run(void)
 	else if(TFC_Ticker[3] > 10) 
 	{
 		TFC_Ticker[3] = 0;
-		update_distantio();
 	}
 }
 

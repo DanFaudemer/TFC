@@ -24,8 +24,4 @@ void TFC_Task()
 		TFC_UART_Process();
 	#endif
 	 
-    //TFC_ProcessTerminal();
-		//Our terminal
-		if(cur_state == DEBUG)
-			uart_communication(); 	
 }
