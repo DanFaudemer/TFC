@@ -1,0 +1,2594 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"communication_uart.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.global	command_buffer
+  18              		.section	.bss.command_buffer,"aw",%nobits
+  19              		.align	2
+  22              	command_buffer:
+  23 0000 00000000 		.space	256
+  23      00000000 
+  23      00000000 
+  23      00000000 
+  23      00000000 
+  24              		.global	pos_command_buffer
+  25              		.section	.bss.pos_command_buffer,"aw",%nobits
+  28              	pos_command_buffer:
+  29 0000 00       		.space	1
+  30              		.global	cancel_char
+  31              		.section	.rodata.cancel_char,"a",%progbits
+  32              		.align	2
+  35              	cancel_char:
+  36 0000 20       		.byte	32
+  37 0001 0A       		.byte	10
+  38 0002 0D       		.byte	13
+  39 0003 09       		.byte	9
+  40 0004 00       		.byte	0
+  41              		.global	MyTerminalRecords
+  42 0005 000000   		.section	.rodata
+  43              		.align	2
+  44              	.LC0:
+  45 0000 68656C70 		.ascii	"help\000"
+  45      00
+  46 0005 000000   		.align	2
+  47              	.LC1:
+  48 0008 4C697374 		.ascii	"Lists available commands\000"
+  48      73206176 
+  48      61696C61 
+  48      626C6520 
+  48      636F6D6D 
+  49 0021 000000   		.align	2
+  50              	.LC2:
+  51 0024 4449525F 		.ascii	"DIR_P\000"
+  51      5000
+  52 002a 0000     		.align	2
+  53              	.LC3:
+  54 002c 00       		.ascii	"\000"
+  55 002d 000000   		.align	2
+  56              	.LC4:
+  57 0030 4449525F 		.ascii	"DIR_I\000"
+  57      4900
+  58 0036 0000     		.align	2
+  59              	.LC5:
+  60 0038 4449525F 		.ascii	"DIR_D\000"
+  60      4400
+  61 003e 0000     		.align	2
+  62              	.LC6:
+  63 0040 44494646 		.ascii	"DIFF_P\000"
+  63      5F5000
+  64 0047 00       		.align	2
+  65              	.LC7:
+  66 0048 44494646 		.ascii	"DIFF_I\000"
+  66      5F4900
+  67 004f 00       		.align	2
+  68              	.LC8:
+  69 0050 44494646 		.ascii	"DIFF_D\000"
+  69      5F4400
+  70 0057 00       		.align	2
+  71              	.LC9:
+  72 0058 44494646 		.ascii	"DIFF_MAX\000"
+  72      5F4D4158 
+  72      00
+  73 0061 000000   		.align	2
+  74              	.LC10:
+  75 0064 5350455F 		.ascii	"SPE_P\000"
+  75      5000
+  76 006a 0000     		.align	2
+  77              	.LC11:
+  78 006c 5350455F 		.ascii	"SPE_D\000"
+  78      4400
+  79 0072 0000     		.align	2
+  80              	.LC12:
+  81 0074 5350455F 		.ascii	"SPE_I\000"
+  81      4900
+  82 007a 0000     		.align	2
+  83              	.LC13:
+  84 007c 5350455F 		.ascii	"SPE_MAX\000"
+  84      4D415800 
+  85              		.align	2
+  86              	.LC14:
+  87 0084 5350455F 		.ascii	"SPE_MIN\000"
+  87      4D494E00 
+  88              		.align	2
+  89              	.LC15:
+  90 008c 5350455F 		.ascii	"SPE_ERROR\000"
+  90      4552524F 
+  90      5200
+  91 0096 0000     		.align	2
+  92              	.LC16:
+  93 0098 45727265 		.ascii	"Erreur minimum pour d\351clancher le PID du freinag"
+  93      7572206D 
+  93      696E696D 
+  93      756D2070 
+  93      6F757220 
+  94 00c8 652C2073 		.ascii	"e, sinon vit=vit_max\000"
+  94      696E6F6E 
+  94      20766974 
+  94      3D766974 
+  94      5F6D6178 
+  95 00dd 000000   		.align	2
+  96              	.LC17:
+  97 00e0 43414D5F 		.ascii	"CAM_EXPO\000"
+  97      4558504F 
+  97      00
+  98 00e9 000000   		.align	2
+  99              	.LC18:
+ 100 00ec 43414D5F 		.ascii	"CAM_SEUIL\000"
+ 100      53455549 
+ 100      4C00
+ 101 00f6 0000     		.align	2
+ 102              	.LC19:
+ 103 00f8 53657569 		.ascii	"Seuil de d\351tection de la cam\351ra (default = 20"
+ 103      6C206465 
+ 103      2064E974 
+ 103      65637469 
+ 103      6F6E2064 
+ 104 0125 302900   		.ascii	"0)\000"
+ 105              		.align	2
+ 106              	.LC20:
+ 107 0128 52656672 		.ascii	"Refresh\000"
+ 107      65736800 
+ 108              		.align	2
+ 109              	.LC21:
+ 110 0130 56626174 		.ascii	"Vbat\000"
+ 110      00
+ 111 0135 000000   		.align	2
+ 112              	.LC22:
+ 113 0138 506F7300 		.ascii	"Pos\000"
+ 114              		.align	2
+ 115              	.LC23:
+ 116 013c 4745545F 		.ascii	"GET_LOG\000"
+ 116      4C4F4700 
+ 117              		.align	2
+ 118              	.LC24:
+ 119 0144 47657420 		.ascii	"Get logged data\000"
+ 119      6C6F6767 
+ 119      65642064 
+ 119      61746100 
+ 120              		.align	2
+ 121              	.LC25:
+ 122 0154 4745545F 		.ascii	"GET_LAST_LOG\000"
+ 122      4C415354 
+ 122      5F4C4F47 
+ 122      00
+ 123 0161 000000   		.align	2
+ 124              	.LC26:
+ 125 0164 50736572 		.ascii	"Pservo\000"
+ 125      766F00
+ 126              		.section	.rodata.MyTerminalRecords,"a",%progbits
+ 127              		.align	2
+ 130              	MyTerminalRecords:
+ 131 0000 00000000 		.word	.LC0
+ 132 0004 00000000 		.word	cmd_Help
+ 133 0008 08000000 		.word	.LC1
+ 134 000c 24000000 		.word	.LC2
+ 135 0010 00000000 		.word	cmd_DIR_P
+ 136 0014 2C000000 		.word	.LC3
+ 137 0018 30000000 		.word	.LC4
+ 138 001c 00000000 		.word	cmd_DIR_I
+ 139 0020 2C000000 		.word	.LC3
+ 140 0024 38000000 		.word	.LC5
+ 141 0028 00000000 		.word	cmd_DIR_D
+ 142 002c 2C000000 		.word	.LC3
+ 143 0030 40000000 		.word	.LC6
+ 144 0034 00000000 		.word	cmd_DIFF_P
+ 145 0038 2C000000 		.word	.LC3
+ 146 003c 48000000 		.word	.LC7
+ 147 0040 00000000 		.word	cmd_DIFF_I
+ 148 0044 2C000000 		.word	.LC3
+ 149 0048 50000000 		.word	.LC8
+ 150 004c 00000000 		.word	cmd_DIFF_D
+ 151 0050 2C000000 		.word	.LC3
+ 152 0054 58000000 		.word	.LC9
+ 153 0058 00000000 		.word	cmd_DIFF_MAX
+ 154 005c 2C000000 		.word	.LC3
+ 155 0060 64000000 		.word	.LC10
+ 156 0064 00000000 		.word	cmd_SPE_P
+ 157 0068 2C000000 		.word	.LC3
+ 158 006c 6C000000 		.word	.LC11
+ 159 0070 00000000 		.word	cmd_SPE_D
+ 160 0074 2C000000 		.word	.LC3
+ 161 0078 74000000 		.word	.LC12
+ 162 007c 00000000 		.word	cmd_SPE_I
+ 163 0080 2C000000 		.word	.LC3
+ 164 0084 7C000000 		.word	.LC13
+ 165 0088 00000000 		.word	cmd_SPE_MAX
+ 166 008c 2C000000 		.word	.LC3
+ 167 0090 84000000 		.word	.LC14
+ 168 0094 00000000 		.word	cmd_SPE_MIN
+ 169 0098 2C000000 		.word	.LC3
+ 170 009c 8C000000 		.word	.LC15
+ 171 00a0 00000000 		.word	cmd_SPE_ERROR
+ 172 00a4 98000000 		.word	.LC16
+ 173 00a8 E0000000 		.word	.LC17
+ 174 00ac 00000000 		.word	cmd_CAM_EXPO
+ 175 00b0 2C000000 		.word	.LC3
+ 176 00b4 EC000000 		.word	.LC18
+ 177 00b8 00000000 		.word	cmd_CAM_SEUIL
+ 178 00bc F8000000 		.word	.LC19
+ 179 00c0 28010000 		.word	.LC20
+ 180 00c4 00000000 		.word	cmd_Refresh
+ 181 00c8 2C000000 		.word	.LC3
+ 182 00cc 30010000 		.word	.LC21
+ 183 00d0 00000000 		.word	cmd_Vbat
+ 184 00d4 2C000000 		.word	.LC3
+ 185 00d8 38010000 		.word	.LC22
+ 186 00dc 00000000 		.word	cmd_Pos
+ 187 00e0 2C000000 		.word	.LC3
+ 188 00e4 3C010000 		.word	.LC23
+ 189 00e8 00000000 		.word	cmd_GET_LOG
+ 190 00ec 44010000 		.word	.LC24
+ 191 00f0 54010000 		.word	.LC25
+ 192 00f4 00000000 		.word	cmd_GET_LAST_LOG
+ 193 00f8 44010000 		.word	.LC24
+ 194 00fc 64010000 		.word	.LC26
+ 195 0100 00000000 		.word	cmd_Pservo
+ 196 0104 2C000000 		.word	.LC3
+ 197              		.global	__aeabi_d2f
+ 198              		.global	__aeabi_f2d
+ 199              		.section	.rodata
+ 200 016b 00       		.align	2
+ 201              	.LC29:
+ 202 016c 0D0A204E 		.ascii	"\015\012 New coefficient DIR_P is %f \015\012\000"
+ 202      65772063 
+ 202      6F656666 
+ 202      69636965 
+ 202      6E742044 
+ 203              		.section	.text.cmd_DIR_P,"ax",%progbits
+ 204              		.align	2
+ 205              		.global	cmd_DIR_P
+ 206              		.code	16
+ 207              		.thumb_func
+ 209              	cmd_DIR_P:
+ 210              	.LFB0:
+ 211              		.file 1 "../Sources/TFC/communication_uart.c"
+   1:../Sources/TFC/communication_uart.c **** #include "stdlib.h"
+   2:../Sources/TFC/communication_uart.c **** 
+   3:../Sources/TFC/communication_uart.c **** #include "TFC\TFC.h"
+   4:../Sources/TFC/communication_uart.c **** #include "logger.h"
+   5:../Sources/TFC/communication_uart.c **** #define  UART_COMMAND_MAX_SIZE 256
+   6:../Sources/TFC/communication_uart.c **** #define NUM_TERMINAL_COMMANDS 21
+   7:../Sources/TFC/communication_uart.c **** char command_buffer[UART_COMMAND_MAX_SIZE] = { };
+   8:../Sources/TFC/communication_uart.c **** uint8_t pos_command_buffer = 0;
+   9:../Sources/TFC/communication_uart.c **** const char cancel_char[] = {' ', '\n', '\r', '\t', '\0'};
+  10:../Sources/TFC/communication_uart.c **** 
+  11:../Sources/TFC/communication_uart.c **** 
+  12:../Sources/TFC/communication_uart.c **** 
+  13:../Sources/TFC/communication_uart.c **** 
+  14:../Sources/TFC/communication_uart.c **** 
+  15:../Sources/TFC/communication_uart.c **** extern float coeff_dir_P;
+  16:../Sources/TFC/communication_uart.c **** extern float coeff_dir_D;
+  17:../Sources/TFC/communication_uart.c **** extern float coeff_dir_I;
+  18:../Sources/TFC/communication_uart.c **** 
+  19:../Sources/TFC/communication_uart.c **** 
+  20:../Sources/TFC/communication_uart.c **** extern float coeff_diff_P ;
+  21:../Sources/TFC/communication_uart.c **** extern float coeff_diff_I ;
+  22:../Sources/TFC/communication_uart.c **** extern float coeff_diff_D ;
+  23:../Sources/TFC/communication_uart.c **** 
+  24:../Sources/TFC/communication_uart.c **** extern float coeff_speed_P ;
+  25:../Sources/TFC/communication_uart.c **** extern float coeff_speed_I ;
+  26:../Sources/TFC/communication_uart.c **** extern float coeff_speed_D ;
+  27:../Sources/TFC/communication_uart.c **** 
+  28:../Sources/TFC/communication_uart.c **** 
+  29:../Sources/TFC/communication_uart.c **** extern float differentiel_max;
+  30:../Sources/TFC/communication_uart.c **** extern float vit_max ;
+  31:../Sources/TFC/communication_uart.c **** extern float vit_min;
+  32:../Sources/TFC/communication_uart.c **** extern uint8_t  break_min_error ;
+  33:../Sources/TFC/communication_uart.c **** 
+  34:../Sources/TFC/communication_uart.c **** extern uint16_t seuil_detection;
+  35:../Sources/TFC/communication_uart.c **** 
+  36:../Sources/TFC/communication_uart.c **** 
+  37:../Sources/TFC/communication_uart.c **** 
+  38:../Sources/TFC/communication_uart.c **** typedef void (*TerminalCallback)(char *);
+  39:../Sources/TFC/communication_uart.c **** 
+  40:../Sources/TFC/communication_uart.c **** typedef struct {
+  41:../Sources/TFC/communication_uart.c **** 	const char *CommandString;
+  42:../Sources/TFC/communication_uart.c **** 	TerminalCallback Callback;
+  43:../Sources/TFC/communication_uart.c **** 	const char * HelpString;
+  44:../Sources/TFC/communication_uart.c **** 
+  45:../Sources/TFC/communication_uart.c **** } CommandRecord;
+  46:../Sources/TFC/communication_uart.c **** void cmd_DIR_P(char *arg);
+  47:../Sources/TFC/communication_uart.c **** void cmd_DIR_I(char *arg);
+  48:../Sources/TFC/communication_uart.c **** void cmd_DIR_D(char *arg) ;
+  49:../Sources/TFC/communication_uart.c **** void cmd_DIFF_P(char *arg) ;
+  50:../Sources/TFC/communication_uart.c **** void cmd_DIFF_I(char *arg) ;
+  51:../Sources/TFC/communication_uart.c **** void cmd_DIFF_D(char *arg) ;
+  52:../Sources/TFC/communication_uart.c **** void cmd_DIFF_MAX(char *arg) ;
+  53:../Sources/TFC/communication_uart.c **** void cmd_SPE_P(char *arg) ;
+  54:../Sources/TFC/communication_uart.c **** void cmd_SPE_I(char *arg) ;
+  55:../Sources/TFC/communication_uart.c **** void cmd_SPE_D(char *arg) ;
+  56:../Sources/TFC/communication_uart.c **** void cmd_CAM_EXPO(char *arg) ;
+  57:../Sources/TFC/communication_uart.c **** void cmd_CAM_SEUIL(char *arg);
+  58:../Sources/TFC/communication_uart.c **** void cmd_Vbat(char *arg) ;
+  59:../Sources/TFC/communication_uart.c **** void cmd_Pos(char *arg) ;
+  60:../Sources/TFC/communication_uart.c **** void cmd_Pservo(char *arg) ;
+  61:../Sources/TFC/communication_uart.c **** void cmd_Refresh(char *arg) ;
+  62:../Sources/TFC/communication_uart.c **** void cmd_Help(char *arg)  ;
+  63:../Sources/TFC/communication_uart.c **** 
+  64:../Sources/TFC/communication_uart.c **** 
+  65:../Sources/TFC/communication_uart.c **** void cmd_SPE_MIN(char *arg);
+  66:../Sources/TFC/communication_uart.c **** void cmd_SPE_MAX(char *arg);
+  67:../Sources/TFC/communication_uart.c **** void cmd_SPE_ERROR(char *arg);
+  68:../Sources/TFC/communication_uart.c **** 
+  69:../Sources/TFC/communication_uart.c **** void cmd_GET_LOG(char *arg);
+  70:../Sources/TFC/communication_uart.c **** void cmd_GET_LAST_LOG(char *arg);
+  71:../Sources/TFC/communication_uart.c **** const CommandRecord MyTerminalRecords[] = { { "help", cmd_Help,"Lists available commands" },
+  72:../Sources/TFC/communication_uart.c **** 		{ "DIR_P", cmd_DIR_P, "" },
+  73:../Sources/TFC/communication_uart.c **** 		{ "DIR_I",cmd_DIR_I, "" }, 
+  74:../Sources/TFC/communication_uart.c **** 		{ "DIR_D", cmd_DIR_D, "" },
+  75:../Sources/TFC/communication_uart.c **** 		{ "DIFF_P", cmd_DIFF_P, "" },
+  76:../Sources/TFC/communication_uart.c **** 		{ "DIFF_I", cmd_DIFF_I, "" }, 
+  77:../Sources/TFC/communication_uart.c **** 		{ "DIFF_D",	cmd_DIFF_D, "" },
+  78:../Sources/TFC/communication_uart.c **** 		{ "DIFF_MAX", cmd_DIFF_MAX, "" },
+  79:../Sources/TFC/communication_uart.c **** 		{ "SPE_P",cmd_SPE_P, "" }, 
+  80:../Sources/TFC/communication_uart.c **** 		{ "SPE_D", cmd_SPE_D, "" }, 
+  81:../Sources/TFC/communication_uart.c **** 		{ "SPE_I",cmd_SPE_I, "" }, 
+  82:../Sources/TFC/communication_uart.c **** 		{ "SPE_MAX",cmd_SPE_MAX, "" }, 
+  83:../Sources/TFC/communication_uart.c **** 		{ "SPE_MIN",cmd_SPE_MIN, "" }, 
+  84:../Sources/TFC/communication_uart.c **** 		{ "SPE_ERROR",cmd_SPE_ERROR, "Erreur minimum pour déclancher le PID du freinage, sinon vit=vit_ma
+  85:../Sources/TFC/communication_uart.c **** 		{ "CAM_EXPO", cmd_CAM_EXPO, "" },
+  86:../Sources/TFC/communication_uart.c **** 		{ "CAM_SEUIL", cmd_CAM_SEUIL, "Seuil de détection de la caméra (default = 200)" },
+  87:../Sources/TFC/communication_uart.c **** 		{ "Refresh",cmd_Refresh, "" },
+  88:../Sources/TFC/communication_uart.c **** 		{ "Vbat", cmd_Vbat, "" },
+  89:../Sources/TFC/communication_uart.c **** 		{ "Pos", cmd_Pos,"" },
+  90:../Sources/TFC/communication_uart.c **** 		{ "GET_LOG", cmd_GET_LOG,"Get logged data" },
+  91:../Sources/TFC/communication_uart.c **** 		{ "GET_LAST_LOG", cmd_GET_LAST_LOG,"Get logged data" },
+  92:../Sources/TFC/communication_uart.c **** 		{ "Pservo", cmd_Pservo, "" }
+  93:../Sources/TFC/communication_uart.c **** 		
+  94:../Sources/TFC/communication_uart.c **** };
+  95:../Sources/TFC/communication_uart.c **** 
+  96:../Sources/TFC/communication_uart.c **** void cmd_DIR_P(char *arg) {
+ 212              		.loc 1 96 0
+ 213              		.cfi_startproc
+ 214 0000 90B5     		push	{r4, r7, lr}
+ 215              	.LCFI0:
+ 216              		.cfi_def_cfa_offset 12
+ 217              		.cfi_offset 4, -12
+ 218              		.cfi_offset 7, -8
+ 219              		.cfi_offset 14, -4
+ 220 0002 83B0     		sub	sp, sp, #12
+ 221              	.LCFI1:
+ 222              		.cfi_def_cfa_offset 24
+ 223 0004 00AF     		add	r7, sp, #0
+ 224              	.LCFI2:
+ 225              		.cfi_def_cfa_register 7
+ 226 0006 7860     		str	r0, [r7, #4]
+  97:../Sources/TFC/communication_uart.c **** 	coeff_dir_P = (float)atof(arg);
+ 227              		.loc 1 97 0
+ 228 0008 7B68     		ldr	r3, [r7, #4]
+ 229 000a 181C     		mov	r0, r3
+ 230 000c FFF7FEFF 		bl	atof
+ 231 0010 031C     		mov	r3, r0
+ 232 0012 0C1C     		mov	r4, r1
+ 233 0014 181C     		mov	r0, r3
+ 234 0016 211C     		mov	r1, r4
+ 235 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 236 001c 021C     		add	r2, r0, #0
+ 237 001e 0A4B     		ldr	r3, .L2
+ 238 0020 1A60     		str	r2, [r3]
+  98:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient DIR_P is %f \r\n",  (coeff_dir_P));
+ 239              		.loc 1 98 0
+ 240 0022 094B     		ldr	r3, .L2
+ 241 0024 1B68     		ldr	r3, [r3]
+ 242 0026 181C     		add	r0, r3, #0
+ 243 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 244 002c 031C     		mov	r3, r0
+ 245 002e 0C1C     		mov	r4, r1
+ 246 0030 0649     		ldr	r1, .L2+4
+ 247 0032 074A     		ldr	r2, .L2+8
+ 248 0034 081C     		mov	r0, r1
+ 249 0036 111C     		mov	r1, r2
+ 250 0038 1A1C     		mov	r2, r3
+ 251 003a 231C     		mov	r3, r4
+ 252 003c FFF7FEFF 		bl	Qprintf
+  99:../Sources/TFC/communication_uart.c **** }
+ 253              		.loc 1 99 0
+ 254 0040 BD46     		mov	sp, r7
+ 255 0042 03B0     		add	sp, sp, #12
+ 256              		@ sp needed for prologue
+ 257 0044 90BD     		pop	{r4, r7, pc}
+ 258              	.L3:
+ 259 0046 C046     		.align	2
+ 260              	.L2:
+ 261 0048 00000000 		.word	coeff_dir_P
+ 262 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 263 0050 6C010000 		.word	.LC29
+ 264              		.cfi_endproc
+ 265              	.LFE0:
+ 267              		.section	.rodata
+ 268 018e 0000     		.align	2
+ 269              	.LC33:
+ 270 0190 0D0A204E 		.ascii	"\015\012 New coefficient DIR_I is %f \015\012\000"
+ 270      65772063 
+ 270      6F656666 
+ 270      69636965 
+ 270      6E742044 
+ 271              		.section	.text.cmd_DIR_I,"ax",%progbits
+ 272              		.align	2
+ 273              		.global	cmd_DIR_I
+ 274              		.code	16
+ 275              		.thumb_func
+ 277              	cmd_DIR_I:
+ 278              	.LFB1:
+ 100:../Sources/TFC/communication_uart.c **** 
+ 101:../Sources/TFC/communication_uart.c **** void cmd_DIR_I(char *arg) {
+ 279              		.loc 1 101 0
+ 280              		.cfi_startproc
+ 281 0000 90B5     		push	{r4, r7, lr}
+ 282              	.LCFI3:
+ 283              		.cfi_def_cfa_offset 12
+ 284              		.cfi_offset 4, -12
+ 285              		.cfi_offset 7, -8
+ 286              		.cfi_offset 14, -4
+ 287 0002 83B0     		sub	sp, sp, #12
+ 288              	.LCFI4:
+ 289              		.cfi_def_cfa_offset 24
+ 290 0004 00AF     		add	r7, sp, #0
+ 291              	.LCFI5:
+ 292              		.cfi_def_cfa_register 7
+ 293 0006 7860     		str	r0, [r7, #4]
+ 102:../Sources/TFC/communication_uart.c **** 	coeff_dir_I = atof(arg);
+ 294              		.loc 1 102 0
+ 295 0008 7B68     		ldr	r3, [r7, #4]
+ 296 000a 181C     		mov	r0, r3
+ 297 000c FFF7FEFF 		bl	atof
+ 298 0010 031C     		mov	r3, r0
+ 299 0012 0C1C     		mov	r4, r1
+ 300 0014 181C     		mov	r0, r3
+ 301 0016 211C     		mov	r1, r4
+ 302 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 303 001c 021C     		add	r2, r0, #0
+ 304 001e 0A4B     		ldr	r3, .L5
+ 305 0020 1A60     		str	r2, [r3]
+ 103:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient DIR_I is %f \r\n", coeff_dir_I);
+ 306              		.loc 1 103 0
+ 307 0022 094B     		ldr	r3, .L5
+ 308 0024 1B68     		ldr	r3, [r3]
+ 309 0026 181C     		add	r0, r3, #0
+ 310 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 311 002c 031C     		mov	r3, r0
+ 312 002e 0C1C     		mov	r4, r1
+ 313 0030 0649     		ldr	r1, .L5+4
+ 314 0032 074A     		ldr	r2, .L5+8
+ 315 0034 081C     		mov	r0, r1
+ 316 0036 111C     		mov	r1, r2
+ 317 0038 1A1C     		mov	r2, r3
+ 318 003a 231C     		mov	r3, r4
+ 319 003c FFF7FEFF 		bl	Qprintf
+ 104:../Sources/TFC/communication_uart.c **** }
+ 320              		.loc 1 104 0
+ 321 0040 BD46     		mov	sp, r7
+ 322 0042 03B0     		add	sp, sp, #12
+ 323              		@ sp needed for prologue
+ 324 0044 90BD     		pop	{r4, r7, pc}
+ 325              	.L6:
+ 326 0046 C046     		.align	2
+ 327              	.L5:
+ 328 0048 00000000 		.word	coeff_dir_I
+ 329 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 330 0050 90010000 		.word	.LC33
+ 331              		.cfi_endproc
+ 332              	.LFE1:
+ 334              		.section	.rodata
+ 335 01b2 0000     		.align	2
+ 336              	.LC37:
+ 337 01b4 0D0A204E 		.ascii	"\015\012 New coefficient DIR_D is %f \015\012\000"
+ 337      65772063 
+ 337      6F656666 
+ 337      69636965 
+ 337      6E742044 
+ 338              		.section	.text.cmd_DIR_D,"ax",%progbits
+ 339              		.align	2
+ 340              		.global	cmd_DIR_D
+ 341              		.code	16
+ 342              		.thumb_func
+ 344              	cmd_DIR_D:
+ 345              	.LFB2:
+ 105:../Sources/TFC/communication_uart.c **** 
+ 106:../Sources/TFC/communication_uart.c **** void cmd_DIR_D(char *arg) {
+ 346              		.loc 1 106 0
+ 347              		.cfi_startproc
+ 348 0000 90B5     		push	{r4, r7, lr}
+ 349              	.LCFI6:
+ 350              		.cfi_def_cfa_offset 12
+ 351              		.cfi_offset 4, -12
+ 352              		.cfi_offset 7, -8
+ 353              		.cfi_offset 14, -4
+ 354 0002 83B0     		sub	sp, sp, #12
+ 355              	.LCFI7:
+ 356              		.cfi_def_cfa_offset 24
+ 357 0004 00AF     		add	r7, sp, #0
+ 358              	.LCFI8:
+ 359              		.cfi_def_cfa_register 7
+ 360 0006 7860     		str	r0, [r7, #4]
+ 107:../Sources/TFC/communication_uart.c **** 	coeff_dir_D = atof(arg);
+ 361              		.loc 1 107 0
+ 362 0008 7B68     		ldr	r3, [r7, #4]
+ 363 000a 181C     		mov	r0, r3
+ 364 000c FFF7FEFF 		bl	atof
+ 365 0010 031C     		mov	r3, r0
+ 366 0012 0C1C     		mov	r4, r1
+ 367 0014 181C     		mov	r0, r3
+ 368 0016 211C     		mov	r1, r4
+ 369 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 370 001c 021C     		add	r2, r0, #0
+ 371 001e 0A4B     		ldr	r3, .L8
+ 372 0020 1A60     		str	r2, [r3]
+ 108:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient DIR_D is %f \r\n",  (coeff_dir_D));
+ 373              		.loc 1 108 0
+ 374 0022 094B     		ldr	r3, .L8
+ 375 0024 1B68     		ldr	r3, [r3]
+ 376 0026 181C     		add	r0, r3, #0
+ 377 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 378 002c 031C     		mov	r3, r0
+ 379 002e 0C1C     		mov	r4, r1
+ 380 0030 0649     		ldr	r1, .L8+4
+ 381 0032 074A     		ldr	r2, .L8+8
+ 382 0034 081C     		mov	r0, r1
+ 383 0036 111C     		mov	r1, r2
+ 384 0038 1A1C     		mov	r2, r3
+ 385 003a 231C     		mov	r3, r4
+ 386 003c FFF7FEFF 		bl	Qprintf
+ 109:../Sources/TFC/communication_uart.c **** }
+ 387              		.loc 1 109 0
+ 388 0040 BD46     		mov	sp, r7
+ 389 0042 03B0     		add	sp, sp, #12
+ 390              		@ sp needed for prologue
+ 391 0044 90BD     		pop	{r4, r7, pc}
+ 392              	.L9:
+ 393 0046 C046     		.align	2
+ 394              	.L8:
+ 395 0048 00000000 		.word	coeff_dir_D
+ 396 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 397 0050 B4010000 		.word	.LC37
+ 398              		.cfi_endproc
+ 399              	.LFE2:
+ 401              		.section	.rodata
+ 402 01d6 0000     		.align	2
+ 403              	.LC41:
+ 404 01d8 0D0A204E 		.ascii	"\015\012 New coefficient DIFF_P is %f \015\012\000"
+ 404      65772063 
+ 404      6F656666 
+ 404      69636965 
+ 404      6E742044 
+ 405              		.section	.text.cmd_DIFF_P,"ax",%progbits
+ 406              		.align	2
+ 407              		.global	cmd_DIFF_P
+ 408              		.code	16
+ 409              		.thumb_func
+ 411              	cmd_DIFF_P:
+ 412              	.LFB3:
+ 110:../Sources/TFC/communication_uart.c **** //////////////////////////////////////////////////////////////////////////
+ 111:../Sources/TFC/communication_uart.c **** void cmd_DIFF_P(char *arg) {
+ 413              		.loc 1 111 0
+ 414              		.cfi_startproc
+ 415 0000 90B5     		push	{r4, r7, lr}
+ 416              	.LCFI9:
+ 417              		.cfi_def_cfa_offset 12
+ 418              		.cfi_offset 4, -12
+ 419              		.cfi_offset 7, -8
+ 420              		.cfi_offset 14, -4
+ 421 0002 83B0     		sub	sp, sp, #12
+ 422              	.LCFI10:
+ 423              		.cfi_def_cfa_offset 24
+ 424 0004 00AF     		add	r7, sp, #0
+ 425              	.LCFI11:
+ 426              		.cfi_def_cfa_register 7
+ 427 0006 7860     		str	r0, [r7, #4]
+ 112:../Sources/TFC/communication_uart.c **** 	coeff_diff_P = atof(arg);
+ 428              		.loc 1 112 0
+ 429 0008 7B68     		ldr	r3, [r7, #4]
+ 430 000a 181C     		mov	r0, r3
+ 431 000c FFF7FEFF 		bl	atof
+ 432 0010 031C     		mov	r3, r0
+ 433 0012 0C1C     		mov	r4, r1
+ 434 0014 181C     		mov	r0, r3
+ 435 0016 211C     		mov	r1, r4
+ 436 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 437 001c 021C     		add	r2, r0, #0
+ 438 001e 0A4B     		ldr	r3, .L11
+ 439 0020 1A60     		str	r2, [r3]
+ 113:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient DIFF_P is %f \r\n",  (coeff_diff_P));
+ 440              		.loc 1 113 0
+ 441 0022 094B     		ldr	r3, .L11
+ 442 0024 1B68     		ldr	r3, [r3]
+ 443 0026 181C     		add	r0, r3, #0
+ 444 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 445 002c 031C     		mov	r3, r0
+ 446 002e 0C1C     		mov	r4, r1
+ 447 0030 0649     		ldr	r1, .L11+4
+ 448 0032 074A     		ldr	r2, .L11+8
+ 449 0034 081C     		mov	r0, r1
+ 450 0036 111C     		mov	r1, r2
+ 451 0038 1A1C     		mov	r2, r3
+ 452 003a 231C     		mov	r3, r4
+ 453 003c FFF7FEFF 		bl	Qprintf
+ 114:../Sources/TFC/communication_uart.c **** }
+ 454              		.loc 1 114 0
+ 455 0040 BD46     		mov	sp, r7
+ 456 0042 03B0     		add	sp, sp, #12
+ 457              		@ sp needed for prologue
+ 458 0044 90BD     		pop	{r4, r7, pc}
+ 459              	.L12:
+ 460 0046 C046     		.align	2
+ 461              	.L11:
+ 462 0048 00000000 		.word	coeff_diff_P
+ 463 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 464 0050 D8010000 		.word	.LC41
+ 465              		.cfi_endproc
+ 466              	.LFE3:
+ 468              		.section	.rodata
+ 469 01fb 00       		.align	2
+ 470              	.LC45:
+ 471 01fc 0D0A204E 		.ascii	"\015\012 New coefficient DIFF_I is %f \015\012\000"
+ 471      65772063 
+ 471      6F656666 
+ 471      69636965 
+ 471      6E742044 
+ 472              		.section	.text.cmd_DIFF_I,"ax",%progbits
+ 473              		.align	2
+ 474              		.global	cmd_DIFF_I
+ 475              		.code	16
+ 476              		.thumb_func
+ 478              	cmd_DIFF_I:
+ 479              	.LFB4:
+ 115:../Sources/TFC/communication_uart.c **** void cmd_DIFF_I(char *arg) {
+ 480              		.loc 1 115 0
+ 481              		.cfi_startproc
+ 482 0000 90B5     		push	{r4, r7, lr}
+ 483              	.LCFI12:
+ 484              		.cfi_def_cfa_offset 12
+ 485              		.cfi_offset 4, -12
+ 486              		.cfi_offset 7, -8
+ 487              		.cfi_offset 14, -4
+ 488 0002 83B0     		sub	sp, sp, #12
+ 489              	.LCFI13:
+ 490              		.cfi_def_cfa_offset 24
+ 491 0004 00AF     		add	r7, sp, #0
+ 492              	.LCFI14:
+ 493              		.cfi_def_cfa_register 7
+ 494 0006 7860     		str	r0, [r7, #4]
+ 116:../Sources/TFC/communication_uart.c **** 	coeff_diff_I = atof(arg);
+ 495              		.loc 1 116 0
+ 496 0008 7B68     		ldr	r3, [r7, #4]
+ 497 000a 181C     		mov	r0, r3
+ 498 000c FFF7FEFF 		bl	atof
+ 499 0010 031C     		mov	r3, r0
+ 500 0012 0C1C     		mov	r4, r1
+ 501 0014 181C     		mov	r0, r3
+ 502 0016 211C     		mov	r1, r4
+ 503 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 504 001c 021C     		add	r2, r0, #0
+ 505 001e 0A4B     		ldr	r3, .L14
+ 506 0020 1A60     		str	r2, [r3]
+ 117:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient DIFF_I is %f \r\n",  (coeff_diff_I));
+ 507              		.loc 1 117 0
+ 508 0022 094B     		ldr	r3, .L14
+ 509 0024 1B68     		ldr	r3, [r3]
+ 510 0026 181C     		add	r0, r3, #0
+ 511 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 512 002c 031C     		mov	r3, r0
+ 513 002e 0C1C     		mov	r4, r1
+ 514 0030 0649     		ldr	r1, .L14+4
+ 515 0032 074A     		ldr	r2, .L14+8
+ 516 0034 081C     		mov	r0, r1
+ 517 0036 111C     		mov	r1, r2
+ 518 0038 1A1C     		mov	r2, r3
+ 519 003a 231C     		mov	r3, r4
+ 520 003c FFF7FEFF 		bl	Qprintf
+ 118:../Sources/TFC/communication_uart.c **** }
+ 521              		.loc 1 118 0
+ 522 0040 BD46     		mov	sp, r7
+ 523 0042 03B0     		add	sp, sp, #12
+ 524              		@ sp needed for prologue
+ 525 0044 90BD     		pop	{r4, r7, pc}
+ 526              	.L15:
+ 527 0046 C046     		.align	2
+ 528              	.L14:
+ 529 0048 00000000 		.word	coeff_diff_I
+ 530 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 531 0050 FC010000 		.word	.LC45
+ 532              		.cfi_endproc
+ 533              	.LFE4:
+ 535              		.section	.rodata
+ 536 021f 00       		.align	2
+ 537              	.LC49:
+ 538 0220 0D0A204E 		.ascii	"\015\012 New coefficient DIFF_D is %f \015\012\000"
+ 538      65772063 
+ 538      6F656666 
+ 538      69636965 
+ 538      6E742044 
+ 539              		.section	.text.cmd_DIFF_D,"ax",%progbits
+ 540              		.align	2
+ 541              		.global	cmd_DIFF_D
+ 542              		.code	16
+ 543              		.thumb_func
+ 545              	cmd_DIFF_D:
+ 546              	.LFB5:
+ 119:../Sources/TFC/communication_uart.c **** 
+ 120:../Sources/TFC/communication_uart.c **** void cmd_DIFF_D(char *arg) {
+ 547              		.loc 1 120 0
+ 548              		.cfi_startproc
+ 549 0000 90B5     		push	{r4, r7, lr}
+ 550              	.LCFI15:
+ 551              		.cfi_def_cfa_offset 12
+ 552              		.cfi_offset 4, -12
+ 553              		.cfi_offset 7, -8
+ 554              		.cfi_offset 14, -4
+ 555 0002 83B0     		sub	sp, sp, #12
+ 556              	.LCFI16:
+ 557              		.cfi_def_cfa_offset 24
+ 558 0004 00AF     		add	r7, sp, #0
+ 559              	.LCFI17:
+ 560              		.cfi_def_cfa_register 7
+ 561 0006 7860     		str	r0, [r7, #4]
+ 121:../Sources/TFC/communication_uart.c **** 	coeff_diff_D = atof(arg);
+ 562              		.loc 1 121 0
+ 563 0008 7B68     		ldr	r3, [r7, #4]
+ 564 000a 181C     		mov	r0, r3
+ 565 000c FFF7FEFF 		bl	atof
+ 566 0010 031C     		mov	r3, r0
+ 567 0012 0C1C     		mov	r4, r1
+ 568 0014 181C     		mov	r0, r3
+ 569 0016 211C     		mov	r1, r4
+ 570 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 571 001c 021C     		add	r2, r0, #0
+ 572 001e 0A4B     		ldr	r3, .L17
+ 573 0020 1A60     		str	r2, [r3]
+ 122:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient DIFF_D is %f \r\n",  (coeff_diff_D));
+ 574              		.loc 1 122 0
+ 575 0022 094B     		ldr	r3, .L17
+ 576 0024 1B68     		ldr	r3, [r3]
+ 577 0026 181C     		add	r0, r3, #0
+ 578 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 579 002c 031C     		mov	r3, r0
+ 580 002e 0C1C     		mov	r4, r1
+ 581 0030 0649     		ldr	r1, .L17+4
+ 582 0032 074A     		ldr	r2, .L17+8
+ 583 0034 081C     		mov	r0, r1
+ 584 0036 111C     		mov	r1, r2
+ 585 0038 1A1C     		mov	r2, r3
+ 586 003a 231C     		mov	r3, r4
+ 587 003c FFF7FEFF 		bl	Qprintf
+ 123:../Sources/TFC/communication_uart.c **** }
+ 588              		.loc 1 123 0
+ 589 0040 BD46     		mov	sp, r7
+ 590 0042 03B0     		add	sp, sp, #12
+ 591              		@ sp needed for prologue
+ 592 0044 90BD     		pop	{r4, r7, pc}
+ 593              	.L18:
+ 594 0046 C046     		.align	2
+ 595              	.L17:
+ 596 0048 00000000 		.word	coeff_diff_D
+ 597 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 598 0050 20020000 		.word	.LC49
+ 599              		.cfi_endproc
+ 600              	.LFE5:
+ 602              		.section	.rodata
+ 603 0243 00       		.align	2
+ 604              	.LC53:
+ 605 0244 0D0A204E 		.ascii	"\015\012 New value for DIFF_MAX is %f \015\012\000"
+ 605      65772076 
+ 605      616C7565 
+ 605      20666F72 
+ 605      20444946 
+ 606              		.section	.text.cmd_DIFF_MAX,"ax",%progbits
+ 607              		.align	2
+ 608              		.global	cmd_DIFF_MAX
+ 609              		.code	16
+ 610              		.thumb_func
+ 612              	cmd_DIFF_MAX:
+ 613              	.LFB6:
+ 124:../Sources/TFC/communication_uart.c **** 
+ 125:../Sources/TFC/communication_uart.c **** void cmd_DIFF_MAX(char *arg) {
+ 614              		.loc 1 125 0
+ 615              		.cfi_startproc
+ 616 0000 90B5     		push	{r4, r7, lr}
+ 617              	.LCFI18:
+ 618              		.cfi_def_cfa_offset 12
+ 619              		.cfi_offset 4, -12
+ 620              		.cfi_offset 7, -8
+ 621              		.cfi_offset 14, -4
+ 622 0002 83B0     		sub	sp, sp, #12
+ 623              	.LCFI19:
+ 624              		.cfi_def_cfa_offset 24
+ 625 0004 00AF     		add	r7, sp, #0
+ 626              	.LCFI20:
+ 627              		.cfi_def_cfa_register 7
+ 628 0006 7860     		str	r0, [r7, #4]
+ 126:../Sources/TFC/communication_uart.c **** 	differentiel_max = atof(arg);
+ 629              		.loc 1 126 0
+ 630 0008 7B68     		ldr	r3, [r7, #4]
+ 631 000a 181C     		mov	r0, r3
+ 632 000c FFF7FEFF 		bl	atof
+ 633 0010 031C     		mov	r3, r0
+ 634 0012 0C1C     		mov	r4, r1
+ 635 0014 181C     		mov	r0, r3
+ 636 0016 211C     		mov	r1, r4
+ 637 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 638 001c 021C     		add	r2, r0, #0
+ 639 001e 0A4B     		ldr	r3, .L20
+ 640 0020 1A60     		str	r2, [r3]
+ 127:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New value for DIFF_MAX is %f \r\n", differentiel_max);
+ 641              		.loc 1 127 0
+ 642 0022 094B     		ldr	r3, .L20
+ 643 0024 1B68     		ldr	r3, [r3]
+ 644 0026 181C     		add	r0, r3, #0
+ 645 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 646 002c 031C     		mov	r3, r0
+ 647 002e 0C1C     		mov	r4, r1
+ 648 0030 0649     		ldr	r1, .L20+4
+ 649 0032 074A     		ldr	r2, .L20+8
+ 650 0034 081C     		mov	r0, r1
+ 651 0036 111C     		mov	r1, r2
+ 652 0038 1A1C     		mov	r2, r3
+ 653 003a 231C     		mov	r3, r4
+ 654 003c FFF7FEFF 		bl	Qprintf
+ 128:../Sources/TFC/communication_uart.c **** }
+ 655              		.loc 1 128 0
+ 656 0040 BD46     		mov	sp, r7
+ 657 0042 03B0     		add	sp, sp, #12
+ 658              		@ sp needed for prologue
+ 659 0044 90BD     		pop	{r4, r7, pc}
+ 660              	.L21:
+ 661 0046 C046     		.align	2
+ 662              	.L20:
+ 663 0048 00000000 		.word	differentiel_max
+ 664 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 665 0050 44020000 		.word	.LC53
+ 666              		.cfi_endproc
+ 667              	.LFE6:
+ 669              		.section	.rodata
+ 670 0267 00       		.align	2
+ 671              	.LC57:
+ 672 0268 0D0A204E 		.ascii	"\015\012 New coefficient SPE_P is %f \015\012\000"
+ 672      65772063 
+ 672      6F656666 
+ 672      69636965 
+ 672      6E742053 
+ 673              		.section	.text.cmd_SPE_P,"ax",%progbits
+ 674              		.align	2
+ 675              		.global	cmd_SPE_P
+ 676              		.code	16
+ 677              		.thumb_func
+ 679              	cmd_SPE_P:
+ 680              	.LFB7:
+ 129:../Sources/TFC/communication_uart.c **** ////////////////////////////////////////////////////////////////////// 
+ 130:../Sources/TFC/communication_uart.c **** void cmd_SPE_P(char *arg) {
+ 681              		.loc 1 130 0
+ 682              		.cfi_startproc
+ 683 0000 90B5     		push	{r4, r7, lr}
+ 684              	.LCFI21:
+ 685              		.cfi_def_cfa_offset 12
+ 686              		.cfi_offset 4, -12
+ 687              		.cfi_offset 7, -8
+ 688              		.cfi_offset 14, -4
+ 689 0002 83B0     		sub	sp, sp, #12
+ 690              	.LCFI22:
+ 691              		.cfi_def_cfa_offset 24
+ 692 0004 00AF     		add	r7, sp, #0
+ 693              	.LCFI23:
+ 694              		.cfi_def_cfa_register 7
+ 695 0006 7860     		str	r0, [r7, #4]
+ 131:../Sources/TFC/communication_uart.c **** 	coeff_speed_P = atof(arg);
+ 696              		.loc 1 131 0
+ 697 0008 7B68     		ldr	r3, [r7, #4]
+ 698 000a 181C     		mov	r0, r3
+ 699 000c FFF7FEFF 		bl	atof
+ 700 0010 031C     		mov	r3, r0
+ 701 0012 0C1C     		mov	r4, r1
+ 702 0014 181C     		mov	r0, r3
+ 703 0016 211C     		mov	r1, r4
+ 704 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 705 001c 021C     		add	r2, r0, #0
+ 706 001e 0A4B     		ldr	r3, .L23
+ 707 0020 1A60     		str	r2, [r3]
+ 132:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient SPE_P is %f \r\n",  (coeff_speed_P));
+ 708              		.loc 1 132 0
+ 709 0022 094B     		ldr	r3, .L23
+ 710 0024 1B68     		ldr	r3, [r3]
+ 711 0026 181C     		add	r0, r3, #0
+ 712 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 713 002c 031C     		mov	r3, r0
+ 714 002e 0C1C     		mov	r4, r1
+ 715 0030 0649     		ldr	r1, .L23+4
+ 716 0032 074A     		ldr	r2, .L23+8
+ 717 0034 081C     		mov	r0, r1
+ 718 0036 111C     		mov	r1, r2
+ 719 0038 1A1C     		mov	r2, r3
+ 720 003a 231C     		mov	r3, r4
+ 721 003c FFF7FEFF 		bl	Qprintf
+ 133:../Sources/TFC/communication_uart.c **** }
+ 722              		.loc 1 133 0
+ 723 0040 BD46     		mov	sp, r7
+ 724 0042 03B0     		add	sp, sp, #12
+ 725              		@ sp needed for prologue
+ 726 0044 90BD     		pop	{r4, r7, pc}
+ 727              	.L24:
+ 728 0046 C046     		.align	2
+ 729              	.L23:
+ 730 0048 00000000 		.word	coeff_speed_P
+ 731 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 732 0050 68020000 		.word	.LC57
+ 733              		.cfi_endproc
+ 734              	.LFE7:
+ 736              		.section	.rodata
+ 737 028a 0000     		.align	2
+ 738              	.LC61:
+ 739 028c 0D0A204E 		.ascii	"\015\012 New coefficient SPE_I is %f \015\012\000"
+ 739      65772063 
+ 739      6F656666 
+ 739      69636965 
+ 739      6E742053 
+ 740              		.section	.text.cmd_SPE_I,"ax",%progbits
+ 741              		.align	2
+ 742              		.global	cmd_SPE_I
+ 743              		.code	16
+ 744              		.thumb_func
+ 746              	cmd_SPE_I:
+ 747              	.LFB8:
+ 134:../Sources/TFC/communication_uart.c **** 
+ 135:../Sources/TFC/communication_uart.c **** void cmd_SPE_I(char *arg) {
+ 748              		.loc 1 135 0
+ 749              		.cfi_startproc
+ 750 0000 90B5     		push	{r4, r7, lr}
+ 751              	.LCFI24:
+ 752              		.cfi_def_cfa_offset 12
+ 753              		.cfi_offset 4, -12
+ 754              		.cfi_offset 7, -8
+ 755              		.cfi_offset 14, -4
+ 756 0002 83B0     		sub	sp, sp, #12
+ 757              	.LCFI25:
+ 758              		.cfi_def_cfa_offset 24
+ 759 0004 00AF     		add	r7, sp, #0
+ 760              	.LCFI26:
+ 761              		.cfi_def_cfa_register 7
+ 762 0006 7860     		str	r0, [r7, #4]
+ 136:../Sources/TFC/communication_uart.c **** 	coeff_speed_I = atof(arg);
+ 763              		.loc 1 136 0
+ 764 0008 7B68     		ldr	r3, [r7, #4]
+ 765 000a 181C     		mov	r0, r3
+ 766 000c FFF7FEFF 		bl	atof
+ 767 0010 031C     		mov	r3, r0
+ 768 0012 0C1C     		mov	r4, r1
+ 769 0014 181C     		mov	r0, r3
+ 770 0016 211C     		mov	r1, r4
+ 771 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 772 001c 021C     		add	r2, r0, #0
+ 773 001e 0A4B     		ldr	r3, .L26
+ 774 0020 1A60     		str	r2, [r3]
+ 137:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient SPE_I is %f \r\n",  (coeff_speed_I));
+ 775              		.loc 1 137 0
+ 776 0022 094B     		ldr	r3, .L26
+ 777 0024 1B68     		ldr	r3, [r3]
+ 778 0026 181C     		add	r0, r3, #0
+ 779 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 780 002c 031C     		mov	r3, r0
+ 781 002e 0C1C     		mov	r4, r1
+ 782 0030 0649     		ldr	r1, .L26+4
+ 783 0032 074A     		ldr	r2, .L26+8
+ 784 0034 081C     		mov	r0, r1
+ 785 0036 111C     		mov	r1, r2
+ 786 0038 1A1C     		mov	r2, r3
+ 787 003a 231C     		mov	r3, r4
+ 788 003c FFF7FEFF 		bl	Qprintf
+ 138:../Sources/TFC/communication_uart.c **** }
+ 789              		.loc 1 138 0
+ 790 0040 BD46     		mov	sp, r7
+ 791 0042 03B0     		add	sp, sp, #12
+ 792              		@ sp needed for prologue
+ 793 0044 90BD     		pop	{r4, r7, pc}
+ 794              	.L27:
+ 795 0046 C046     		.align	2
+ 796              	.L26:
+ 797 0048 00000000 		.word	coeff_speed_I
+ 798 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 799 0050 8C020000 		.word	.LC61
+ 800              		.cfi_endproc
+ 801              	.LFE8:
+ 803              		.section	.rodata
+ 804 02ae 0000     		.align	2
+ 805              	.LC65:
+ 806 02b0 0D0A204E 		.ascii	"\015\012 New coefficient SPE_D is %f \015\012\000"
+ 806      65772063 
+ 806      6F656666 
+ 806      69636965 
+ 806      6E742053 
+ 807              		.section	.text.cmd_SPE_D,"ax",%progbits
+ 808              		.align	2
+ 809              		.global	cmd_SPE_D
+ 810              		.code	16
+ 811              		.thumb_func
+ 813              	cmd_SPE_D:
+ 814              	.LFB9:
+ 139:../Sources/TFC/communication_uart.c **** 
+ 140:../Sources/TFC/communication_uart.c **** void cmd_SPE_D(char *arg) {
+ 815              		.loc 1 140 0
+ 816              		.cfi_startproc
+ 817 0000 90B5     		push	{r4, r7, lr}
+ 818              	.LCFI27:
+ 819              		.cfi_def_cfa_offset 12
+ 820              		.cfi_offset 4, -12
+ 821              		.cfi_offset 7, -8
+ 822              		.cfi_offset 14, -4
+ 823 0002 83B0     		sub	sp, sp, #12
+ 824              	.LCFI28:
+ 825              		.cfi_def_cfa_offset 24
+ 826 0004 00AF     		add	r7, sp, #0
+ 827              	.LCFI29:
+ 828              		.cfi_def_cfa_register 7
+ 829 0006 7860     		str	r0, [r7, #4]
+ 141:../Sources/TFC/communication_uart.c **** 	coeff_speed_D = atof(arg);
+ 830              		.loc 1 141 0
+ 831 0008 7B68     		ldr	r3, [r7, #4]
+ 832 000a 181C     		mov	r0, r3
+ 833 000c FFF7FEFF 		bl	atof
+ 834 0010 031C     		mov	r3, r0
+ 835 0012 0C1C     		mov	r4, r1
+ 836 0014 181C     		mov	r0, r3
+ 837 0016 211C     		mov	r1, r4
+ 838 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 839 001c 021C     		add	r2, r0, #0
+ 840 001e 0A4B     		ldr	r3, .L29
+ 841 0020 1A60     		str	r2, [r3]
+ 142:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New coefficient SPE_D is %f \r\n",  (coeff_speed_D));
+ 842              		.loc 1 142 0
+ 843 0022 094B     		ldr	r3, .L29
+ 844 0024 1B68     		ldr	r3, [r3]
+ 845 0026 181C     		add	r0, r3, #0
+ 846 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 847 002c 031C     		mov	r3, r0
+ 848 002e 0C1C     		mov	r4, r1
+ 849 0030 0649     		ldr	r1, .L29+4
+ 850 0032 074A     		ldr	r2, .L29+8
+ 851 0034 081C     		mov	r0, r1
+ 852 0036 111C     		mov	r1, r2
+ 853 0038 1A1C     		mov	r2, r3
+ 854 003a 231C     		mov	r3, r4
+ 855 003c FFF7FEFF 		bl	Qprintf
+ 143:../Sources/TFC/communication_uart.c **** }
+ 856              		.loc 1 143 0
+ 857 0040 BD46     		mov	sp, r7
+ 858 0042 03B0     		add	sp, sp, #12
+ 859              		@ sp needed for prologue
+ 860 0044 90BD     		pop	{r4, r7, pc}
+ 861              	.L30:
+ 862 0046 C046     		.align	2
+ 863              	.L29:
+ 864 0048 00000000 		.word	coeff_speed_D
+ 865 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 866 0050 B0020000 		.word	.LC65
+ 867              		.cfi_endproc
+ 868              	.LFE9:
+ 870              		.section	.rodata
+ 871 02d2 0000     		.align	2
+ 872              	.LC69:
+ 873 02d4 0D0A204E 		.ascii	"\015\012 New value for SPE_MAX is %f \015\012\000"
+ 873      65772076 
+ 873      616C7565 
+ 873      20666F72 
+ 873      20535045 
+ 874              		.section	.text.cmd_SPE_MAX,"ax",%progbits
+ 875              		.align	2
+ 876              		.global	cmd_SPE_MAX
+ 877              		.code	16
+ 878              		.thumb_func
+ 880              	cmd_SPE_MAX:
+ 881              	.LFB10:
+ 144:../Sources/TFC/communication_uart.c **** 
+ 145:../Sources/TFC/communication_uart.c **** 
+ 146:../Sources/TFC/communication_uart.c **** void cmd_SPE_MAX(char *arg) {
+ 882              		.loc 1 146 0
+ 883              		.cfi_startproc
+ 884 0000 90B5     		push	{r4, r7, lr}
+ 885              	.LCFI30:
+ 886              		.cfi_def_cfa_offset 12
+ 887              		.cfi_offset 4, -12
+ 888              		.cfi_offset 7, -8
+ 889              		.cfi_offset 14, -4
+ 890 0002 83B0     		sub	sp, sp, #12
+ 891              	.LCFI31:
+ 892              		.cfi_def_cfa_offset 24
+ 893 0004 00AF     		add	r7, sp, #0
+ 894              	.LCFI32:
+ 895              		.cfi_def_cfa_register 7
+ 896 0006 7860     		str	r0, [r7, #4]
+ 147:../Sources/TFC/communication_uart.c **** 	vit_max = atof(arg);
+ 897              		.loc 1 147 0
+ 898 0008 7B68     		ldr	r3, [r7, #4]
+ 899 000a 181C     		mov	r0, r3
+ 900 000c FFF7FEFF 		bl	atof
+ 901 0010 031C     		mov	r3, r0
+ 902 0012 0C1C     		mov	r4, r1
+ 903 0014 181C     		mov	r0, r3
+ 904 0016 211C     		mov	r1, r4
+ 905 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 906 001c 021C     		add	r2, r0, #0
+ 907 001e 0A4B     		ldr	r3, .L32
+ 908 0020 1A60     		str	r2, [r3]
+ 148:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New value for SPE_MAX is %f \r\n", vit_max);
+ 909              		.loc 1 148 0
+ 910 0022 094B     		ldr	r3, .L32
+ 911 0024 1B68     		ldr	r3, [r3]
+ 912 0026 181C     		add	r0, r3, #0
+ 913 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 914 002c 031C     		mov	r3, r0
+ 915 002e 0C1C     		mov	r4, r1
+ 916 0030 0649     		ldr	r1, .L32+4
+ 917 0032 074A     		ldr	r2, .L32+8
+ 918 0034 081C     		mov	r0, r1
+ 919 0036 111C     		mov	r1, r2
+ 920 0038 1A1C     		mov	r2, r3
+ 921 003a 231C     		mov	r3, r4
+ 922 003c FFF7FEFF 		bl	Qprintf
+ 149:../Sources/TFC/communication_uart.c **** }
+ 923              		.loc 1 149 0
+ 924 0040 BD46     		mov	sp, r7
+ 925 0042 03B0     		add	sp, sp, #12
+ 926              		@ sp needed for prologue
+ 927 0044 90BD     		pop	{r4, r7, pc}
+ 928              	.L33:
+ 929 0046 C046     		.align	2
+ 930              	.L32:
+ 931 0048 00000000 		.word	vit_max
+ 932 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 933 0050 D4020000 		.word	.LC69
+ 934              		.cfi_endproc
+ 935              	.LFE10:
+ 937              		.section	.rodata
+ 938 02f6 0000     		.align	2
+ 939              	.LC73:
+ 940 02f8 0D0A204E 		.ascii	"\015\012 New value for SPE_MIN is %f \015\012\000"
+ 940      65772076 
+ 940      616C7565 
+ 940      20666F72 
+ 940      20535045 
+ 941              		.section	.text.cmd_SPE_MIN,"ax",%progbits
+ 942              		.align	2
+ 943              		.global	cmd_SPE_MIN
+ 944              		.code	16
+ 945              		.thumb_func
+ 947              	cmd_SPE_MIN:
+ 948              	.LFB11:
+ 150:../Sources/TFC/communication_uart.c **** 
+ 151:../Sources/TFC/communication_uart.c **** void cmd_SPE_MIN(char *arg) {
+ 949              		.loc 1 151 0
+ 950              		.cfi_startproc
+ 951 0000 90B5     		push	{r4, r7, lr}
+ 952              	.LCFI33:
+ 953              		.cfi_def_cfa_offset 12
+ 954              		.cfi_offset 4, -12
+ 955              		.cfi_offset 7, -8
+ 956              		.cfi_offset 14, -4
+ 957 0002 83B0     		sub	sp, sp, #12
+ 958              	.LCFI34:
+ 959              		.cfi_def_cfa_offset 24
+ 960 0004 00AF     		add	r7, sp, #0
+ 961              	.LCFI35:
+ 962              		.cfi_def_cfa_register 7
+ 963 0006 7860     		str	r0, [r7, #4]
+ 152:../Sources/TFC/communication_uart.c **** 	vit_min = atof(arg);
+ 964              		.loc 1 152 0
+ 965 0008 7B68     		ldr	r3, [r7, #4]
+ 966 000a 181C     		mov	r0, r3
+ 967 000c FFF7FEFF 		bl	atof
+ 968 0010 031C     		mov	r3, r0
+ 969 0012 0C1C     		mov	r4, r1
+ 970 0014 181C     		mov	r0, r3
+ 971 0016 211C     		mov	r1, r4
+ 972 0018 FFF7FEFF 		bl	__aeabi_d2f
+ 973 001c 021C     		add	r2, r0, #0
+ 974 001e 0A4B     		ldr	r3, .L35
+ 975 0020 1A60     		str	r2, [r3]
+ 153:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New value for SPE_MIN is %f \r\n",  vit_min);
+ 976              		.loc 1 153 0
+ 977 0022 094B     		ldr	r3, .L35
+ 978 0024 1B68     		ldr	r3, [r3]
+ 979 0026 181C     		add	r0, r3, #0
+ 980 0028 FFF7FEFF 		bl	__aeabi_f2d
+ 981 002c 031C     		mov	r3, r0
+ 982 002e 0C1C     		mov	r4, r1
+ 983 0030 0649     		ldr	r1, .L35+4
+ 984 0032 074A     		ldr	r2, .L35+8
+ 985 0034 081C     		mov	r0, r1
+ 986 0036 111C     		mov	r1, r2
+ 987 0038 1A1C     		mov	r2, r3
+ 988 003a 231C     		mov	r3, r4
+ 989 003c FFF7FEFF 		bl	Qprintf
+ 154:../Sources/TFC/communication_uart.c **** }
+ 990              		.loc 1 154 0
+ 991 0040 BD46     		mov	sp, r7
+ 992 0042 03B0     		add	sp, sp, #12
+ 993              		@ sp needed for prologue
+ 994 0044 90BD     		pop	{r4, r7, pc}
+ 995              	.L36:
+ 996 0046 C046     		.align	2
+ 997              	.L35:
+ 998 0048 00000000 		.word	vit_min
+ 999 004c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1000 0050 F8020000 		.word	.LC73
+ 1001              		.cfi_endproc
+ 1002              	.LFE11:
+ 1004              		.global	__aeabi_d2uiz
+ 1005              		.section	.rodata
+ 1006 031a 0000     		.align	2
+ 1007              	.LC77:
+ 1008 031c 0D0A204E 		.ascii	"\015\012 Not implemented \015\012\000"
+ 1008      6F742069 
+ 1008      6D706C65 
+ 1008      6D656E74 
+ 1008      6564200D 
+ 1009              		.section	.text.cmd_SPE_ERROR,"ax",%progbits
+ 1010              		.align	2
+ 1011              		.global	cmd_SPE_ERROR
+ 1012              		.code	16
+ 1013              		.thumb_func
+ 1015              	cmd_SPE_ERROR:
+ 1016              	.LFB12:
+ 155:../Sources/TFC/communication_uart.c **** 
+ 156:../Sources/TFC/communication_uart.c **** void cmd_SPE_ERROR(char *arg) {
+ 1017              		.loc 1 156 0
+ 1018              		.cfi_startproc
+ 1019 0000 90B5     		push	{r4, r7, lr}
+ 1020              	.LCFI36:
+ 1021              		.cfi_def_cfa_offset 12
+ 1022              		.cfi_offset 4, -12
+ 1023              		.cfi_offset 7, -8
+ 1024              		.cfi_offset 14, -4
+ 1025 0002 83B0     		sub	sp, sp, #12
+ 1026              	.LCFI37:
+ 1027              		.cfi_def_cfa_offset 24
+ 1028 0004 00AF     		add	r7, sp, #0
+ 1029              	.LCFI38:
+ 1030              		.cfi_def_cfa_register 7
+ 1031 0006 7860     		str	r0, [r7, #4]
+ 157:../Sources/TFC/communication_uart.c **** 	break_min_error = atof(arg);
+ 1032              		.loc 1 157 0
+ 1033 0008 7B68     		ldr	r3, [r7, #4]
+ 1034 000a 181C     		mov	r0, r3
+ 1035 000c FFF7FEFF 		bl	atof
+ 1036 0010 031C     		mov	r3, r0
+ 1037 0012 0C1C     		mov	r4, r1
+ 1038 0014 181C     		mov	r0, r3
+ 1039 0016 211C     		mov	r1, r4
+ 1040 0018 FFF7FEFF 		bl	__aeabi_d2uiz
+ 1041 001c 031C     		mov	r3, r0
+ 1042 001e DAB2     		uxtb	r2, r3
+ 1043 0020 064B     		ldr	r3, .L38
+ 1044 0022 1A70     		strb	r2, [r3]
+ 158:../Sources/TFC/communication_uart.c **** 	//TERMINAL_PRINTF("\r\n New value for SPE_ERROR is %d \r\n",  break_min_error);
+ 159:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n Not implemented \r\n",  break_min_error);
+ 1045              		.loc 1 159 0
+ 1046 0024 054B     		ldr	r3, .L38
+ 1047 0026 1B78     		ldrb	r3, [r3]
+ 1048 0028 0549     		ldr	r1, .L38+4
+ 1049 002a 064A     		ldr	r2, .L38+8
+ 1050 002c 081C     		mov	r0, r1
+ 1051 002e 111C     		mov	r1, r2
+ 1052 0030 1A1C     		mov	r2, r3
+ 1053 0032 FFF7FEFF 		bl	Qprintf
+ 160:../Sources/TFC/communication_uart.c **** }
+ 1054              		.loc 1 160 0
+ 1055 0036 BD46     		mov	sp, r7
+ 1056 0038 03B0     		add	sp, sp, #12
+ 1057              		@ sp needed for prologue
+ 1058 003a 90BD     		pop	{r4, r7, pc}
+ 1059              	.L39:
+ 1060              		.align	2
+ 1061              	.L38:
+ 1062 003c 00000000 		.word	break_min_error
+ 1063 0040 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1064 0044 1C030000 		.word	.LC77
+ 1065              		.cfi_endproc
+ 1066              	.LFE12:
+ 1068              		.section	.rodata
+ 1069 0332 0000     		.align	2
+ 1070              	.LC81:
+ 1071 0334 0D0A204E 		.ascii	"\015\012 New exposition time is not supported  \015"
+ 1071      65772065 
+ 1071      78706F73 
+ 1071      6974696F 
+ 1071      6E207469 
+ 1072 035e 0A00     		.ascii	"\012\000"
+ 1073              		.section	.text.cmd_CAM_EXPO,"ax",%progbits
+ 1074              		.align	2
+ 1075              		.global	cmd_CAM_EXPO
+ 1076              		.code	16
+ 1077              		.thumb_func
+ 1079              	cmd_CAM_EXPO:
+ 1080              	.LFB13:
+ 161:../Sources/TFC/communication_uart.c **** ////////////////////////////////////////////////////////////////////// 
+ 162:../Sources/TFC/communication_uart.c **** void cmd_CAM_EXPO(char *arg) {
+ 1081              		.loc 1 162 0
+ 1082              		.cfi_startproc
+ 1083 0000 90B5     		push	{r4, r7, lr}
+ 1084              	.LCFI39:
+ 1085              		.cfi_def_cfa_offset 12
+ 1086              		.cfi_offset 4, -12
+ 1087              		.cfi_offset 7, -8
+ 1088              		.cfi_offset 14, -4
+ 1089 0002 83B0     		sub	sp, sp, #12
+ 1090              	.LCFI40:
+ 1091              		.cfi_def_cfa_offset 24
+ 1092 0004 00AF     		add	r7, sp, #0
+ 1093              	.LCFI41:
+ 1094              		.cfi_def_cfa_register 7
+ 1095 0006 7860     		str	r0, [r7, #4]
+ 163:../Sources/TFC/communication_uart.c **** 	//cam_expo = atoi(arg);
+ 164:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New exposition time is not supported  \r\n", coeff_speed_D);
+ 1096              		.loc 1 164 0
+ 1097 0008 084B     		ldr	r3, .L41
+ 1098 000a 1B68     		ldr	r3, [r3]
+ 1099 000c 181C     		add	r0, r3, #0
+ 1100 000e FFF7FEFF 		bl	__aeabi_f2d
+ 1101 0012 031C     		mov	r3, r0
+ 1102 0014 0C1C     		mov	r4, r1
+ 1103 0016 0649     		ldr	r1, .L41+4
+ 1104 0018 064A     		ldr	r2, .L41+8
+ 1105 001a 081C     		mov	r0, r1
+ 1106 001c 111C     		mov	r1, r2
+ 1107 001e 1A1C     		mov	r2, r3
+ 1108 0020 231C     		mov	r3, r4
+ 1109 0022 FFF7FEFF 		bl	Qprintf
+ 165:../Sources/TFC/communication_uart.c **** }
+ 1110              		.loc 1 165 0
+ 1111 0026 BD46     		mov	sp, r7
+ 1112 0028 03B0     		add	sp, sp, #12
+ 1113              		@ sp needed for prologue
+ 1114 002a 90BD     		pop	{r4, r7, pc}
+ 1115              	.L42:
+ 1116              		.align	2
+ 1117              	.L41:
+ 1118 002c 00000000 		.word	coeff_speed_D
+ 1119 0030 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1120 0034 34030000 		.word	.LC81
+ 1121              		.cfi_endproc
+ 1122              	.LFE13:
+ 1124              		.section	.rodata
+ 1125              		.align	2
+ 1126              	.LC85:
+ 1127 0360 0D0A204E 		.ascii	"\015\012 New value for CAM_SEUIL is %d \015\012\000"
+ 1127      65772076 
+ 1127      616C7565 
+ 1127      20666F72 
+ 1127      2043414D 
+ 1128              		.section	.text.cmd_CAM_SEUIL,"ax",%progbits
+ 1129              		.align	2
+ 1130              		.global	cmd_CAM_SEUIL
+ 1131              		.code	16
+ 1132              		.thumb_func
+ 1134              	cmd_CAM_SEUIL:
+ 1135              	.LFB14:
+ 166:../Sources/TFC/communication_uart.c **** 
+ 167:../Sources/TFC/communication_uart.c **** void cmd_CAM_SEUIL(char *arg) {
+ 1136              		.loc 1 167 0
+ 1137              		.cfi_startproc
+ 1138 0000 80B5     		push	{r7, lr}
+ 1139              	.LCFI42:
+ 1140              		.cfi_def_cfa_offset 8
+ 1141              		.cfi_offset 7, -8
+ 1142              		.cfi_offset 14, -4
+ 1143 0002 82B0     		sub	sp, sp, #8
+ 1144              	.LCFI43:
+ 1145              		.cfi_def_cfa_offset 16
+ 1146 0004 00AF     		add	r7, sp, #0
+ 1147              	.LCFI44:
+ 1148              		.cfi_def_cfa_register 7
+ 1149 0006 7860     		str	r0, [r7, #4]
+ 168:../Sources/TFC/communication_uart.c **** 	seuil_detection = atoi(arg);
+ 1150              		.loc 1 168 0
+ 1151 0008 7B68     		ldr	r3, [r7, #4]
+ 1152 000a 181C     		mov	r0, r3
+ 1153 000c FFF7FEFF 		bl	atoi
+ 1154 0010 031C     		mov	r3, r0
+ 1155 0012 9AB2     		uxth	r2, r3
+ 1156 0014 064B     		ldr	r3, .L44
+ 1157 0016 1A80     		strh	r2, [r3]
+ 169:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n New value for CAM_SEUIL is %d \r\n",  seuil_detection);
+ 1158              		.loc 1 169 0
+ 1159 0018 054B     		ldr	r3, .L44
+ 1160 001a 1B88     		ldrh	r3, [r3]
+ 1161 001c 0549     		ldr	r1, .L44+4
+ 1162 001e 064A     		ldr	r2, .L44+8
+ 1163 0020 081C     		mov	r0, r1
+ 1164 0022 111C     		mov	r1, r2
+ 1165 0024 1A1C     		mov	r2, r3
+ 1166 0026 FFF7FEFF 		bl	Qprintf
+ 170:../Sources/TFC/communication_uart.c **** 	
+ 171:../Sources/TFC/communication_uart.c **** }
+ 1167              		.loc 1 171 0
+ 1168 002a BD46     		mov	sp, r7
+ 1169 002c 02B0     		add	sp, sp, #8
+ 1170              		@ sp needed for prologue
+ 1171 002e 80BD     		pop	{r7, pc}
+ 1172              	.L45:
+ 1173              		.align	2
+ 1174              	.L44:
+ 1175 0030 00000000 		.word	seuil_detection
+ 1176 0034 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1177 0038 60030000 		.word	.LC85
+ 1178              		.cfi_endproc
+ 1179              	.LFE14:
+ 1181              		.section	.rodata
+ 1182              		.align	2
+ 1183              	.LC88:
+ 1184 0384 0D0A2056 		.ascii	"\015\012 Vbatt is %f V \015\012\000"
+ 1184      62617474 
+ 1184      20697320 
+ 1184      25662056 
+ 1184      200D0A00 
+ 1185              		.section	.text.cmd_Vbat,"ax",%progbits
+ 1186              		.align	2
+ 1187              		.global	cmd_Vbat
+ 1188              		.code	16
+ 1189              		.thumb_func
+ 1191              	cmd_Vbat:
+ 1192              	.LFB15:
+ 172:../Sources/TFC/communication_uart.c **** ////////////////////////////////////////////////////////////////////// 
+ 173:../Sources/TFC/communication_uart.c **** void cmd_Vbat(char *arg) {
+ 1193              		.loc 1 173 0
+ 1194              		.cfi_startproc
+ 1195 0000 80B5     		push	{r7, lr}
+ 1196              	.LCFI45:
+ 1197              		.cfi_def_cfa_offset 8
+ 1198              		.cfi_offset 7, -8
+ 1199              		.cfi_offset 14, -4
+ 1200 0002 82B0     		sub	sp, sp, #8
+ 1201              	.LCFI46:
+ 1202              		.cfi_def_cfa_offset 16
+ 1203 0004 00AF     		add	r7, sp, #0
+ 1204              	.LCFI47:
+ 1205              		.cfi_def_cfa_register 7
+ 1206 0006 7860     		str	r0, [r7, #4]
+ 174:../Sources/TFC/communication_uart.c **** 
+ 175:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n Vbatt is %f V \r\n", TFC_ReadBatteryVoltage);
+ 1207              		.loc 1 175 0
+ 1208 0008 0549     		ldr	r1, .L47
+ 1209 000a 064A     		ldr	r2, .L47+4
+ 1210 000c 064B     		ldr	r3, .L47+8
+ 1211 000e 081C     		mov	r0, r1
+ 1212 0010 111C     		mov	r1, r2
+ 1213 0012 1A1C     		mov	r2, r3
+ 1214 0014 FFF7FEFF 		bl	Qprintf
+ 176:../Sources/TFC/communication_uart.c **** }
+ 1215              		.loc 1 176 0
+ 1216 0018 BD46     		mov	sp, r7
+ 1217 001a 02B0     		add	sp, sp, #8
+ 1218              		@ sp needed for prologue
+ 1219 001c 80BD     		pop	{r7, pc}
+ 1220              	.L48:
+ 1221 001e C046     		.align	2
+ 1222              	.L47:
+ 1223 0020 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1224 0024 84030000 		.word	.LC88
+ 1225 0028 00000000 		.word	TFC_ReadBatteryVoltage
+ 1226              		.cfi_endproc
+ 1227              	.LFE15:
+ 1229              		.section	.rodata
+ 1230              		.align	2
+ 1231              	.LC92:
+ 1232 0398 0D0A2050 		.ascii	"\015\012 Pos is not supported \015\012\000"
+ 1232      6F732069 
+ 1232      73206E6F 
+ 1232      74207375 
+ 1232      70706F72 
+ 1233              		.section	.text.cmd_Pos,"ax",%progbits
+ 1234              		.align	2
+ 1235              		.global	cmd_Pos
+ 1236              		.code	16
+ 1237              		.thumb_func
+ 1239              	cmd_Pos:
+ 1240              	.LFB16:
+ 177:../Sources/TFC/communication_uart.c **** ////////////////////////////////////////////////////////////////////// 
+ 178:../Sources/TFC/communication_uart.c **** void cmd_Pos(char *arg) {
+ 1241              		.loc 1 178 0
+ 1242              		.cfi_startproc
+ 1243 0000 80B5     		push	{r7, lr}
+ 1244              	.LCFI48:
+ 1245              		.cfi_def_cfa_offset 8
+ 1246              		.cfi_offset 7, -8
+ 1247              		.cfi_offset 14, -4
+ 1248 0002 82B0     		sub	sp, sp, #8
+ 1249              	.LCFI49:
+ 1250              		.cfi_def_cfa_offset 16
+ 1251 0004 00AF     		add	r7, sp, #0
+ 1252              	.LCFI50:
+ 1253              		.cfi_def_cfa_register 7
+ 1254 0006 7860     		str	r0, [r7, #4]
+ 179:../Sources/TFC/communication_uart.c **** 
+ 180:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n Pos is not supported \r\n");
+ 1255              		.loc 1 180 0
+ 1256 0008 044A     		ldr	r2, .L50
+ 1257 000a 054B     		ldr	r3, .L50+4
+ 1258 000c 101C     		mov	r0, r2
+ 1259 000e 191C     		mov	r1, r3
+ 1260 0010 FFF7FEFF 		bl	Qprintf
+ 181:../Sources/TFC/communication_uart.c **** }
+ 1261              		.loc 1 181 0
+ 1262 0014 BD46     		mov	sp, r7
+ 1263 0016 02B0     		add	sp, sp, #8
+ 1264              		@ sp needed for prologue
+ 1265 0018 80BD     		pop	{r7, pc}
+ 1266              	.L51:
+ 1267 001a C046     		.align	2
+ 1268              	.L50:
+ 1269 001c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1270 0020 98030000 		.word	.LC92
+ 1271              		.cfi_endproc
+ 1272              	.LFE16:
+ 1274              		.section	.rodata
+ 1275 03b3 00       		.align	2
+ 1276              	.LC95:
+ 1277 03b4 0D0A2053 		.ascii	"\015\012 Servo position is not supported \015\012\000"
+ 1277      6572766F 
+ 1277      20706F73 
+ 1277      6974696F 
+ 1277      6E206973 
+ 1278              		.section	.text.cmd_Pservo,"ax",%progbits
+ 1279              		.align	2
+ 1280              		.global	cmd_Pservo
+ 1281              		.code	16
+ 1282              		.thumb_func
+ 1284              	cmd_Pservo:
+ 1285              	.LFB17:
+ 182:../Sources/TFC/communication_uart.c **** ////////////////////////////////////////////////////////////////////// 
+ 183:../Sources/TFC/communication_uart.c **** void cmd_Pservo(char *arg) {
+ 1286              		.loc 1 183 0
+ 1287              		.cfi_startproc
+ 1288 0000 80B5     		push	{r7, lr}
+ 1289              	.LCFI51:
+ 1290              		.cfi_def_cfa_offset 8
+ 1291              		.cfi_offset 7, -8
+ 1292              		.cfi_offset 14, -4
+ 1293 0002 82B0     		sub	sp, sp, #8
+ 1294              	.LCFI52:
+ 1295              		.cfi_def_cfa_offset 16
+ 1296 0004 00AF     		add	r7, sp, #0
+ 1297              	.LCFI53:
+ 1298              		.cfi_def_cfa_register 7
+ 1299 0006 7860     		str	r0, [r7, #4]
+ 184:../Sources/TFC/communication_uart.c **** 
+ 185:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n Servo position is not supported \r\n" );
+ 1300              		.loc 1 185 0
+ 1301 0008 044A     		ldr	r2, .L53
+ 1302 000a 054B     		ldr	r3, .L53+4
+ 1303 000c 101C     		mov	r0, r2
+ 1304 000e 191C     		mov	r1, r3
+ 1305 0010 FFF7FEFF 		bl	Qprintf
+ 186:../Sources/TFC/communication_uart.c **** }
+ 1306              		.loc 1 186 0
+ 1307 0014 BD46     		mov	sp, r7
+ 1308 0016 02B0     		add	sp, sp, #8
+ 1309              		@ sp needed for prologue
+ 1310 0018 80BD     		pop	{r7, pc}
+ 1311              	.L54:
+ 1312 001a C046     		.align	2
+ 1313              	.L53:
+ 1314 001c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1315 0020 B4030000 		.word	.LC95
+ 1316              		.cfi_endproc
+ 1317              	.LFE17:
+ 1319              		.section	.text.cmd_GET_LOG,"ax",%progbits
+ 1320              		.align	2
+ 1321              		.global	cmd_GET_LOG
+ 1322              		.code	16
+ 1323              		.thumb_func
+ 1325              	cmd_GET_LOG:
+ 1326              	.LFB18:
+ 187:../Sources/TFC/communication_uart.c **** 
+ 188:../Sources/TFC/communication_uart.c **** void cmd_GET_LOG(char *arg) {
+ 1327              		.loc 1 188 0
+ 1328              		.cfi_startproc
+ 1329 0000 80B5     		push	{r7, lr}
+ 1330              	.LCFI54:
+ 1331              		.cfi_def_cfa_offset 8
+ 1332              		.cfi_offset 7, -8
+ 1333              		.cfi_offset 14, -4
+ 1334 0002 82B0     		sub	sp, sp, #8
+ 1335              	.LCFI55:
+ 1336              		.cfi_def_cfa_offset 16
+ 1337 0004 00AF     		add	r7, sp, #0
+ 1338              	.LCFI56:
+ 1339              		.cfi_def_cfa_register 7
+ 1340 0006 7860     		str	r0, [r7, #4]
+ 189:../Sources/TFC/communication_uart.c **** 	printLogger();	
+ 1341              		.loc 1 189 0
+ 1342 0008 FFF7FEFF 		bl	printLogger
+ 190:../Sources/TFC/communication_uart.c **** }
+ 1343              		.loc 1 190 0
+ 1344 000c BD46     		mov	sp, r7
+ 1345 000e 02B0     		add	sp, sp, #8
+ 1346              		@ sp needed for prologue
+ 1347 0010 80BD     		pop	{r7, pc}
+ 1348              		.cfi_endproc
+ 1349              	.LFE18:
+ 1351 0012 C046     		.section	.text.cmd_GET_LAST_LOG,"ax",%progbits
+ 1352              		.align	2
+ 1353              		.global	cmd_GET_LAST_LOG
+ 1354              		.code	16
+ 1355              		.thumb_func
+ 1357              	cmd_GET_LAST_LOG:
+ 1358              	.LFB19:
+ 191:../Sources/TFC/communication_uart.c **** 
+ 192:../Sources/TFC/communication_uart.c **** void cmd_GET_LAST_LOG(char *arg) {
+ 1359              		.loc 1 192 0
+ 1360              		.cfi_startproc
+ 1361 0000 80B5     		push	{r7, lr}
+ 1362              	.LCFI57:
+ 1363              		.cfi_def_cfa_offset 8
+ 1364              		.cfi_offset 7, -8
+ 1365              		.cfi_offset 14, -4
+ 1366 0002 82B0     		sub	sp, sp, #8
+ 1367              	.LCFI58:
+ 1368              		.cfi_def_cfa_offset 16
+ 1369 0004 00AF     		add	r7, sp, #0
+ 1370              	.LCFI59:
+ 1371              		.cfi_def_cfa_register 7
+ 1372 0006 7860     		str	r0, [r7, #4]
+ 193:../Sources/TFC/communication_uart.c **** 	printLastLog();
+ 1373              		.loc 1 193 0
+ 1374 0008 FFF7FEFF 		bl	printLastLog
+ 194:../Sources/TFC/communication_uart.c **** }
+ 1375              		.loc 1 194 0
+ 1376 000c BD46     		mov	sp, r7
+ 1377 000e 02B0     		add	sp, sp, #8
+ 1378              		@ sp needed for prologue
+ 1379 0010 80BD     		pop	{r7, pc}
+ 1380              		.cfi_endproc
+ 1381              	.LFE19:
+ 1383 0012 C046     		.section	.rodata
+ 1384 03da 0000     		.align	2
+ 1385              	.LC110:
+ 1386 03dc 0D0A4449 		.ascii	"\015\012DIR_P:%f;\015\012DIR_I:%f;\015\012DIR_D:%f;"
+ 1386      525F503A 
+ 1386      25663B0D 
+ 1386      0A444952 
+ 1386      5F493A25 
+ 1387 03fd 0D0A4449 		.ascii	"\015\012DIFF_P:%f;\015\012DIFF_I:%f;\015\012DIFF_D:"
+ 1387      46465F50 
+ 1387      3A25663B 
+ 1387      0D0A4449 
+ 1387      46465F49 
+ 1388 041e 25663B0D 		.ascii	"%f;\015\012DIFF_MAX:%f;\015\012SPE_P:%f;\015\012SPE"
+ 1388      0A444946 
+ 1388      465F4D41 
+ 1388      583A2566 
+ 1388      3B0D0A53 
+ 1389 043f 5F493A25 		.ascii	"_I:%f;\015\012SPE_D:%f;\015\012SPE_MAX:%f;\015\012S"
+ 1389      663B0D0A 
+ 1389      5350455F 
+ 1389      443A2566 
+ 1389      3B0D0A53 
+ 1390 0460 50455F4D 		.ascii	"PE_MIN:%f;\015\012CAM_EXPO:%d;\015\012\000"
+ 1390      494E3A25 
+ 1390      663B0D0A 
+ 1390      43414D5F 
+ 1390      4558504F 
+ 1391              		.section	.text.cmd_Refresh,"ax",%progbits
+ 1392              		.align	2
+ 1393              		.global	cmd_Refresh
+ 1394              		.code	16
+ 1395              		.thumb_func
+ 1397              	cmd_Refresh:
+ 1398              	.LFB20:
+ 195:../Sources/TFC/communication_uart.c **** 
+ 196:../Sources/TFC/communication_uart.c **** ////////////////////////////////////////////////////////////////////// 
+ 197:../Sources/TFC/communication_uart.c **** void cmd_Refresh(char *arg) {
+ 1399              		.loc 1 197 0
+ 1400              		.cfi_startproc
+ 1401 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 1402              	.LCFI60:
+ 1403              		.cfi_def_cfa_offset 20
+ 1404              		.cfi_offset 4, -20
+ 1405              		.cfi_offset 5, -16
+ 1406              		.cfi_offset 6, -12
+ 1407              		.cfi_offset 7, -8
+ 1408              		.cfi_offset 14, -4
+ 1409 0002 B1B0     		sub	sp, sp, #196
+ 1410              	.LCFI61:
+ 1411              		.cfi_def_cfa_offset 216
+ 1412 0004 18AF     		add	r7, sp, #96
+ 1413              	.LCFI62:
+ 1414              		.cfi_def_cfa 7, 120
+ 1415 0006 F865     		str	r0, [r7, #92]
+ 198:../Sources/TFC/communication_uart.c **** 
+ 199:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF(
+ 1416              		.loc 1 199 0
+ 1417 0008 494B     		ldr	r3, .L58+8
+ 1418 000a 1B68     		ldr	r3, [r3]
+ 1419 000c 181C     		add	r0, r3, #0
+ 1420 000e FFF7FEFF 		bl	__aeabi_f2d
+ 1421 0012 3865     		str	r0, [r7, #80]
+ 1422 0014 7965     		str	r1, [r7, #84]
+ 1423 0016 474B     		ldr	r3, .L58+12
+ 1424 0018 1B68     		ldr	r3, [r3]
+ 1425 001a 181C     		add	r0, r3, #0
+ 1426 001c FFF7FEFF 		bl	__aeabi_f2d
+ 1427 0020 B864     		str	r0, [r7, #72]
+ 1428 0022 F964     		str	r1, [r7, #76]
+ 1429 0024 444B     		ldr	r3, .L58+16
+ 1430 0026 1B68     		ldr	r3, [r3]
+ 1431 0028 181C     		add	r0, r3, #0
+ 1432 002a FFF7FEFF 		bl	__aeabi_f2d
+ 1433 002e 3864     		str	r0, [r7, #64]
+ 1434 0030 7964     		str	r1, [r7, #68]
+ 1435 0032 424B     		ldr	r3, .L58+20
+ 1436 0034 1B68     		ldr	r3, [r3]
+ 1437 0036 181C     		add	r0, r3, #0
+ 1438 0038 FFF7FEFF 		bl	__aeabi_f2d
+ 1439 003c B863     		str	r0, [r7, #56]
+ 1440 003e F963     		str	r1, [r7, #60]
+ 1441 0040 3F4B     		ldr	r3, .L58+24
+ 1442 0042 1B68     		ldr	r3, [r3]
+ 1443 0044 181C     		add	r0, r3, #0
+ 1444 0046 FFF7FEFF 		bl	__aeabi_f2d
+ 1445 004a 3863     		str	r0, [r7, #48]
+ 1446 004c 7963     		str	r1, [r7, #52]
+ 1447 004e 3D4B     		ldr	r3, .L58+28
+ 1448 0050 1B68     		ldr	r3, [r3]
+ 1449 0052 181C     		add	r0, r3, #0
+ 1450 0054 FFF7FEFF 		bl	__aeabi_f2d
+ 1451 0058 B862     		str	r0, [r7, #40]
+ 1452 005a F962     		str	r1, [r7, #44]
+ 1453 005c 3A4B     		ldr	r3, .L58+32
+ 1454 005e 1B68     		ldr	r3, [r3]
+ 1455 0060 181C     		add	r0, r3, #0
+ 1456 0062 FFF7FEFF 		bl	__aeabi_f2d
+ 1457 0066 3862     		str	r0, [r7, #32]
+ 1458 0068 7962     		str	r1, [r7, #36]
+ 1459 006a 384B     		ldr	r3, .L58+36
+ 1460 006c 1B68     		ldr	r3, [r3]
+ 1461 006e 181C     		add	r0, r3, #0
+ 1462 0070 FFF7FEFF 		bl	__aeabi_f2d
+ 1463 0074 B861     		str	r0, [r7, #24]
+ 1464 0076 F961     		str	r1, [r7, #28]
+ 1465 0078 354B     		ldr	r3, .L58+40
+ 1466 007a 1B68     		ldr	r3, [r3]
+ 1467 007c 181C     		add	r0, r3, #0
+ 1468 007e FFF7FEFF 		bl	__aeabi_f2d
+ 1469 0082 3861     		str	r0, [r7, #16]
+ 1470 0084 7961     		str	r1, [r7, #20]
+ 1471 0086 334B     		ldr	r3, .L58+44
+ 1472 0088 1B68     		ldr	r3, [r3]
+ 1473 008a 181C     		add	r0, r3, #0
+ 1474 008c FFF7FEFF 		bl	__aeabi_f2d
+ 1475 0090 B860     		str	r0, [r7, #8]
+ 1476 0092 F960     		str	r1, [r7, #12]
+ 1477 0094 304B     		ldr	r3, .L58+48
+ 1478 0096 1B68     		ldr	r3, [r3]
+ 1479 0098 181C     		add	r0, r3, #0
+ 1480 009a FFF7FEFF 		bl	__aeabi_f2d
+ 1481 009e 051C     		mov	r5, r0
+ 1482 00a0 0E1C     		mov	r6, r1
+ 1483 00a2 2E4B     		ldr	r3, .L58+52
+ 1484 00a4 1B68     		ldr	r3, [r3]
+ 1485 00a6 181C     		add	r0, r3, #0
+ 1486 00a8 FFF7FEFF 		bl	__aeabi_f2d
+ 1487 00ac 3860     		str	r0, [r7]
+ 1488 00ae 7960     		str	r1, [r7, #4]
+ 1489 00b0 2B49     		ldr	r1, .L58+56
+ 1490 00b2 2C4A     		ldr	r2, .L58+60
+ 1491 00b4 BB6C     		ldr	r3, [r7, #72]
+ 1492 00b6 FC6C     		ldr	r4, [r7, #76]
+ 1493 00b8 0093     		str	r3, [sp]
+ 1494 00ba 0194     		str	r4, [sp, #4]
+ 1495 00bc 3B6C     		ldr	r3, [r7, #64]
+ 1496 00be 7C6C     		ldr	r4, [r7, #68]
+ 1497 00c0 0293     		str	r3, [sp, #8]
+ 1498 00c2 0394     		str	r4, [sp, #12]
+ 1499 00c4 BB6B     		ldr	r3, [r7, #56]
+ 1500 00c6 FC6B     		ldr	r4, [r7, #60]
+ 1501 00c8 0493     		str	r3, [sp, #16]
+ 1502 00ca 0594     		str	r4, [sp, #20]
+ 1503 00cc 3B6B     		ldr	r3, [r7, #48]
+ 1504 00ce 7C6B     		ldr	r4, [r7, #52]
+ 1505 00d0 0693     		str	r3, [sp, #24]
+ 1506 00d2 0794     		str	r4, [sp, #28]
+ 1507 00d4 BB6A     		ldr	r3, [r7, #40]
+ 1508 00d6 FC6A     		ldr	r4, [r7, #44]
+ 1509 00d8 0893     		str	r3, [sp, #32]
+ 1510 00da 0994     		str	r4, [sp, #36]
+ 1511 00dc 3B6A     		ldr	r3, [r7, #32]
+ 1512 00de 7C6A     		ldr	r4, [r7, #36]
+ 1513 00e0 0A93     		str	r3, [sp, #40]
+ 1514 00e2 0B94     		str	r4, [sp, #44]
+ 1515 00e4 BB69     		ldr	r3, [r7, #24]
+ 1516 00e6 FC69     		ldr	r4, [r7, #28]
+ 1517 00e8 0C93     		str	r3, [sp, #48]
+ 1518 00ea 0D94     		str	r4, [sp, #52]
+ 1519 00ec 3B69     		ldr	r3, [r7, #16]
+ 1520 00ee 7C69     		ldr	r4, [r7, #20]
+ 1521 00f0 0E93     		str	r3, [sp, #56]
+ 1522 00f2 0F94     		str	r4, [sp, #60]
+ 1523 00f4 BB68     		ldr	r3, [r7, #8]
+ 1524 00f6 FC68     		ldr	r4, [r7, #12]
+ 1525 00f8 1093     		str	r3, [sp, #64]
+ 1526 00fa 1194     		str	r4, [sp, #68]
+ 1527 00fc 1295     		str	r5, [sp, #72]
+ 1528 00fe 1396     		str	r6, [sp, #76]
+ 1529 0100 3B68     		ldr	r3, [r7]
+ 1530 0102 7C68     		ldr	r4, [r7, #4]
+ 1531 0104 1493     		str	r3, [sp, #80]
+ 1532 0106 1594     		str	r4, [sp, #84]
+ 1533 0108 084C     		ldr	r4, .L58+4
+ 1534 010a 074B     		ldr	r3, .L58
+ 1535 010c 1693     		str	r3, [sp, #88]
+ 1536 010e 1794     		str	r4, [sp, #92]
+ 1537 0110 081C     		mov	r0, r1
+ 1538 0112 111C     		mov	r1, r2
+ 1539 0114 3A6D     		ldr	r2, [r7, #80]
+ 1540 0116 7B6D     		ldr	r3, [r7, #84]
+ 1541 0118 FFF7FEFF 		bl	Qprintf
+ 200:../Sources/TFC/communication_uart.c **** 			"\r\nDIR_P:%f;\r\n"
+ 201:../Sources/TFC/communication_uart.c **** 			"DIR_I:%f;\r\n"
+ 202:../Sources/TFC/communication_uart.c **** 			"DIR_D:%f;\r\n"
+ 203:../Sources/TFC/communication_uart.c **** 
+ 204:../Sources/TFC/communication_uart.c **** 			"DIFF_P:%f;\r\n"
+ 205:../Sources/TFC/communication_uart.c **** 			"DIFF_I:%f;\r\n"
+ 206:../Sources/TFC/communication_uart.c **** 			"DIFF_D:%f;\r\n"
+ 207:../Sources/TFC/communication_uart.c **** 			"DIFF_MAX:%f;\r\n"
+ 208:../Sources/TFC/communication_uart.c **** 
+ 209:../Sources/TFC/communication_uart.c **** 			"SPE_P:%f;\r\n"
+ 210:../Sources/TFC/communication_uart.c **** 			"SPE_I:%f;\r\n"
+ 211:../Sources/TFC/communication_uart.c **** 			"SPE_D:%f;\r\n"
+ 212:../Sources/TFC/communication_uart.c **** 			"SPE_MAX:%f;\r\n"
+ 213:../Sources/TFC/communication_uart.c **** 			"SPE_MIN:%f;\r\n"
+ 214:../Sources/TFC/communication_uart.c **** 
+ 215:../Sources/TFC/communication_uart.c **** 			"CAM_EXPO:%d;\r\n"
+ 216:../Sources/TFC/communication_uart.c **** 
+ 217:../Sources/TFC/communication_uart.c **** 			,coeff_dir_P,coeff_dir_I,coeff_dir_D, 
+ 218:../Sources/TFC/communication_uart.c **** 			coeff_diff_P,coeff_diff_I,coeff_diff_D, differentiel_max,
+ 219:../Sources/TFC/communication_uart.c **** 			coeff_speed_P,coeff_speed_I,coeff_speed_D,vit_max,vit_min,
+ 220:../Sources/TFC/communication_uart.c **** 
+ 221:../Sources/TFC/communication_uart.c **** 			-1.0);
+ 222:../Sources/TFC/communication_uart.c **** 
+ 223:../Sources/TFC/communication_uart.c **** }
+ 1542              		.loc 1 223 0
+ 1543 011c BD46     		mov	sp, r7
+ 1544 011e 19B0     		add	sp, sp, #100
+ 1545              		@ sp needed for prologue
+ 1546 0120 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 1547              	.L59:
+ 1548 0122 C046C046 		.align	3
+ 1548      C046
+ 1549              	.L58:
+ 1550 0128 00000000 		.word	0
+ 1551 012c 0000F0BF 		.word	-1074790400
+ 1552 0130 00000000 		.word	coeff_dir_P
+ 1553 0134 00000000 		.word	coeff_dir_I
+ 1554 0138 00000000 		.word	coeff_dir_D
+ 1555 013c 00000000 		.word	coeff_diff_P
+ 1556 0140 00000000 		.word	coeff_diff_I
+ 1557 0144 00000000 		.word	coeff_diff_D
+ 1558 0148 00000000 		.word	differentiel_max
+ 1559 014c 00000000 		.word	coeff_speed_P
+ 1560 0150 00000000 		.word	coeff_speed_I
+ 1561 0154 00000000 		.word	coeff_speed_D
+ 1562 0158 00000000 		.word	vit_max
+ 1563 015c 00000000 		.word	vit_min
+ 1564 0160 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1565 0164 DC030000 		.word	.LC110
+ 1566              		.cfi_endproc
+ 1567              	.LFE20:
+ 1569              		.section	.rodata
+ 1570 047b 00       		.align	2
+ 1571              	.LC113:
+ 1572 047c 0D0A0D0A 		.ascii	"\015\012\015\012Command List:\015\012\000"
+ 1572      436F6D6D 
+ 1572      616E6420 
+ 1572      4C697374 
+ 1572      3A0D0A00 
+ 1573              		.align	2
+ 1574              	.LC115:
+ 1575 0490 2D2D2D2D 		.ascii	"----------------------\015\012\000"
+ 1575      2D2D2D2D 
+ 1575      2D2D2D2D 
+ 1575      2D2D2D2D 
+ 1575      2D2D2D2D 
+ 1576 04a9 000000   		.align	2
+ 1577              	.LC118:
+ 1578 04ac 25732020 		.ascii	"%s  ---->  %s\015\012\000"
+ 1578      2D2D2D2D 
+ 1578      3E202025 
+ 1578      730D0A00 
+ 1579              		.align	2
+ 1580              	.LC120:
+ 1581 04bc 0D0A0D0A 		.ascii	"\015\012\015\012\000"
+ 1581      00
+ 1582              		.section	.text.cmd_Help,"ax",%progbits
+ 1583              		.align	2
+ 1584              		.global	cmd_Help
+ 1585              		.code	16
+ 1586              		.thumb_func
+ 1588              	cmd_Help:
+ 1589              	.LFB21:
+ 224:../Sources/TFC/communication_uart.c **** 
+ 225:../Sources/TFC/communication_uart.c **** void cmd_Help(char *arg) {
+ 1590              		.loc 1 225 0
+ 1591              		.cfi_startproc
+ 1592 0000 90B5     		push	{r4, r7, lr}
+ 1593              	.LCFI63:
+ 1594              		.cfi_def_cfa_offset 12
+ 1595              		.cfi_offset 4, -12
+ 1596              		.cfi_offset 7, -8
+ 1597              		.cfi_offset 14, -4
+ 1598 0002 85B0     		sub	sp, sp, #20
+ 1599              	.LCFI64:
+ 1600              		.cfi_def_cfa_offset 32
+ 1601 0004 00AF     		add	r7, sp, #0
+ 1602              	.LCFI65:
+ 1603              		.cfi_def_cfa_register 7
+ 1604 0006 7860     		str	r0, [r7, #4]
+ 226:../Sources/TFC/communication_uart.c **** 	uint8_t i;
+ 227:../Sources/TFC/communication_uart.c **** 
+ 228:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n\r\nCommand List:\r\n");
+ 1605              		.loc 1 228 0
+ 1606 0008 204A     		ldr	r2, .L63
+ 1607 000a 214B     		ldr	r3, .L63+4
+ 1608 000c 101C     		mov	r0, r2
+ 1609 000e 191C     		mov	r1, r3
+ 1610 0010 FFF7FEFF 		bl	Qprintf
+ 229:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("----------------------\r\n");
+ 1611              		.loc 1 229 0
+ 1612 0014 1D4A     		ldr	r2, .L63
+ 1613 0016 1F4B     		ldr	r3, .L63+8
+ 1614 0018 101C     		mov	r0, r2
+ 1615 001a 191C     		mov	r1, r3
+ 1616 001c FFF7FEFF 		bl	Qprintf
+ 230:../Sources/TFC/communication_uart.c **** 
+ 231:../Sources/TFC/communication_uart.c **** 	for (i = 0; i < NUM_TERMINAL_COMMANDS; i++) {
+ 1617              		.loc 1 231 0
+ 1618 0020 3B1C     		mov	r3, r7
+ 1619 0022 0F33     		add	r3, r3, #15
+ 1620 0024 0022     		mov	r2, #0
+ 1621 0026 1A70     		strb	r2, [r3]
+ 1622 0028 21E0     		b	.L61
+ 1623              	.L62:
+ 232:../Sources/TFC/communication_uart.c **** 		TERMINAL_PRINTF(
+ 1624              		.loc 1 232 0
+ 1625 002a 3B1C     		mov	r3, r7
+ 1626 002c 0F33     		add	r3, r3, #15
+ 1627 002e 1A78     		ldrb	r2, [r3]
+ 1628 0030 1949     		ldr	r1, .L63+12
+ 1629 0032 131C     		mov	r3, r2
+ 1630 0034 5B00     		lsl	r3, r3, #1
+ 1631 0036 9B18     		add	r3, r3, r2
+ 1632 0038 9B00     		lsl	r3, r3, #2
+ 1633 003a 5C58     		ldr	r4, [r3, r1]
+ 1634 003c 3B1C     		mov	r3, r7
+ 1635 003e 0F33     		add	r3, r3, #15
+ 1636 0040 1A78     		ldrb	r2, [r3]
+ 1637 0042 1549     		ldr	r1, .L63+12
+ 1638 0044 131C     		mov	r3, r2
+ 1639 0046 5B00     		lsl	r3, r3, #1
+ 1640 0048 9B18     		add	r3, r3, r2
+ 1641 004a 9B00     		lsl	r3, r3, #2
+ 1642 004c CB18     		add	r3, r1, r3
+ 1643 004e 0833     		add	r3, r3, #8
+ 1644 0050 1B68     		ldr	r3, [r3]
+ 1645 0052 0E49     		ldr	r1, .L63
+ 1646 0054 114A     		ldr	r2, .L63+16
+ 1647 0056 081C     		mov	r0, r1
+ 1648 0058 111C     		mov	r1, r2
+ 1649 005a 221C     		mov	r2, r4
+ 1650 005c FFF7FEFF 		bl	Qprintf
+ 231:../Sources/TFC/communication_uart.c **** 	for (i = 0; i < NUM_TERMINAL_COMMANDS; i++) {
+ 1651              		.loc 1 231 0
+ 1652 0060 3B1C     		mov	r3, r7
+ 1653 0062 0F33     		add	r3, r3, #15
+ 1654 0064 3A1C     		mov	r2, r7
+ 1655 0066 0F32     		add	r2, r2, #15
+ 1656 0068 1278     		ldrb	r2, [r2]
+ 1657 006a 0132     		add	r2, r2, #1
+ 1658 006c 1A70     		strb	r2, [r3]
+ 1659              	.L61:
+ 231:../Sources/TFC/communication_uart.c **** 	for (i = 0; i < NUM_TERMINAL_COMMANDS; i++) {
+ 1660              		.loc 1 231 0 is_stmt 0
+ 1661 006e 3B1C     		mov	r3, r7
+ 1662 0070 0F33     		add	r3, r3, #15
+ 1663 0072 1B78     		ldrb	r3, [r3]
+ 1664 0074 142B     		cmp	r3, #20
+ 1665 0076 D8D9     		bls	.L62
+ 233:../Sources/TFC/communication_uart.c **** 				"%s  ---->  %s\r\n", MyTerminalRecords[i].CommandString, MyTerminalRecords[i].HelpString);
+ 234:../Sources/TFC/communication_uart.c **** 	}
+ 235:../Sources/TFC/communication_uart.c **** 
+ 236:../Sources/TFC/communication_uart.c **** 	TERMINAL_PRINTF("\r\n\r\n");
+ 1666              		.loc 1 236 0 is_stmt 1
+ 1667 0078 044A     		ldr	r2, .L63
+ 1668 007a 094B     		ldr	r3, .L63+20
+ 1669 007c 101C     		mov	r0, r2
+ 1670 007e 191C     		mov	r1, r3
+ 1671 0080 FFF7FEFF 		bl	Qprintf
+ 237:../Sources/TFC/communication_uart.c **** }
+ 1672              		.loc 1 237 0
+ 1673 0084 BD46     		mov	sp, r7
+ 1674 0086 05B0     		add	sp, sp, #20
+ 1675              		@ sp needed for prologue
+ 1676 0088 90BD     		pop	{r4, r7, pc}
+ 1677              	.L64:
+ 1678 008a C046     		.align	2
+ 1679              	.L63:
+ 1680 008c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 1681 0090 7C040000 		.word	.LC113
+ 1682 0094 90040000 		.word	.LC115
+ 1683 0098 00000000 		.word	MyTerminalRecords
+ 1684 009c AC040000 		.word	.LC118
+ 1685 00a0 BC040000 		.word	.LC120
+ 1686              		.cfi_endproc
+ 1687              	.LFE21:
+ 1689              		.section	.rodata
+ 1690 04c1 000000   		.align	2
+ 1691              	.LC127:
+ 1692 04c4 256300   		.ascii	"%c\000"
+ 1693 04c7 00       		.align	2
+ 1694              	.LC130:
+ 1695 04c8 0D0A2045 		.ascii	"\015\012 Error : Command not Found %s \012\015\000"
+ 1695      72726F72 
+ 1695      203A2043 
+ 1695      6F6D6D61 
+ 1695      6E64206E 
+ 1696 04eb 00       		.align	2
+ 1697              	.LC132:
+ 1698 04ec 0D0A2045 		.ascii	"\015\012 Error : ; not found ! \012\015\000"
+ 1698      72726F72 
+ 1698      203A203B 
+ 1698      206E6F74 
+ 1698      20666F75 
+ 1699              		.section	.text.uart_communication,"ax",%progbits
+ 1700              		.align	2
+ 1701              		.global	uart_communication
+ 1702              		.code	16
+ 1703              		.thumb_func
+ 1705              	uart_communication:
+ 1706              	.LFB22:
+ 238:../Sources/TFC/communication_uart.c **** 
+ 239:../Sources/TFC/communication_uart.c **** void uart_communication() {
+ 1707              		.loc 1 239 0
+ 1708              		.cfi_startproc
+ 1709 0000 90B5     		push	{r4, r7, lr}
+ 1710              	.LCFI66:
+ 1711              		.cfi_def_cfa_offset 12
+ 1712              		.cfi_offset 4, -12
+ 1713              		.cfi_offset 7, -8
+ 1714              		.cfi_offset 14, -4
+ 1715 0002 8BB0     		sub	sp, sp, #44
+ 1716              	.LCFI67:
+ 1717              		.cfi_def_cfa_offset 56
+ 1718 0004 00AF     		add	r7, sp, #0
+ 1719              	.LCFI68:
+ 1720              		.cfi_def_cfa_register 7
+ 240:../Sources/TFC/communication_uart.c **** 	char read_c = ' ';
+ 1721              		.loc 1 240 0
+ 1722 0006 3B1C     		mov	r3, r7
+ 1723 0008 2733     		add	r3, r3, #39
+ 1724 000a 2022     		mov	r2, #32
+ 1725 000c 1A70     		strb	r2, [r3]
+ 241:../Sources/TFC/communication_uart.c **** 	char entete[10] ="", arg[10]="";
+ 1726              		.loc 1 241 0
+ 1727 000e 3B1C     		mov	r3, r7
+ 1728 0010 1033     		add	r3, r3, #16
+ 1729 0012 0022     		mov	r2, #0
+ 1730 0014 1A60     		str	r2, [r3]
+ 1731 0016 0022     		mov	r2, #0
+ 1732 0018 5A60     		str	r2, [r3, #4]
+ 1733 001a 0022     		mov	r2, #0
+ 1734 001c 1A81     		strh	r2, [r3, #8]
+ 1735 001e 3B1D     		add	r3, r7, #4
+ 1736 0020 0022     		mov	r2, #0
+ 1737 0022 1A60     		str	r2, [r3]
+ 1738 0024 0022     		mov	r2, #0
+ 1739 0026 5A60     		str	r2, [r3, #4]
+ 1740 0028 0022     		mov	r2, #0
+ 1741 002a 1A81     		strh	r2, [r3, #8]
+ 242:../Sources/TFC/communication_uart.c **** 	char *pt_tab;
+ 243:../Sources/TFC/communication_uart.c **** 	uint8_t i, i_arg, j, CmdFound;
+ 244:../Sources/TFC/communication_uart.c **** 		   
+ 245:../Sources/TFC/communication_uart.c **** 	while (TERMINAL_READABLE && read_c != ';') //Empty the queue 
+ 1742              		.loc 1 245 0
+ 1743 002c 2DE0     		b	.L66
+ 1744              	.L69:
+ 246:../Sources/TFC/communication_uart.c **** 	{
+ 247:../Sources/TFC/communication_uart.c **** 		
+ 248:../Sources/TFC/communication_uart.c **** 		read_c = TERMINAL_GETC;
+ 1745              		.loc 1 248 0
+ 1746 002e 3C1C     		mov	r4, r7
+ 1747 0030 2734     		add	r4, r4, #39
+ 1748 0032 7D4B     		ldr	r3, .L83
+ 1749 0034 181C     		mov	r0, r3
+ 1750 0036 FFF7FEFF 		bl	ForcedByteDequeue
+ 1751 003a 031C     		mov	r3, r0
+ 1752 003c 2370     		strb	r3, [r4]
+ 249:../Sources/TFC/communication_uart.c **** 		
+ 250:../Sources/TFC/communication_uart.c **** 		if (strchr(cancel_char, read_c) != NULL )/* Cancel char  \n \r \t...*/
+ 1753              		.loc 1 250 0
+ 1754 003e 3B1C     		mov	r3, r7
+ 1755 0040 2733     		add	r3, r3, #39
+ 1756 0042 1B78     		ldrb	r3, [r3]
+ 1757 0044 794A     		ldr	r2, .L83+4
+ 1758 0046 101C     		mov	r0, r2
+ 1759 0048 191C     		mov	r1, r3
+ 1760 004a FFF7FEFF 		bl	strchr
+ 1761 004e 031C     		mov	r3, r0
+ 1762 0050 002B     		cmp	r3, #0
+ 1763 0052 03D0     		beq	.L67
+ 251:../Sources/TFC/communication_uart.c **** 		{
+ 252:../Sources/TFC/communication_uart.c **** 			pos_command_buffer = 0;			
+ 1764              		.loc 1 252 0
+ 1765 0054 764B     		ldr	r3, .L83+8
+ 1766 0056 0022     		mov	r2, #0
+ 1767 0058 1A70     		strb	r2, [r3]
+ 1768 005a 16E0     		b	.L66
+ 1769              	.L67:
+ 253:../Sources/TFC/communication_uart.c **** 		}
+ 254:../Sources/TFC/communication_uart.c **** 		else
+ 255:../Sources/TFC/communication_uart.c **** 		{		
+ 256:../Sources/TFC/communication_uart.c **** 			command_buffer[pos_command_buffer] = read_c;
+ 1770              		.loc 1 256 0
+ 1771 005c 744B     		ldr	r3, .L83+8
+ 1772 005e 1B78     		ldrb	r3, [r3]
+ 1773 0060 744A     		ldr	r2, .L83+12
+ 1774 0062 391C     		mov	r1, r7
+ 1775 0064 2731     		add	r1, r1, #39
+ 1776 0066 0978     		ldrb	r1, [r1]
+ 1777 0068 D154     		strb	r1, [r2, r3]
+ 257:../Sources/TFC/communication_uart.c **** 			pos_command_buffer++;
+ 1778              		.loc 1 257 0
+ 1779 006a 714B     		ldr	r3, .L83+8
+ 1780 006c 1B78     		ldrb	r3, [r3]
+ 1781 006e 0133     		add	r3, r3, #1
+ 1782 0070 DAB2     		uxtb	r2, r3
+ 1783 0072 6F4B     		ldr	r3, .L83+8
+ 1784 0074 1A70     		strb	r2, [r3]
+ 258:../Sources/TFC/communication_uart.c **** 			//Print the read character 
+ 259:../Sources/TFC/communication_uart.c **** 			TERMINAL_PRINTF("%c", read_c);
+ 1785              		.loc 1 259 0
+ 1786 0076 3B1C     		mov	r3, r7
+ 1787 0078 2733     		add	r3, r3, #39
+ 1788 007a 1B78     		ldrb	r3, [r3]
+ 1789 007c 6E49     		ldr	r1, .L83+16
+ 1790 007e 6F4A     		ldr	r2, .L83+20
+ 1791 0080 081C     		mov	r0, r1
+ 1792 0082 111C     		mov	r1, r2
+ 1793 0084 1A1C     		mov	r2, r3
+ 1794 0086 FFF7FEFF 		bl	Qprintf
+ 1795              	.L66:
+ 245:../Sources/TFC/communication_uart.c **** 	while (TERMINAL_READABLE && read_c != ';') //Empty the queue 
+ 1796              		.loc 1 245 0
+ 1797 008a 674B     		ldr	r3, .L83
+ 1798 008c 181C     		mov	r0, r3
+ 1799 008e FFF7FEFF 		bl	BytesInQueue
+ 1800 0092 031C     		mov	r3, r0
+ 1801 0094 002B     		cmp	r3, #0
+ 1802 0096 04D0     		beq	.L68
+ 245:../Sources/TFC/communication_uart.c **** 	while (TERMINAL_READABLE && read_c != ';') //Empty the queue 
+ 1803              		.loc 1 245 0 is_stmt 0
+ 1804 0098 3B1C     		mov	r3, r7
+ 1805 009a 2733     		add	r3, r3, #39
+ 1806 009c 1B78     		ldrb	r3, [r3]
+ 1807 009e 3B2B     		cmp	r3, #59
+ 1808 00a0 C5D1     		bne	.L69
+ 1809              	.L68:
+ 260:../Sources/TFC/communication_uart.c **** 		}	
+ 261:../Sources/TFC/communication_uart.c **** 	}
+ 262:../Sources/TFC/communication_uart.c **** 	
+ 263:../Sources/TFC/communication_uart.c **** 	if (read_c == ';') // We just saw a ; end of the command => Process the new command  
+ 1810              		.loc 1 263 0 is_stmt 1
+ 1811 00a2 3B1C     		mov	r3, r7
+ 1812 00a4 2733     		add	r3, r3, #39
+ 1813 00a6 1B78     		ldrb	r3, [r3]
+ 1814 00a8 3B2B     		cmp	r3, #59
+ 1815 00aa 00D0     		beq	.LCB1370
+ 1816 00ac B8E0     		b	.L65	@long jump
+ 1817              	.LCB1370:
+ 264:../Sources/TFC/communication_uart.c **** 	{
+ 265:../Sources/TFC/communication_uart.c **** 
+ 266:../Sources/TFC/communication_uart.c **** 		pt_tab = entete;
+ 1818              		.loc 1 266 0
+ 1819 00ae 3B1C     		mov	r3, r7
+ 1820 00b0 1033     		add	r3, r3, #16
+ 1821 00b2 3B62     		str	r3, [r7, #32]
+ 267:../Sources/TFC/communication_uart.c **** 		i_arg = 0;
+ 1822              		.loc 1 267 0
+ 1823 00b4 3B1C     		mov	r3, r7
+ 1824 00b6 1E33     		add	r3, r3, #30
+ 1825 00b8 0022     		mov	r2, #0
+ 1826 00ba 1A70     		strb	r2, [r3]
+ 268:../Sources/TFC/communication_uart.c **** 		for (i = 0; i < pos_command_buffer && command_buffer[i] != ';'; i++) {
+ 1827              		.loc 1 268 0
+ 1828 00bc 3B1C     		mov	r3, r7
+ 1829 00be 1F33     		add	r3, r3, #31
+ 1830 00c0 0022     		mov	r2, #0
+ 1831 00c2 1A70     		strb	r2, [r3]
+ 1832 00c4 2DE0     		b	.L71
+ 1833              	.L75:
+ 269:../Sources/TFC/communication_uart.c **** 			if (command_buffer[i] == ':') {
+ 1834              		.loc 1 269 0
+ 1835 00c6 3B1C     		mov	r3, r7
+ 1836 00c8 1F33     		add	r3, r3, #31
+ 1837 00ca 1B78     		ldrb	r3, [r3]
+ 1838 00cc 594A     		ldr	r2, .L83+12
+ 1839 00ce D35C     		ldrb	r3, [r2, r3]
+ 1840 00d0 3A2B     		cmp	r3, #58
+ 1841 00d2 10D1     		bne	.L72
+ 270:../Sources/TFC/communication_uart.c **** 				pt_tab[i]='\0';
+ 1842              		.loc 1 270 0
+ 1843 00d4 3B1C     		mov	r3, r7
+ 1844 00d6 1F33     		add	r3, r3, #31
+ 1845 00d8 1B78     		ldrb	r3, [r3]
+ 1846 00da 3A6A     		ldr	r2, [r7, #32]
+ 1847 00dc D318     		add	r3, r2, r3
+ 1848 00de 0022     		mov	r2, #0
+ 1849 00e0 1A70     		strb	r2, [r3]
+ 271:../Sources/TFC/communication_uart.c **** 				pt_tab = arg;
+ 1850              		.loc 1 271 0
+ 1851 00e2 3B1D     		add	r3, r7, #4
+ 1852 00e4 3B62     		str	r3, [r7, #32]
+ 272:../Sources/TFC/communication_uart.c **** 				i_arg = i + 1;
+ 1853              		.loc 1 272 0
+ 1854 00e6 3B1C     		mov	r3, r7
+ 1855 00e8 1E33     		add	r3, r3, #30
+ 1856 00ea 3A1C     		mov	r2, r7
+ 1857 00ec 1F32     		add	r2, r2, #31
+ 1858 00ee 1278     		ldrb	r2, [r2]
+ 1859 00f0 0132     		add	r2, r2, #1
+ 1860 00f2 1A70     		strb	r2, [r3]
+ 1861 00f4 0EE0     		b	.L73
+ 1862              	.L72:
+ 273:../Sources/TFC/communication_uart.c **** 			} else {
+ 274:../Sources/TFC/communication_uart.c **** 				pt_tab[i - i_arg] = command_buffer[i];
+ 1863              		.loc 1 274 0
+ 1864 00f6 3B1C     		mov	r3, r7
+ 1865 00f8 1F33     		add	r3, r3, #31
+ 1866 00fa 1A78     		ldrb	r2, [r3]
+ 1867 00fc 3B1C     		mov	r3, r7
+ 1868 00fe 1E33     		add	r3, r3, #30
+ 1869 0100 1B78     		ldrb	r3, [r3]
+ 1870 0102 D31A     		sub	r3, r2, r3
+ 1871 0104 3A6A     		ldr	r2, [r7, #32]
+ 1872 0106 D318     		add	r3, r2, r3
+ 1873 0108 3A1C     		mov	r2, r7
+ 1874 010a 1F32     		add	r2, r2, #31
+ 1875 010c 1278     		ldrb	r2, [r2]
+ 1876 010e 4949     		ldr	r1, .L83+12
+ 1877 0110 8A5C     		ldrb	r2, [r1, r2]
+ 1878 0112 1A70     		strb	r2, [r3]
+ 1879              	.L73:
+ 268:../Sources/TFC/communication_uart.c **** 		for (i = 0; i < pos_command_buffer && command_buffer[i] != ';'; i++) {
+ 1880              		.loc 1 268 0
+ 1881 0114 3B1C     		mov	r3, r7
+ 1882 0116 1F33     		add	r3, r3, #31
+ 1883 0118 3A1C     		mov	r2, r7
+ 1884 011a 1F32     		add	r2, r2, #31
+ 1885 011c 1278     		ldrb	r2, [r2]
+ 1886 011e 0132     		add	r2, r2, #1
+ 1887 0120 1A70     		strb	r2, [r3]
+ 1888              	.L71:
+ 268:../Sources/TFC/communication_uart.c **** 		for (i = 0; i < pos_command_buffer && command_buffer[i] != ';'; i++) {
+ 1889              		.loc 1 268 0 is_stmt 0
+ 1890 0122 434B     		ldr	r3, .L83+8
+ 1891 0124 1B78     		ldrb	r3, [r3]
+ 1892 0126 3A1C     		mov	r2, r7
+ 1893 0128 1F32     		add	r2, r2, #31
+ 1894 012a 1278     		ldrb	r2, [r2]
+ 1895 012c 9A42     		cmp	r2, r3
+ 1896 012e 06D2     		bcs	.L74
+ 268:../Sources/TFC/communication_uart.c **** 		for (i = 0; i < pos_command_buffer && command_buffer[i] != ';'; i++) {
+ 1897              		.loc 1 268 0
+ 1898 0130 3B1C     		mov	r3, r7
+ 1899 0132 1F33     		add	r3, r3, #31
+ 1900 0134 1B78     		ldrb	r3, [r3]
+ 1901 0136 3F4A     		ldr	r2, .L83+12
+ 1902 0138 D35C     		ldrb	r3, [r2, r3]
+ 1903 013a 3B2B     		cmp	r3, #59
+ 1904 013c C3D1     		bne	.L75
+ 1905              	.L74:
+ 275:../Sources/TFC/communication_uart.c **** 			}
+ 276:../Sources/TFC/communication_uart.c **** 
+ 277:../Sources/TFC/communication_uart.c **** 		}
+ 278:../Sources/TFC/communication_uart.c **** 		pt_tab[i- i_arg]='\0';
+ 1906              		.loc 1 278 0 is_stmt 1
+ 1907 013e 3B1C     		mov	r3, r7
+ 1908 0140 1F33     		add	r3, r3, #31
+ 1909 0142 1A78     		ldrb	r2, [r3]
+ 1910 0144 3B1C     		mov	r3, r7
+ 1911 0146 1E33     		add	r3, r3, #30
+ 1912 0148 1B78     		ldrb	r3, [r3]
+ 1913 014a D31A     		sub	r3, r2, r3
+ 1914 014c 3A6A     		ldr	r2, [r7, #32]
+ 1915 014e D318     		add	r3, r2, r3
+ 1916 0150 0022     		mov	r2, #0
+ 1917 0152 1A70     		strb	r2, [r3]
+ 279:../Sources/TFC/communication_uart.c **** 		CmdFound = FALSE;
+ 1918              		.loc 1 279 0
+ 1919 0154 3B1C     		mov	r3, r7
+ 1920 0156 1C33     		add	r3, r3, #28
+ 1921 0158 0022     		mov	r2, #0
+ 1922 015a 1A70     		strb	r2, [r3]
+ 280:../Sources/TFC/communication_uart.c **** 		if (command_buffer[i] == ';') {
+ 1923              		.loc 1 280 0
+ 1924 015c 3B1C     		mov	r3, r7
+ 1925 015e 1F33     		add	r3, r3, #31
+ 1926 0160 1B78     		ldrb	r3, [r3]
+ 1927 0162 344A     		ldr	r2, .L83+12
+ 1928 0164 D35C     		ldrb	r3, [r2, r3]
+ 1929 0166 3B2B     		cmp	r3, #59
+ 1930 0168 51D1     		bne	.L76
+ 281:../Sources/TFC/communication_uart.c **** 			for (j = 0; j < NUM_TERMINAL_COMMANDS; j++) {
+ 1931              		.loc 1 281 0
+ 1932 016a 3B1C     		mov	r3, r7
+ 1933 016c 1D33     		add	r3, r3, #29
+ 1934 016e 0022     		mov	r2, #0
+ 1935 0170 1A70     		strb	r2, [r3]
+ 1936 0172 38E0     		b	.L77
+ 1937              	.L81:
+ 282:../Sources/TFC/communication_uart.c **** 				//TERMINAL_PRINTF("Compare : %s with %s \r\n", entete, MyTerminalRecords[j].CommandString);
+ 283:../Sources/TFC/communication_uart.c **** 				if (strcmp(entete, MyTerminalRecords[j].CommandString) == 0) {
+ 1938              		.loc 1 283 0
+ 1939 0174 3B1C     		mov	r3, r7
+ 1940 0176 1D33     		add	r3, r3, #29
+ 1941 0178 1A78     		ldrb	r2, [r3]
+ 1942 017a 3149     		ldr	r1, .L83+24
+ 1943 017c 131C     		mov	r3, r2
+ 1944 017e 5B00     		lsl	r3, r3, #1
+ 1945 0180 9B18     		add	r3, r3, r2
+ 1946 0182 9B00     		lsl	r3, r3, #2
+ 1947 0184 5B58     		ldr	r3, [r3, r1]
+ 1948 0186 3A1C     		mov	r2, r7
+ 1949 0188 1032     		add	r2, r2, #16
+ 1950 018a 101C     		mov	r0, r2
+ 1951 018c 191C     		mov	r1, r3
+ 1952 018e FFF7FEFF 		bl	strcmp
+ 1953 0192 031C     		mov	r3, r0
+ 1954 0194 002B     		cmp	r3, #0
+ 1955 0196 1FD1     		bne	.L78
+ 284:../Sources/TFC/communication_uart.c **** 					if (MyTerminalRecords[j].Callback != NULL)
+ 1956              		.loc 1 284 0
+ 1957 0198 3B1C     		mov	r3, r7
+ 1958 019a 1D33     		add	r3, r3, #29
+ 1959 019c 1A78     		ldrb	r2, [r3]
+ 1960 019e 2849     		ldr	r1, .L83+24
+ 1961 01a0 131C     		mov	r3, r2
+ 1962 01a2 5B00     		lsl	r3, r3, #1
+ 1963 01a4 9B18     		add	r3, r3, r2
+ 1964 01a6 9B00     		lsl	r3, r3, #2
+ 1965 01a8 CB18     		add	r3, r1, r3
+ 1966 01aa 0433     		add	r3, r3, #4
+ 1967 01ac 1B68     		ldr	r3, [r3]
+ 1968 01ae 002B     		cmp	r3, #0
+ 1969 01b0 0DD0     		beq	.L79
+ 285:../Sources/TFC/communication_uart.c **** 						MyTerminalRecords[j].Callback(arg);
+ 1970              		.loc 1 285 0
+ 1971 01b2 3B1C     		mov	r3, r7
+ 1972 01b4 1D33     		add	r3, r3, #29
+ 1973 01b6 1A78     		ldrb	r2, [r3]
+ 1974 01b8 2149     		ldr	r1, .L83+24
+ 1975 01ba 131C     		mov	r3, r2
+ 1976 01bc 5B00     		lsl	r3, r3, #1
+ 1977 01be 9B18     		add	r3, r3, r2
+ 1978 01c0 9B00     		lsl	r3, r3, #2
+ 1979 01c2 CB18     		add	r3, r1, r3
+ 1980 01c4 0433     		add	r3, r3, #4
+ 1981 01c6 1B68     		ldr	r3, [r3]
+ 1982 01c8 3A1D     		add	r2, r7, #4
+ 1983 01ca 101C     		mov	r0, r2
+ 1984 01cc 9847     		blx	r3
+ 1985              	.L79:
+ 286:../Sources/TFC/communication_uart.c **** 
+ 287:../Sources/TFC/communication_uart.c **** 					CmdFound = TRUE;
+ 1986              		.loc 1 287 0
+ 1987 01ce 3B1C     		mov	r3, r7
+ 1988 01d0 1C33     		add	r3, r3, #28
+ 1989 01d2 0122     		mov	r2, #1
+ 1990 01d4 1A70     		strb	r2, [r3]
+ 288:../Sources/TFC/communication_uart.c **** 					break;
+ 1991              		.loc 1 288 0
+ 1992 01d6 0BE0     		b	.L80
+ 1993              	.L78:
+ 281:../Sources/TFC/communication_uart.c **** 			for (j = 0; j < NUM_TERMINAL_COMMANDS; j++) {
+ 1994              		.loc 1 281 0
+ 1995 01d8 3B1C     		mov	r3, r7
+ 1996 01da 1D33     		add	r3, r3, #29
+ 1997 01dc 3A1C     		mov	r2, r7
+ 1998 01de 1D32     		add	r2, r2, #29
+ 1999 01e0 1278     		ldrb	r2, [r2]
+ 2000 01e2 0132     		add	r2, r2, #1
+ 2001 01e4 1A70     		strb	r2, [r3]
+ 2002              	.L77:
+ 281:../Sources/TFC/communication_uart.c **** 			for (j = 0; j < NUM_TERMINAL_COMMANDS; j++) {
+ 2003              		.loc 1 281 0 is_stmt 0
+ 2004 01e6 3B1C     		mov	r3, r7
+ 2005 01e8 1D33     		add	r3, r3, #29
+ 2006 01ea 1B78     		ldrb	r3, [r3]
+ 2007 01ec 142B     		cmp	r3, #20
+ 2008 01ee C1D9     		bls	.L81
+ 2009              	.L80:
+ 289:../Sources/TFC/communication_uart.c **** 				}
+ 290:../Sources/TFC/communication_uart.c **** 			}
+ 291:../Sources/TFC/communication_uart.c **** 
+ 292:../Sources/TFC/communication_uart.c **** 			if (CmdFound == FALSE) {
+ 2010              		.loc 1 292 0 is_stmt 1
+ 2011 01f0 3B1C     		mov	r3, r7
+ 2012 01f2 1C33     		add	r3, r3, #28
+ 2013 01f4 1B78     		ldrb	r3, [r3]
+ 2014 01f6 002B     		cmp	r3, #0
+ 2015 01f8 0FD1     		bne	.L82
+ 293:../Sources/TFC/communication_uart.c **** 				TERMINAL_PRINTF("\r\n Error : Command not Found %s \n\r", entete);
+ 2016              		.loc 1 293 0
+ 2017 01fa 0F49     		ldr	r1, .L83+16
+ 2018 01fc 114A     		ldr	r2, .L83+28
+ 2019 01fe 3B1C     		mov	r3, r7
+ 2020 0200 1033     		add	r3, r3, #16
+ 2021 0202 081C     		mov	r0, r1
+ 2022 0204 111C     		mov	r1, r2
+ 2023 0206 1A1C     		mov	r2, r3
+ 2024 0208 FFF7FEFF 		bl	Qprintf
+ 2025 020c 05E0     		b	.L82
+ 2026              	.L76:
+ 294:../Sources/TFC/communication_uart.c **** 
+ 295:../Sources/TFC/communication_uart.c **** 			}
+ 296:../Sources/TFC/communication_uart.c **** 
+ 297:../Sources/TFC/communication_uart.c **** 		} else {
+ 298:../Sources/TFC/communication_uart.c **** 			TERMINAL_PRINTF("\r\n Error : ; not found ! \n\r");
+ 2027              		.loc 1 298 0
+ 2028 020e 0A4A     		ldr	r2, .L83+16
+ 2029 0210 0D4B     		ldr	r3, .L83+32
+ 2030 0212 101C     		mov	r0, r2
+ 2031 0214 191C     		mov	r1, r3
+ 2032 0216 FFF7FEFF 		bl	Qprintf
+ 2033              	.L82:
+ 299:../Sources/TFC/communication_uart.c **** 		}
+ 300:../Sources/TFC/communication_uart.c **** 		pos_command_buffer = 0;
+ 2034              		.loc 1 300 0
+ 2035 021a 054B     		ldr	r3, .L83+8
+ 2036 021c 0022     		mov	r2, #0
+ 2037 021e 1A70     		strb	r2, [r3]
+ 2038              	.L65:
+ 301:../Sources/TFC/communication_uart.c **** 	}
+ 302:../Sources/TFC/communication_uart.c **** 
+ 303:../Sources/TFC/communication_uart.c **** }
+ 2039              		.loc 1 303 0
+ 2040 0220 BD46     		mov	sp, r7
+ 2041 0222 0BB0     		add	sp, sp, #44
+ 2042              		@ sp needed for prologue
+ 2043 0224 90BD     		pop	{r4, r7, pc}
+ 2044              	.L84:
+ 2045 0226 C046     		.align	2
+ 2046              	.L83:
+ 2047 0228 00000000 		.word	SDA_SERIAL_INCOMING_QUEUE
+ 2048 022c 00000000 		.word	cancel_char
+ 2049 0230 00000000 		.word	pos_command_buffer
+ 2050 0234 00000000 		.word	command_buffer
+ 2051 0238 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 2052 023c C4040000 		.word	.LC127
+ 2053 0240 00000000 		.word	MyTerminalRecords
+ 2054 0244 C8040000 		.word	.LC130
+ 2055 0248 EC040000 		.word	.LC132
+ 2056              		.cfi_endproc
+ 2057              	.LFE22:
+ 2059              		.text
+ 2060              	.Letext0:
+ 2061              		.file 2 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+ 2062              		.file 3 "C:/Users/B48861/TFC/Carcode/Project_Headers/TFC\\TFC_Queue.h"
+ 2063              		.file 4 "C:/Users/B48861/TFC/Carcode/Project_Headers/TFC\\TFC_UART.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 communication_uart.c
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:22     .bss.command_buffer:00000000 command_buffer
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:19     .bss.command_buffer:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:28     .bss.pos_command_buffer:00000000 pos_command_buffer
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:29     .bss.pos_command_buffer:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:35     .rodata.cancel_char:00000000 cancel_char
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:32     .rodata.cancel_char:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:130    .rodata.MyTerminalRecords:00000000 MyTerminalRecords
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:43     .rodata:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:127    .rodata.MyTerminalRecords:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1588   .text.cmd_Help:00000000 cmd_Help
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:209    .text.cmd_DIR_P:00000000 cmd_DIR_P
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:277    .text.cmd_DIR_I:00000000 cmd_DIR_I
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:344    .text.cmd_DIR_D:00000000 cmd_DIR_D
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:411    .text.cmd_DIFF_P:00000000 cmd_DIFF_P
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:478    .text.cmd_DIFF_I:00000000 cmd_DIFF_I
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:545    .text.cmd_DIFF_D:00000000 cmd_DIFF_D
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:612    .text.cmd_DIFF_MAX:00000000 cmd_DIFF_MAX
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:679    .text.cmd_SPE_P:00000000 cmd_SPE_P
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:813    .text.cmd_SPE_D:00000000 cmd_SPE_D
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:746    .text.cmd_SPE_I:00000000 cmd_SPE_I
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:880    .text.cmd_SPE_MAX:00000000 cmd_SPE_MAX
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:947    .text.cmd_SPE_MIN:00000000 cmd_SPE_MIN
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1015   .text.cmd_SPE_ERROR:00000000 cmd_SPE_ERROR
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1079   .text.cmd_CAM_EXPO:00000000 cmd_CAM_EXPO
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1134   .text.cmd_CAM_SEUIL:00000000 cmd_CAM_SEUIL
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1397   .text.cmd_Refresh:00000000 cmd_Refresh
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1191   .text.cmd_Vbat:00000000 cmd_Vbat
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1239   .text.cmd_Pos:00000000 cmd_Pos
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1325   .text.cmd_GET_LOG:00000000 cmd_GET_LOG
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1357   .text.cmd_GET_LAST_LOG:00000000 cmd_GET_LAST_LOG
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1284   .text.cmd_Pservo:00000000 cmd_Pservo
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:204    .text.cmd_DIR_P:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:261    .text.cmd_DIR_P:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:272    .text.cmd_DIR_I:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:328    .text.cmd_DIR_I:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:339    .text.cmd_DIR_D:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:395    .text.cmd_DIR_D:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:406    .text.cmd_DIFF_P:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:462    .text.cmd_DIFF_P:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:473    .text.cmd_DIFF_I:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:529    .text.cmd_DIFF_I:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:540    .text.cmd_DIFF_D:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:596    .text.cmd_DIFF_D:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:607    .text.cmd_DIFF_MAX:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:663    .text.cmd_DIFF_MAX:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:674    .text.cmd_SPE_P:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:730    .text.cmd_SPE_P:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:741    .text.cmd_SPE_I:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:797    .text.cmd_SPE_I:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:808    .text.cmd_SPE_D:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:864    .text.cmd_SPE_D:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:875    .text.cmd_SPE_MAX:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:931    .text.cmd_SPE_MAX:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:942    .text.cmd_SPE_MIN:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:998    .text.cmd_SPE_MIN:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1010   .text.cmd_SPE_ERROR:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1062   .text.cmd_SPE_ERROR:0000003c $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1074   .text.cmd_CAM_EXPO:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1118   .text.cmd_CAM_EXPO:0000002c $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1129   .text.cmd_CAM_SEUIL:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1175   .text.cmd_CAM_SEUIL:00000030 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1186   .text.cmd_Vbat:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1223   .text.cmd_Vbat:00000020 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1234   .text.cmd_Pos:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1269   .text.cmd_Pos:0000001c $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1279   .text.cmd_Pservo:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1314   .text.cmd_Pservo:0000001c $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1320   .text.cmd_GET_LOG:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1352   .text.cmd_GET_LAST_LOG:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1392   .text.cmd_Refresh:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1550   .text.cmd_Refresh:00000128 $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1583   .text.cmd_Help:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1680   .text.cmd_Help:0000008c $d
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1700   .text.uart_communication:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:1705   .text.uart_communication:00000000 uart_communication
+C:\Users\B48861\AppData\Local\Temp\cczOGMQE.s:2047   .text.uart_communication:00000228 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+__aeabi_d2f
+__aeabi_f2d
+atof
+Qprintf
+coeff_dir_P
+SDA_SERIAL_OUTGOING_QUEUE
+coeff_dir_I
+coeff_dir_D
+coeff_diff_P
+coeff_diff_I
+coeff_diff_D
+differentiel_max
+coeff_speed_P
+coeff_speed_I
+coeff_speed_D
+vit_max
+vit_min
+__aeabi_d2uiz
+break_min_error
+atoi
+seuil_detection
+TFC_ReadBatteryVoltage
+printLogger
+printLastLog
+ForcedByteDequeue
+strchr
+BytesInQueue
+strcmp
+SDA_SERIAL_INCOMING_QUEUE

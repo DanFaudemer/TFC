@@ -1,0 +1,431 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"serial.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.comm	peak_load,2,2
+  18              		.section	.text.init_serial,"ax",%progbits
+  19              		.align	2
+  20              		.global	init_serial
+  21              		.code	16
+  22              		.thumb_func
+  24              	init_serial:
+  25              	.LFB0:
+  26              		.file 1 "../Sources/serial.c"
+   1:../Sources/serial.c **** /*
+   2:../Sources/serial.c ****  * serial.c
+   3:../Sources/serial.c ****  *
+   4:../Sources/serial.c ****  *  Created on: Oct 13, 2014
+   5:../Sources/serial.c ****  *      Author: B48923
+   6:../Sources/serial.c ****  */
+   7:../Sources/serial.c **** 
+   8:../Sources/serial.c **** // Copyright (C) 2014 Rémi Bèges
+   9:../Sources/serial.c **** // For conditions of distribution and use, see copyright notice in the LICENSE file
+  10:../Sources/serial.c **** 
+  11:../Sources/serial.c **** #include "serial.h"
+  12:../Sources/serial.c **** #define SERIAL_NO_OVERWRITE
+  13:../Sources/serial.c **** 
+  14:../Sources/serial.c **** uint16_t peak_load;
+  15:../Sources/serial.c **** 
+  16:../Sources/serial.c **** void init_serial()
+  17:../Sources/serial.c **** {
+  27              		.loc 1 17 0
+  28              		.cfi_startproc
+  29 0000 80B5     		push	{r7, lr}
+  30              	.LCFI0:
+  31              		.cfi_def_cfa_offset 8
+  32              		.cfi_offset 7, -8
+  33              		.cfi_offset 14, -4
+  34 0002 00AF     		add	r7, sp, #0
+  35              	.LCFI1:
+  36              		.cfi_def_cfa_register 7
+  18:../Sources/serial.c **** 	peak_load = 0;
+  37              		.loc 1 18 0
+  38 0004 024B     		ldr	r3, .L2
+  39 0006 0022     		mov	r2, #0
+  40 0008 1A80     		strh	r2, [r3]
+  19:../Sources/serial.c **** }
+  41              		.loc 1 19 0
+  42 000a BD46     		mov	sp, r7
+  43              		@ sp needed for prologue
+  44 000c 80BD     		pop	{r7, pc}
+  45              	.L3:
+  46 000e C046     		.align	2
+  47              	.L2:
+  48 0010 00000000 		.word	peak_load
+  49              		.cfi_endproc
+  50              	.LFE0:
+  52              		.section	.text.getPeakLoad,"ax",%progbits
+  53              		.align	2
+  54              		.global	getPeakLoad
+  55              		.code	16
+  56              		.thumb_func
+  58              	getPeakLoad:
+  59              	.LFB1:
+  20:../Sources/serial.c **** 
+  21:../Sources/serial.c **** uint16_t getPeakLoad()
+  22:../Sources/serial.c **** {
+  60              		.loc 1 22 0
+  61              		.cfi_startproc
+  62 0000 80B5     		push	{r7, lr}
+  63              	.LCFI2:
+  64              		.cfi_def_cfa_offset 8
+  65              		.cfi_offset 7, -8
+  66              		.cfi_offset 14, -4
+  67 0002 00AF     		add	r7, sp, #0
+  68              	.LCFI3:
+  69              		.cfi_def_cfa_register 7
+  23:../Sources/serial.c **** 	return peak_load; 
+  70              		.loc 1 23 0
+  71 0004 024B     		ldr	r3, .L6
+  72 0006 1B88     		ldrh	r3, [r3]
+  24:../Sources/serial.c **** }
+  73              		.loc 1 24 0
+  74 0008 181C     		mov	r0, r3
+  75 000a BD46     		mov	sp, r7
+  76              		@ sp needed for prologue
+  77 000c 80BD     		pop	{r7, pc}
+  78              	.L7:
+  79 000e C046     		.align	2
+  80              	.L6:
+  81 0010 00000000 		.word	peak_load
+  82              		.cfi_endproc
+  83              	.LFE1:
+  85              		.section	.text.serial_write,"ax",%progbits
+  86              		.align	2
+  87              		.global	serial_write
+  88              		.code	16
+  89              		.thumb_func
+  91              	serial_write:
+  92              	.LFB2:
+  25:../Sources/serial.c **** 
+  26:../Sources/serial.c **** int16_t serial_write(uint8_t* buf, uint16_t len)
+  27:../Sources/serial.c **** {
+  93              		.loc 1 27 0
+  94              		.cfi_startproc
+  95 0000 80B5     		push	{r7, lr}
+  96              	.LCFI4:
+  97              		.cfi_def_cfa_offset 8
+  98              		.cfi_offset 7, -8
+  99              		.cfi_offset 14, -4
+ 100 0002 82B0     		sub	sp, sp, #8
+ 101              	.LCFI5:
+ 102              		.cfi_def_cfa_offset 16
+ 103 0004 00AF     		add	r7, sp, #0
+ 104              	.LCFI6:
+ 105              		.cfi_def_cfa_register 7
+ 106 0006 7860     		str	r0, [r7, #4]
+ 107 0008 0A1C     		mov	r2, r1
+ 108 000a BB1C     		add	r3, r7, #2
+ 109 000c 1A80     		strh	r2, [r3]
+  28:../Sources/serial.c **** 	//To monitor peak load
+  29:../Sources/serial.c **** 	static uint16_t load = 0;
+  30:../Sources/serial.c **** 	
+  31:../Sources/serial.c **** 	load = BytesInQueue(&SERIAL_OUTGOING_QUEUE);
+ 110              		.loc 1 31 0
+ 111 000e 2A4B     		ldr	r3, .L15
+ 112 0010 181C     		mov	r0, r3
+ 113 0012 FFF7FEFF 		bl	BytesInQueue
+ 114 0016 031C     		mov	r3, r0
+ 115 0018 1A1C     		mov	r2, r3
+ 116 001a 284B     		ldr	r3, .L15+4
+ 117 001c 1A80     		strh	r2, [r3]
+  32:../Sources/serial.c **** 	
+  33:../Sources/serial.c **** 	if(load > peak_load)
+ 118              		.loc 1 33 0
+ 119 001e 274B     		ldr	r3, .L15+4
+ 120 0020 1A88     		ldrh	r2, [r3]
+ 121 0022 274B     		ldr	r3, .L15+8
+ 122 0024 1B88     		ldrh	r3, [r3]
+ 123 0026 9A42     		cmp	r2, r3
+ 124 0028 0DD9     		bls	.L14
+  34:../Sources/serial.c **** 	{
+  35:../Sources/serial.c **** 		peak_load = load;
+ 125              		.loc 1 35 0
+ 126 002a 244B     		ldr	r3, .L15+4
+ 127 002c 1A88     		ldrh	r2, [r3]
+ 128 002e 244B     		ldr	r3, .L15+8
+ 129 0030 1A80     		strh	r2, [r3]
+  36:../Sources/serial.c **** 	}
+  37:../Sources/serial.c **** 	
+  38:../Sources/serial.c **** 	#if defined(SERIAL_NO_OVERWRITE)
+  39:../Sources/serial.c **** 		while(load + len > SERIAL_OUTGOING_QUEUE.QueueSize)
+ 130              		.loc 1 39 0
+ 131 0032 08E0     		b	.L14
+ 132              	.L11:
+  40:../Sources/serial.c **** 		{
+  41:../Sources/serial.c **** 			load = BytesInQueue(&SERIAL_OUTGOING_QUEUE);
+ 133              		.loc 1 41 0
+ 134 0034 204B     		ldr	r3, .L15
+ 135 0036 181C     		mov	r0, r3
+ 136 0038 FFF7FEFF 		bl	BytesInQueue
+ 137 003c 031C     		mov	r3, r0
+ 138 003e 1A1C     		mov	r2, r3
+ 139 0040 1E4B     		ldr	r3, .L15+4
+ 140 0042 1A80     		strh	r2, [r3]
+ 141 0044 00E0     		b	.L10
+ 142              	.L14:
+  39:../Sources/serial.c **** 		while(load + len > SERIAL_OUTGOING_QUEUE.QueueSize)
+ 143              		.loc 1 39 0
+ 144 0046 C046     		mov	r8, r8
+ 145              	.L10:
+  39:../Sources/serial.c **** 		while(load + len > SERIAL_OUTGOING_QUEUE.QueueSize)
+ 146              		.loc 1 39 0 is_stmt 0
+ 147 0048 1C4B     		ldr	r3, .L15+4
+ 148 004a 1B88     		ldrh	r3, [r3]
+ 149 004c 1A1C     		mov	r2, r3
+ 150 004e BB1C     		add	r3, r7, #2
+ 151 0050 1B88     		ldrh	r3, [r3]
+ 152 0052 D218     		add	r2, r2, r3
+ 153 0054 184B     		ldr	r3, .L15
+ 154 0056 9B88     		ldrh	r3, [r3, #4]
+ 155 0058 9A42     		cmp	r2, r3
+ 156 005a EBDC     		bgt	.L11
+  42:../Sources/serial.c **** 		}
+  43:../Sources/serial.c **** 	#endif
+  44:../Sources/serial.c **** 	
+  45:../Sources/serial.c **** 	//Disable Transmitter Interrupts
+  46:../Sources/serial.c **** 	UART0_C2 &= ~UART_C2_TIE_MASK; 
+ 157              		.loc 1 46 0 is_stmt 1
+ 158 005c 194B     		ldr	r3, .L15+12
+ 159 005e 194A     		ldr	r2, .L15+12
+ 160 0060 D278     		ldrb	r2, [r2, #3]
+ 161 0062 D1B2     		uxtb	r1, r2
+ 162 0064 7F22     		mov	r2, #127
+ 163 0066 0A40     		and	r2, r1
+ 164 0068 D2B2     		uxtb	r2, r2
+ 165 006a DA70     		strb	r2, [r3, #3]
+  47:../Sources/serial.c **** 	
+  48:../Sources/serial.c **** 	ByteArrayEnqueue(&SERIAL_OUTGOING_QUEUE,buf,len);
+ 166              		.loc 1 48 0
+ 167 006c 1249     		ldr	r1, .L15
+ 168 006e 7A68     		ldr	r2, [r7, #4]
+ 169 0070 BB1C     		add	r3, r7, #2
+ 170 0072 1B88     		ldrh	r3, [r3]
+ 171 0074 081C     		mov	r0, r1
+ 172 0076 111C     		mov	r1, r2
+ 173 0078 1A1C     		mov	r2, r3
+ 174 007a FFF7FEFF 		bl	ByteArrayEnqueue
+  49:../Sources/serial.c **** 	
+  50:../Sources/serial.c **** 	//Re-enable Transmitter Interrupts if needed
+  51:../Sources/serial.c **** 	if(BytesInQueue(&SDA_SERIAL_OUTGOING_QUEUE)>0 && (UART0_S1 & UART_S1_TDRE_MASK))
+ 175              		.loc 1 51 0
+ 176 007e 0E4B     		ldr	r3, .L15
+ 177 0080 181C     		mov	r0, r3
+ 178 0082 FFF7FEFF 		bl	BytesInQueue
+ 179 0086 031C     		mov	r3, r0
+ 180 0088 002B     		cmp	r3, #0
+ 181 008a 0FD0     		beq	.L12
+ 182              		.loc 1 51 0 is_stmt 0
+ 183 008c 0D4B     		ldr	r3, .L15+12
+ 184 008e 1B79     		ldrb	r3, [r3, #4]
+ 185 0090 DBB2     		uxtb	r3, r3
+ 186 0092 DBB2     		uxtb	r3, r3
+ 187 0094 5BB2     		sxtb	r3, r3
+ 188 0096 002B     		cmp	r3, #0
+ 189 0098 08DA     		bge	.L12
+  52:../Sources/serial.c **** 		UART0_C2 |= UART_C2_TIE_MASK; 
+ 190              		.loc 1 52 0 is_stmt 1
+ 191 009a 0A4B     		ldr	r3, .L15+12
+ 192 009c 094A     		ldr	r2, .L15+12
+ 193 009e D278     		ldrb	r2, [r2, #3]
+ 194 00a0 D2B2     		uxtb	r2, r2
+ 195 00a2 8021     		mov	r1, #128
+ 196 00a4 4942     		neg	r1, r1
+ 197 00a6 0A43     		orr	r2, r1
+ 198 00a8 D2B2     		uxtb	r2, r2
+ 199 00aa DA70     		strb	r2, [r3, #3]
+ 200              	.L12:
+  53:../Sources/serial.c **** 	
+  54:../Sources/serial.c **** 	return QUEUE_OK;
+ 201              		.loc 1 54 0
+ 202 00ac 0023     		mov	r3, #0
+ 203 00ae 1BB2     		sxth	r3, r3
+  55:../Sources/serial.c **** }
+ 204              		.loc 1 55 0
+ 205 00b0 181C     		mov	r0, r3
+ 206 00b2 BD46     		mov	sp, r7
+ 207 00b4 02B0     		add	sp, sp, #8
+ 208              		@ sp needed for prologue
+ 209 00b6 80BD     		pop	{r7, pc}
+ 210              	.L16:
+ 211              		.align	2
+ 212              	.L15:
+ 213 00b8 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 214 00bc 00000000 		.word	load.5173
+ 215 00c0 00000000 		.word	peak_load
+ 216 00c4 00A00640 		.word	1074176000
+ 217              		.cfi_endproc
+ 218              	.LFE2:
+ 220              		.section	.text.serial_write_available,"ax",%progbits
+ 221              		.align	2
+ 222              		.global	serial_write_available
+ 223              		.code	16
+ 224              		.thumb_func
+ 226              	serial_write_available:
+ 227              	.LFB3:
+  56:../Sources/serial.c **** 
+  57:../Sources/serial.c **** uint16_t serial_write_available()
+  58:../Sources/serial.c **** {
+ 228              		.loc 1 58 0
+ 229              		.cfi_startproc
+ 230 0000 98B5     		push	{r3, r4, r7, lr}
+ 231              	.LCFI7:
+ 232              		.cfi_def_cfa_offset 16
+ 233              		.cfi_offset 3, -16
+ 234              		.cfi_offset 4, -12
+ 235              		.cfi_offset 7, -8
+ 236              		.cfi_offset 14, -4
+ 237 0002 00AF     		add	r7, sp, #0
+ 238              	.LCFI8:
+ 239              		.cfi_def_cfa_register 7
+  59:../Sources/serial.c **** 	return (SERIAL_OUTGOING_QUEUE.QueueSize - BytesInQueue(&SERIAL_OUTGOING_QUEUE));
+ 240              		.loc 1 59 0
+ 241 0004 054B     		ldr	r3, .L19
+ 242 0006 9C88     		ldrh	r4, [r3, #4]
+ 243 0008 044B     		ldr	r3, .L19
+ 244 000a 181C     		mov	r0, r3
+ 245 000c FFF7FEFF 		bl	BytesInQueue
+ 246 0010 031C     		mov	r3, r0
+ 247 0012 E31A     		sub	r3, r4, r3
+ 248 0014 9BB2     		uxth	r3, r3
+  60:../Sources/serial.c **** }
+ 249              		.loc 1 60 0
+ 250 0016 181C     		mov	r0, r3
+ 251 0018 BD46     		mov	sp, r7
+ 252              		@ sp needed for prologue
+ 253 001a 98BD     		pop	{r3, r4, r7, pc}
+ 254              	.L20:
+ 255              		.align	2
+ 256              	.L19:
+ 257 001c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 258              		.cfi_endproc
+ 259              	.LFE3:
+ 261              		.section	.text.serial_available,"ax",%progbits
+ 262              		.align	2
+ 263              		.global	serial_available
+ 264              		.code	16
+ 265              		.thumb_func
+ 267              	serial_available:
+ 268              	.LFB4:
+  61:../Sources/serial.c **** 
+  62:../Sources/serial.c **** uint16_t serial_available()
+  63:../Sources/serial.c **** {
+ 269              		.loc 1 63 0
+ 270              		.cfi_startproc
+ 271 0000 80B5     		push	{r7, lr}
+ 272              	.LCFI9:
+ 273              		.cfi_def_cfa_offset 8
+ 274              		.cfi_offset 7, -8
+ 275              		.cfi_offset 14, -4
+ 276 0002 00AF     		add	r7, sp, #0
+ 277              	.LCFI10:
+ 278              		.cfi_def_cfa_register 7
+  64:../Sources/serial.c **** 	return BytesInQueue(&SERIAL_INCOMING_QUEUE);
+ 279              		.loc 1 64 0
+ 280 0004 034B     		ldr	r3, .L23
+ 281 0006 181C     		mov	r0, r3
+ 282 0008 FFF7FEFF 		bl	BytesInQueue
+ 283 000c 031C     		mov	r3, r0
+  65:../Sources/serial.c **** }
+ 284              		.loc 1 65 0
+ 285 000e 181C     		mov	r0, r3
+ 286 0010 BD46     		mov	sp, r7
+ 287              		@ sp needed for prologue
+ 288 0012 80BD     		pop	{r7, pc}
+ 289              	.L24:
+ 290              		.align	2
+ 291              	.L23:
+ 292 0014 00000000 		.word	SDA_SERIAL_INCOMING_QUEUE
+ 293              		.cfi_endproc
+ 294              	.LFE4:
+ 296              		.section	.text.serial_read,"ax",%progbits
+ 297              		.align	2
+ 298              		.global	serial_read
+ 299              		.code	16
+ 300              		.thumb_func
+ 302              	serial_read:
+ 303              	.LFB5:
+  66:../Sources/serial.c **** 
+  67:../Sources/serial.c **** uint8_t serial_read()
+  68:../Sources/serial.c **** {
+ 304              		.loc 1 68 0
+ 305              		.cfi_startproc
+ 306 0000 80B5     		push	{r7, lr}
+ 307              	.LCFI11:
+ 308              		.cfi_def_cfa_offset 8
+ 309              		.cfi_offset 7, -8
+ 310              		.cfi_offset 14, -4
+ 311 0002 00AF     		add	r7, sp, #0
+ 312              	.LCFI12:
+ 313              		.cfi_def_cfa_register 7
+  69:../Sources/serial.c **** 	return ForcedByteDequeue(&SERIAL_INCOMING_QUEUE);
+ 314              		.loc 1 69 0
+ 315 0004 034B     		ldr	r3, .L27
+ 316 0006 181C     		mov	r0, r3
+ 317 0008 FFF7FEFF 		bl	ForcedByteDequeue
+ 318 000c 031C     		mov	r3, r0
+  70:../Sources/serial.c **** }
+ 319              		.loc 1 70 0
+ 320 000e 181C     		mov	r0, r3
+ 321 0010 BD46     		mov	sp, r7
+ 322              		@ sp needed for prologue
+ 323 0012 80BD     		pop	{r7, pc}
+ 324              	.L28:
+ 325              		.align	2
+ 326              	.L27:
+ 327 0014 00000000 		.word	SDA_SERIAL_INCOMING_QUEUE
+ 328              		.cfi_endproc
+ 329              	.LFE5:
+ 331              		.section	.bss.load.5173,"aw",%nobits
+ 332              		.align	1
+ 335              	load.5173:
+ 336 0000 0000     		.space	2
+ 337              		.text
+ 338              	.Letext0:
+ 339              		.file 2 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+ 340              		.file 3 "C:/Users/B48861/TFC/Carcode/Project_Headers/MKL25Z4.h"
+ 341              		.file 4 "C:/Users/B48861/TFC/Carcode/Project_Headers/TFC\\TFC_Queue.h"
+ 342              		.file 5 "C:/Users/B48861/TFC/Carcode/Project_Headers/TFC\\TFC_UART.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 serial.c
+                            *COM*:00000002 peak_load
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:19     .text.init_serial:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:24     .text.init_serial:00000000 init_serial
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:48     .text.init_serial:00000010 $d
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:53     .text.getPeakLoad:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:58     .text.getPeakLoad:00000000 getPeakLoad
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:81     .text.getPeakLoad:00000010 $d
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:86     .text.serial_write:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:91     .text.serial_write:00000000 serial_write
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:213    .text.serial_write:000000b8 $d
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:335    .bss.load.5173:00000000 load.5173
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:221    .text.serial_write_available:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:226    .text.serial_write_available:00000000 serial_write_available
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:257    .text.serial_write_available:0000001c $d
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:262    .text.serial_available:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:267    .text.serial_available:00000000 serial_available
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:292    .text.serial_available:00000014 $d
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:297    .text.serial_read:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:302    .text.serial_read:00000000 serial_read
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:327    .text.serial_read:00000014 $d
+C:\Users\B48861\AppData\Local\Temp\ccjbTyQi.s:332    .bss.load.5173:00000000 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+BytesInQueue
+ByteArrayEnqueue
+SDA_SERIAL_OUTGOING_QUEUE
+SDA_SERIAL_INCOMING_QUEUE
+ForcedByteDequeue

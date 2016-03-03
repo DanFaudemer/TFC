@@ -1,0 +1,261 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"chrono.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.reset,"ax",%progbits
+  18              		.align	2
+  19              		.global	reset
+  20              		.code	16
+  21              		.thumb_func
+  23              	reset:
+  24              	.LFB0:
+  25              		.file 1 "../Sources/chrono.c"
+   1:../Sources/chrono.c **** /*
+   2:../Sources/chrono.c ****  * chrono.c
+   3:../Sources/chrono.c ****  *
+   4:../Sources/chrono.c ****  *  Created on: Dec 15, 2014
+   5:../Sources/chrono.c ****  *      Author: B48923
+   6:../Sources/chrono.c ****  */
+   7:../Sources/chrono.c **** 
+   8:../Sources/chrono.c **** #include "chrono.h"
+   9:../Sources/chrono.c **** #include "TFC/TFC_ARM_SysTick.h"
+  10:../Sources/chrono.c **** 
+  11:../Sources/chrono.c **** void reset(chrono* chr)
+  12:../Sources/chrono.c **** {
+  26              		.loc 1 12 0
+  27              		.cfi_startproc
+  28 0000 80B5     		push	{r7, lr}
+  29              	.LCFI0:
+  30              		.cfi_def_cfa_offset 8
+  31              		.cfi_offset 7, -8
+  32              		.cfi_offset 14, -4
+  33 0002 82B0     		sub	sp, sp, #8
+  34              	.LCFI1:
+  35              		.cfi_def_cfa_offset 16
+  36 0004 00AF     		add	r7, sp, #0
+  37              	.LCFI2:
+  38              		.cfi_def_cfa_register 7
+  39 0006 7860     		str	r0, [r7, #4]
+  13:../Sources/chrono.c **** 	chr->start = TFC_Ticker[0];
+  40              		.loc 1 13 0
+  41 0008 044B     		ldr	r3, .L2
+  42 000a 1A68     		ldr	r2, [r3]
+  43 000c 7B68     		ldr	r3, [r7, #4]
+  44 000e 1A60     		str	r2, [r3]
+  14:../Sources/chrono.c **** 	chr->duration = 0;
+  45              		.loc 1 14 0
+  46 0010 7B68     		ldr	r3, [r7, #4]
+  47 0012 0022     		mov	r2, #0
+  48 0014 9A60     		str	r2, [r3, #8]
+  15:../Sources/chrono.c **** }
+  49              		.loc 1 15 0
+  50 0016 BD46     		mov	sp, r7
+  51 0018 02B0     		add	sp, sp, #8
+  52              		@ sp needed for prologue
+  53 001a 80BD     		pop	{r7, pc}
+  54              	.L3:
+  55              		.align	2
+  56              	.L2:
+  57 001c 00000000 		.word	TFC_Ticker
+  58              		.cfi_endproc
+  59              	.LFE0:
+  61              		.section	.text.update,"ax",%progbits
+  62              		.align	2
+  63              		.global	update
+  64              		.code	16
+  65              		.thumb_func
+  67              	update:
+  68              	.LFB1:
+  16:../Sources/chrono.c **** 
+  17:../Sources/chrono.c **** void update(chrono* chr)
+  18:../Sources/chrono.c **** {
+  69              		.loc 1 18 0
+  70              		.cfi_startproc
+  71 0000 80B5     		push	{r7, lr}
+  72              	.LCFI3:
+  73              		.cfi_def_cfa_offset 8
+  74              		.cfi_offset 7, -8
+  75              		.cfi_offset 14, -4
+  76 0002 82B0     		sub	sp, sp, #8
+  77              	.LCFI4:
+  78              		.cfi_def_cfa_offset 16
+  79 0004 00AF     		add	r7, sp, #0
+  80              	.LCFI5:
+  81              		.cfi_def_cfa_register 7
+  82 0006 7860     		str	r0, [r7, #4]
+  19:../Sources/chrono.c **** 	chr->stop = TFC_Ticker[0];
+  83              		.loc 1 19 0
+  84 0008 064B     		ldr	r3, .L5
+  85 000a 1A68     		ldr	r2, [r3]
+  86 000c 7B68     		ldr	r3, [r7, #4]
+  87 000e 5A60     		str	r2, [r3, #4]
+  20:../Sources/chrono.c **** 	chr->duration = chr->stop - chr->start;
+  88              		.loc 1 20 0
+  89 0010 7B68     		ldr	r3, [r7, #4]
+  90 0012 5A68     		ldr	r2, [r3, #4]
+  91 0014 7B68     		ldr	r3, [r7, #4]
+  92 0016 1B68     		ldr	r3, [r3]
+  93 0018 D21A     		sub	r2, r2, r3
+  94 001a 7B68     		ldr	r3, [r7, #4]
+  95 001c 9A60     		str	r2, [r3, #8]
+  21:../Sources/chrono.c **** }
+  96              		.loc 1 21 0
+  97 001e BD46     		mov	sp, r7
+  98 0020 02B0     		add	sp, sp, #8
+  99              		@ sp needed for prologue
+ 100 0022 80BD     		pop	{r7, pc}
+ 101              	.L6:
+ 102              		.align	2
+ 103              	.L5:
+ 104 0024 00000000 		.word	TFC_Ticker
+ 105              		.cfi_endproc
+ 106              	.LFE1:
+ 108              		.global	__aeabi_ui2f
+ 109              		.global	__aeabi_fmul
+ 110              		.global	__aeabi_fdiv
+ 111              		.section	.text.us,"ax",%progbits
+ 112              		.align	2
+ 113              		.global	us
+ 114              		.code	16
+ 115              		.thumb_func
+ 117              	us:
+ 118              	.LFB2:
+  22:../Sources/chrono.c **** 
+  23:../Sources/chrono.c **** float us(chrono* chr)
+  24:../Sources/chrono.c **** {
+ 119              		.loc 1 24 0
+ 120              		.cfi_startproc
+ 121 0000 80B5     		push	{r7, lr}
+ 122              	.LCFI6:
+ 123              		.cfi_def_cfa_offset 8
+ 124              		.cfi_offset 7, -8
+ 125              		.cfi_offset 14, -4
+ 126 0002 82B0     		sub	sp, sp, #8
+ 127              	.LCFI7:
+ 128              		.cfi_def_cfa_offset 16
+ 129 0004 00AF     		add	r7, sp, #0
+ 130              	.LCFI8:
+ 131              		.cfi_def_cfa_register 7
+ 132 0006 7860     		str	r0, [r7, #4]
+  25:../Sources/chrono.c **** 	return chr->duration * 1000.f * 1000.f / (float)(SYSTICK_FREQUENCY);
+ 133              		.loc 1 25 0
+ 134 0008 7B68     		ldr	r3, [r7, #4]
+ 135 000a 9B68     		ldr	r3, [r3, #8]
+ 136 000c 181C     		mov	r0, r3
+ 137 000e FFF7FEFF 		bl	__aeabi_ui2f
+ 138 0012 031C     		add	r3, r0, #0
+ 139 0014 181C     		add	r0, r3, #0
+ 140 0016 0949     		ldr	r1, .L9
+ 141 0018 FFF7FEFF 		bl	__aeabi_fmul
+ 142 001c 031C     		add	r3, r0, #0
+ 143 001e 181C     		add	r0, r3, #0
+ 144 0020 0649     		ldr	r1, .L9
+ 145 0022 FFF7FEFF 		bl	__aeabi_fmul
+ 146 0026 031C     		add	r3, r0, #0
+ 147 0028 181C     		add	r0, r3, #0
+ 148 002a 0449     		ldr	r1, .L9
+ 149 002c FFF7FEFF 		bl	__aeabi_fdiv
+ 150 0030 031C     		add	r3, r0, #0
+  26:../Sources/chrono.c **** }
+ 151              		.loc 1 26 0
+ 152 0032 181C     		add	r0, r3, #0
+ 153 0034 BD46     		mov	sp, r7
+ 154 0036 02B0     		add	sp, sp, #8
+ 155              		@ sp needed for prologue
+ 156 0038 80BD     		pop	{r7, pc}
+ 157              	.L10:
+ 158 003a C046     		.align	2
+ 159              	.L9:
+ 160 003c 00007A44 		.word	1148846080
+ 161              		.cfi_endproc
+ 162              	.LFE2:
+ 164              		.section	.text.ms,"ax",%progbits
+ 165              		.align	2
+ 166              		.global	ms
+ 167              		.code	16
+ 168              		.thumb_func
+ 170              	ms:
+ 171              	.LFB3:
+  27:../Sources/chrono.c **** 
+  28:../Sources/chrono.c **** float ms(chrono* chr)
+  29:../Sources/chrono.c **** {
+ 172              		.loc 1 29 0
+ 173              		.cfi_startproc
+ 174 0000 80B5     		push	{r7, lr}
+ 175              	.LCFI9:
+ 176              		.cfi_def_cfa_offset 8
+ 177              		.cfi_offset 7, -8
+ 178              		.cfi_offset 14, -4
+ 179 0002 82B0     		sub	sp, sp, #8
+ 180              	.LCFI10:
+ 181              		.cfi_def_cfa_offset 16
+ 182 0004 00AF     		add	r7, sp, #0
+ 183              	.LCFI11:
+ 184              		.cfi_def_cfa_register 7
+ 185 0006 7860     		str	r0, [r7, #4]
+  30:../Sources/chrono.c **** 	return chr->duration * 1.f * 1000.f / (float)(SYSTICK_FREQUENCY);
+ 186              		.loc 1 30 0
+ 187 0008 7B68     		ldr	r3, [r7, #4]
+ 188 000a 9B68     		ldr	r3, [r3, #8]
+ 189 000c 181C     		mov	r0, r3
+ 190 000e FFF7FEFF 		bl	__aeabi_ui2f
+ 191 0012 031C     		add	r3, r0, #0
+ 192 0014 181C     		add	r0, r3, #0
+ 193 0016 0649     		ldr	r1, .L13
+ 194 0018 FFF7FEFF 		bl	__aeabi_fmul
+ 195 001c 031C     		add	r3, r0, #0
+ 196 001e 181C     		add	r0, r3, #0
+ 197 0020 0349     		ldr	r1, .L13
+ 198 0022 FFF7FEFF 		bl	__aeabi_fdiv
+ 199 0026 031C     		add	r3, r0, #0
+  31:../Sources/chrono.c **** }
+ 200              		.loc 1 31 0
+ 201 0028 181C     		add	r0, r3, #0
+ 202 002a BD46     		mov	sp, r7
+ 203 002c 02B0     		add	sp, sp, #8
+ 204              		@ sp needed for prologue
+ 205 002e 80BD     		pop	{r7, pc}
+ 206              	.L14:
+ 207              		.align	2
+ 208              	.L13:
+ 209 0030 00007A44 		.word	1148846080
+ 210              		.cfi_endproc
+ 211              	.LFE3:
+ 213              		.text
+ 214              	.Letext0:
+ 215              		.file 2 "C:/Users/B48861/TFC/Carcode/Project_Headers/chrono.h"
+ 216              		.file 3 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+ 217              		.file 4 "C:/Users/B48861/TFC/Carcode/Project_Headers/TFC\\TFC_ARM_SysTick.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 chrono.c
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:18     .text.reset:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:23     .text.reset:00000000 reset
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:57     .text.reset:0000001c $d
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:62     .text.update:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:67     .text.update:00000000 update
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:104    .text.update:00000024 $d
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:112    .text.us:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:117    .text.us:00000000 us
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:160    .text.us:0000003c $d
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:165    .text.ms:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:170    .text.ms:00000000 ms
+C:\Users\B48861\AppData\Local\Temp\ccYgcPBg.s:209    .text.ms:00000030 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+TFC_Ticker
+__aeabi_ui2f
+__aeabi_fmul
+__aeabi_fdiv

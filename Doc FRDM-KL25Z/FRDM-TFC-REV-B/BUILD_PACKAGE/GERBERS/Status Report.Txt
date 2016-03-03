@@ -1,0 +1,12 @@
+Output: NC Drill Files
+Type  : NC Drill
+From  : PCB Document [FRDM-TFC.PcbDoc]
+   Generated File[FRDM-TFC.TXT]
+   Generated File[FRDM-TFC.LDP]
+   Generated File[FRDM-TFC.DRR]
+
+
+Files Generated   : 3
+Documents Printed : 0
+
+Finished Output Generation At 1:40:29 PM On 3/22/2013

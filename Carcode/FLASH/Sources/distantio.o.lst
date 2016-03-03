@@ -1,0 +1,2706 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"distantio.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.comm	Log,6660,4
+  18              		.comm	tmp,4,4
+  19              		.comm	chr,12,4
+  20              		.section	.rodata
+  21              		.align	2
+  22              	.LC0:
+  23 0000 756E6465 		.ascii	"undefined\000"
+  23      66696E65 
+  23      6400
+  24 000a 0000     		.section	.text.init_distantio,"ax",%progbits
+  25              		.align	2
+  26              		.global	init_distantio
+  27              		.code	16
+  28              		.thumb_func
+  30              	init_distantio:
+  31              	.LFB0:
+  32              		.file 1 "../Sources/distantio.c"
+   1:../Sources/distantio.c **** /*
+   2:../Sources/distantio.c ****  * logger.c
+   3:../Sources/distantio.c ****  *
+   4:../Sources/distantio.c ****  *  Created on: Oct 13, 2014
+   5:../Sources/distantio.c ****  *      Author: B48923
+   6:../Sources/distantio.c ****  */
+   7:../Sources/distantio.c **** 
+   8:../Sources/distantio.c **** #include "distantio.h"
+   9:../Sources/distantio.c **** #include "serial.h"
+  10:../Sources/distantio.c **** #include "chrono.h"
+  11:../Sources/distantio.c **** 
+  12:../Sources/distantio.c **** uint8_t register_(uint8_t* adress, uint16_t octets, datatype type, uint8_t writeable, char* name);
+  13:../Sources/distantio.c **** void distantio_decode_rx_frame(ByteQueue* rx_queue);
+  14:../Sources/distantio.c **** void distantio_send_table();
+  15:../Sources/distantio.c **** //Returns 0xFF00 if done, or 0x00XX if transmitted only up to index XX
+  16:../Sources/distantio.c **** //TODO : IMPLEMENT DISTRIBUTED TRANSMIT
+  17:../Sources/distantio.c **** uint32_t distantio_send_variable(uint16_t variable_id);
+  18:../Sources/distantio.c **** 
+  19:../Sources/distantio.c **** log Log;
+  20:../Sources/distantio.c **** uint32_t tmp;
+  21:../Sources/distantio.c **** chrono chr;
+  22:../Sources/distantio.c **** 
+  23:../Sources/distantio.c **** void init_distantio()
+  24:../Sources/distantio.c **** {
+  33              		.loc 1 24 0
+  34              		.cfi_startproc
+  35 0000 80B5     		push	{r7, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 7, -8
+  39              		.cfi_offset 14, -4
+  40 0002 84B0     		sub	sp, sp, #16
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_offset 24
+  43 0004 00AF     		add	r7, sp, #0
+  44              	.LCFI2:
+  45              		.cfi_def_cfa_register 7
+  25:../Sources/distantio.c **** 	uint16_t i;
+  26:../Sources/distantio.c **** 	char default_name[] = {"undefined"};
+  46              		.loc 1 26 0
+  47 0006 3B1D     		add	r3, r7, #4
+  48 0008 344A     		ldr	r2, .L4
+  49 000a 03CA     		ldmia	r2!, {r0, r1}
+  50 000c 03C3     		stmia	r3!, {r0, r1}
+  51 000e 1288     		ldrh	r2, [r2]
+  52 0010 1A80     		strh	r2, [r3]
+  27:../Sources/distantio.c **** 	Log.current_index = 0;
+  53              		.loc 1 27 0
+  54 0012 334A     		ldr	r2, .L4+4
+  55 0014 D023     		mov	r3, #208
+  56 0016 5B01     		lsl	r3, r3, #5
+  57 0018 0021     		mov	r1, #0
+  58 001a D152     		strh	r1, [r2, r3]
+  28:../Sources/distantio.c **** 	Log.previous_index = 0;
+  59              		.loc 1 28 0
+  60 001c 304A     		ldr	r2, .L4+4
+  61 001e 314B     		ldr	r3, .L4+8
+  62 0020 0021     		mov	r1, #0
+  63 0022 D152     		strh	r1, [r2, r3]
+  29:../Sources/distantio.c **** 	for(i = 0 ; i < 128 ; i++)
+  64              		.loc 1 29 0
+  65 0024 3B1C     		mov	r3, r7
+  66 0026 0E33     		add	r3, r3, #14
+  67 0028 0022     		mov	r2, #0
+  68 002a 1A80     		strh	r2, [r3]
+  69 002c 46E0     		b	.L2
+  70              	.L3:
+  30:../Sources/distantio.c **** 	{
+  31:../Sources/distantio.c **** 		Log.variables[i].size = 0;
+  71              		.loc 1 31 0
+  72 002e 3B1C     		mov	r3, r7
+  73 0030 0E33     		add	r3, r3, #14
+  74 0032 1B88     		ldrh	r3, [r3]
+  75 0034 2A4A     		ldr	r2, .L4+4
+  76 0036 3421     		mov	r1, #52
+  77 0038 4B43     		mul	r3, r1
+  78 003a D318     		add	r3, r2, r3
+  79 003c 0022     		mov	r2, #0
+  80 003e 9A80     		strh	r2, [r3, #4]
+  32:../Sources/distantio.c **** 		Log.variables[i].ptr = 0;
+  81              		.loc 1 32 0
+  82 0040 3B1C     		mov	r3, r7
+  83 0042 0E33     		add	r3, r3, #14
+  84 0044 1A88     		ldrh	r2, [r3]
+  85 0046 264B     		ldr	r3, .L4+4
+  86 0048 3421     		mov	r1, #52
+  87 004a 4A43     		mul	r2, r1
+  88 004c 0021     		mov	r1, #0
+  89 004e D150     		str	r1, [r2, r3]
+  33:../Sources/distantio.c **** 		Log.variables[i].writeable = 0;
+  90              		.loc 1 33 0
+  91 0050 3B1C     		mov	r3, r7
+  92 0052 0E33     		add	r3, r3, #14
+  93 0054 1B88     		ldrh	r3, [r3]
+  94 0056 224A     		ldr	r2, .L4+4
+  95 0058 3421     		mov	r1, #52
+  96 005a 4B43     		mul	r3, r1
+  97 005c D318     		add	r3, r2, r3
+  98 005e 0022     		mov	r2, #0
+  99 0060 9A71     		strb	r2, [r3, #6]
+  34:../Sources/distantio.c **** 		Log.variables[i].id = i;
+ 100              		.loc 1 34 0
+ 101 0062 3B1C     		mov	r3, r7
+ 102 0064 0E33     		add	r3, r3, #14
+ 103 0066 1A88     		ldrh	r2, [r3]
+ 104 0068 1D49     		ldr	r1, .L4+4
+ 105 006a 0823     		mov	r3, #8
+ 106 006c 3420     		mov	r0, #52
+ 107 006e 4243     		mul	r2, r0
+ 108 0070 8A18     		add	r2, r1, r2
+ 109 0072 D318     		add	r3, r2, r3
+ 110 0074 3A1C     		mov	r2, r7
+ 111 0076 0E32     		add	r2, r2, #14
+ 112 0078 1288     		ldrh	r2, [r2]
+ 113 007a 1A80     		strh	r2, [r3]
+  35:../Sources/distantio.c **** 		strcpy(Log.variables[i].name,default_name);
+ 114              		.loc 1 35 0
+ 115 007c 3B1C     		mov	r3, r7
+ 116 007e 0E33     		add	r3, r3, #14
+ 117 0080 1B88     		ldrh	r3, [r3]
+ 118 0082 3422     		mov	r2, #52
+ 119 0084 5343     		mul	r3, r2
+ 120 0086 1A1C     		mov	r2, r3
+ 121 0088 1032     		add	r2, r2, #16
+ 122 008a 154B     		ldr	r3, .L4+4
+ 123 008c D218     		add	r2, r2, r3
+ 124 008e 3B1D     		add	r3, r7, #4
+ 125 0090 101C     		mov	r0, r2
+ 126 0092 191C     		mov	r1, r3
+ 127 0094 FFF7FEFF 		bl	strcpy
+  36:../Sources/distantio.c **** 		Log.variables[i].send = 0;
+ 128              		.loc 1 36 0
+ 129 0098 3B1C     		mov	r3, r7
+ 130 009a 0E33     		add	r3, r3, #14
+ 131 009c 1A88     		ldrh	r2, [r3]
+ 132 009e 1049     		ldr	r1, .L4+4
+ 133 00a0 3023     		mov	r3, #48
+ 134 00a2 3420     		mov	r0, #52
+ 135 00a4 4243     		mul	r2, r0
+ 136 00a6 8A18     		add	r2, r1, r2
+ 137 00a8 D318     		add	r3, r2, r3
+ 138 00aa 0022     		mov	r2, #0
+ 139 00ac 1A70     		strb	r2, [r3]
+  29:../Sources/distantio.c **** 	for(i = 0 ; i < 128 ; i++)
+ 140              		.loc 1 29 0
+ 141 00ae 3B1C     		mov	r3, r7
+ 142 00b0 0E33     		add	r3, r3, #14
+ 143 00b2 3A1C     		mov	r2, r7
+ 144 00b4 0E32     		add	r2, r2, #14
+ 145 00b6 1288     		ldrh	r2, [r2]
+ 146 00b8 0132     		add	r2, r2, #1
+ 147 00ba 1A80     		strh	r2, [r3]
+ 148              	.L2:
+  29:../Sources/distantio.c **** 	for(i = 0 ; i < 128 ; i++)
+ 149              		.loc 1 29 0 is_stmt 0
+ 150 00bc 3B1C     		mov	r3, r7
+ 151 00be 0E33     		add	r3, r3, #14
+ 152 00c0 1B88     		ldrh	r3, [r3]
+ 153 00c2 7F2B     		cmp	r3, #127
+ 154 00c4 B3D9     		bls	.L3
+  37:../Sources/distantio.c **** 	}
+  38:../Sources/distantio.c **** 	tmp=0;
+ 155              		.loc 1 38 0 is_stmt 1
+ 156 00c6 084B     		ldr	r3, .L4+12
+ 157 00c8 0022     		mov	r2, #0
+ 158 00ca 1A60     		str	r2, [r3]
+  39:../Sources/distantio.c **** 	reset(&chr);
+ 159              		.loc 1 39 0
+ 160 00cc 074B     		ldr	r3, .L4+16
+ 161 00ce 181C     		mov	r0, r3
+ 162 00d0 FFF7FEFF 		bl	reset
+  40:../Sources/distantio.c **** }
+ 163              		.loc 1 40 0
+ 164 00d4 BD46     		mov	sp, r7
+ 165 00d6 04B0     		add	sp, sp, #16
+ 166              		@ sp needed for prologue
+ 167 00d8 80BD     		pop	{r7, pc}
+ 168              	.L5:
+ 169 00da C046     		.align	2
+ 170              	.L4:
+ 171 00dc 00000000 		.word	.LC0
+ 172 00e0 00000000 		.word	Log
+ 173 00e4 021A0000 		.word	6658
+ 174 00e8 00000000 		.word	tmp
+ 175 00ec 00000000 		.word	chr
+ 176              		.cfi_endproc
+ 177              	.LFE0:
+ 179              		.section	.text.register_,"ax",%progbits
+ 180              		.align	2
+ 181              		.global	register_
+ 182              		.code	16
+ 183              		.thumb_func
+ 185              	register_:
+ 186              	.LFB1:
+  41:../Sources/distantio.c **** 
+  42:../Sources/distantio.c **** //TODO : Replace octets by array_size ?
+  43:../Sources/distantio.c **** //Returns 0 if ok, 1 if size exceeds log capacity
+  44:../Sources/distantio.c **** uint8_t register_(uint8_t* adress, uint16_t octets, datatype type, uint8_t writeable, char* name)
+  45:../Sources/distantio.c **** {
+ 187              		.loc 1 45 0
+ 188              		.cfi_startproc
+ 189 0000 80B5     		push	{r7, lr}
+ 190              	.LCFI3:
+ 191              		.cfi_def_cfa_offset 8
+ 192              		.cfi_offset 7, -8
+ 193              		.cfi_offset 14, -4
+ 194 0002 84B0     		sub	sp, sp, #16
+ 195              	.LCFI4:
+ 196              		.cfi_def_cfa_offset 24
+ 197 0004 00AF     		add	r7, sp, #0
+ 198              	.LCFI5:
+ 199              		.cfi_def_cfa_register 7
+ 200 0006 F860     		str	r0, [r7, #12]
+ 201 0008 7A60     		str	r2, [r7, #4]
+ 202 000a 1A1C     		mov	r2, r3
+ 203 000c 3B1C     		mov	r3, r7
+ 204 000e 0A33     		add	r3, r3, #10
+ 205 0010 1980     		strh	r1, [r3]
+ 206 0012 3B1C     		mov	r3, r7
+ 207 0014 0933     		add	r3, r3, #9
+ 208 0016 1A70     		strb	r2, [r3]
+  46:../Sources/distantio.c **** 	if(Log.current_index == 127)
+ 209              		.loc 1 46 0
+ 210 0018 2D4A     		ldr	r2, .L10
+ 211 001a D023     		mov	r3, #208
+ 212 001c 5B01     		lsl	r3, r3, #5
+ 213 001e D35A     		ldrh	r3, [r2, r3]
+ 214 0020 7F2B     		cmp	r3, #127
+ 215 0022 01D1     		bne	.L7
+  47:../Sources/distantio.c **** 		return 1;
+ 216              		.loc 1 47 0
+ 217 0024 0123     		mov	r3, #1
+ 218 0026 4FE0     		b	.L8
+ 219              	.L7:
+  48:../Sources/distantio.c **** 	
+  49:../Sources/distantio.c **** 	//Limited to 1024 octets per variable, should be enough for now
+  50:../Sources/distantio.c **** 	if(octets > 1024)
+ 220              		.loc 1 50 0
+ 221 0028 3B1C     		mov	r3, r7
+ 222 002a 0A33     		add	r3, r3, #10
+ 223 002c 1A88     		ldrh	r2, [r3]
+ 224 002e 8023     		mov	r3, #128
+ 225 0030 DB00     		lsl	r3, r3, #3
+ 226 0032 9A42     		cmp	r2, r3
+ 227 0034 01D9     		bls	.L9
+  51:../Sources/distantio.c **** 		return 1;
+ 228              		.loc 1 51 0
+ 229 0036 0123     		mov	r3, #1
+ 230 0038 46E0     		b	.L8
+ 231              	.L9:
+  52:../Sources/distantio.c **** 	
+  53:../Sources/distantio.c **** 	Log.variables[Log.current_index].ptr = adress;
+ 232              		.loc 1 53 0
+ 233 003a 254A     		ldr	r2, .L10
+ 234 003c D023     		mov	r3, #208
+ 235 003e 5B01     		lsl	r3, r3, #5
+ 236 0040 D35A     		ldrh	r3, [r2, r3]
+ 237 0042 1A1C     		mov	r2, r3
+ 238 0044 224B     		ldr	r3, .L10
+ 239 0046 3421     		mov	r1, #52
+ 240 0048 4A43     		mul	r2, r1
+ 241 004a F968     		ldr	r1, [r7, #12]
+ 242 004c D150     		str	r1, [r2, r3]
+  54:../Sources/distantio.c **** 	Log.variables[Log.current_index].size = octets;
+ 243              		.loc 1 54 0
+ 244 004e 204A     		ldr	r2, .L10
+ 245 0050 D023     		mov	r3, #208
+ 246 0052 5B01     		lsl	r3, r3, #5
+ 247 0054 D35A     		ldrh	r3, [r2, r3]
+ 248 0056 1E49     		ldr	r1, .L10
+ 249 0058 3422     		mov	r2, #52
+ 250 005a 5343     		mul	r3, r2
+ 251 005c 3A1C     		mov	r2, r7
+ 252 005e 0A32     		add	r2, r2, #10
+ 253 0060 CB18     		add	r3, r1, r3
+ 254 0062 1288     		ldrh	r2, [r2]
+ 255 0064 9A80     		strh	r2, [r3, #4]
+  55:../Sources/distantio.c **** 	Log.variables[Log.current_index].writeable = writeable;
+ 256              		.loc 1 55 0
+ 257 0066 1A4A     		ldr	r2, .L10
+ 258 0068 D023     		mov	r3, #208
+ 259 006a 5B01     		lsl	r3, r3, #5
+ 260 006c D35A     		ldrh	r3, [r2, r3]
+ 261 006e 1849     		ldr	r1, .L10
+ 262 0070 3422     		mov	r2, #52
+ 263 0072 5343     		mul	r3, r2
+ 264 0074 3A1C     		mov	r2, r7
+ 265 0076 0932     		add	r2, r2, #9
+ 266 0078 CB18     		add	r3, r1, r3
+ 267 007a 1278     		ldrb	r2, [r2]
+ 268 007c 9A71     		strb	r2, [r3, #6]
+  56:../Sources/distantio.c **** 	Log.variables[Log.current_index].type = type;
+ 269              		.loc 1 56 0
+ 270 007e 144A     		ldr	r2, .L10
+ 271 0080 D023     		mov	r3, #208
+ 272 0082 5B01     		lsl	r3, r3, #5
+ 273 0084 D35A     		ldrh	r3, [r2, r3]
+ 274 0086 124A     		ldr	r2, .L10
+ 275 0088 3421     		mov	r1, #52
+ 276 008a 4B43     		mul	r3, r1
+ 277 008c D318     		add	r3, r2, r3
+ 278 008e 0C33     		add	r3, r3, #12
+ 279 0090 7A68     		ldr	r2, [r7, #4]
+ 280 0092 1A60     		str	r2, [r3]
+  57:../Sources/distantio.c **** 	strcpy(Log.variables[Log.current_index].name,name);
+ 281              		.loc 1 57 0
+ 282 0094 0E4A     		ldr	r2, .L10
+ 283 0096 D023     		mov	r3, #208
+ 284 0098 5B01     		lsl	r3, r3, #5
+ 285 009a D35A     		ldrh	r3, [r2, r3]
+ 286 009c 3422     		mov	r2, #52
+ 287 009e 5343     		mul	r3, r2
+ 288 00a0 1A1C     		mov	r2, r3
+ 289 00a2 1032     		add	r2, r2, #16
+ 290 00a4 0A4B     		ldr	r3, .L10
+ 291 00a6 D218     		add	r2, r2, r3
+ 292 00a8 BB69     		ldr	r3, [r7, #24]
+ 293 00aa 101C     		mov	r0, r2
+ 294 00ac 191C     		mov	r1, r3
+ 295 00ae FFF7FEFF 		bl	strcpy
+  58:../Sources/distantio.c **** 	
+  59:../Sources/distantio.c **** 	Log.current_index++;
+ 296              		.loc 1 59 0
+ 297 00b2 074A     		ldr	r2, .L10
+ 298 00b4 D023     		mov	r3, #208
+ 299 00b6 5B01     		lsl	r3, r3, #5
+ 300 00b8 D35A     		ldrh	r3, [r2, r3]
+ 301 00ba 0133     		add	r3, r3, #1
+ 302 00bc 99B2     		uxth	r1, r3
+ 303 00be 044A     		ldr	r2, .L10
+ 304 00c0 D023     		mov	r3, #208
+ 305 00c2 5B01     		lsl	r3, r3, #5
+ 306 00c4 D152     		strh	r1, [r2, r3]
+  60:../Sources/distantio.c **** 	
+  61:../Sources/distantio.c **** 	return 0;
+ 307              		.loc 1 61 0
+ 308 00c6 0023     		mov	r3, #0
+ 309              	.L8:
+  62:../Sources/distantio.c **** }
+ 310              		.loc 1 62 0
+ 311 00c8 181C     		mov	r0, r3
+ 312 00ca BD46     		mov	sp, r7
+ 313 00cc 04B0     		add	sp, sp, #16
+ 314              		@ sp needed for prologue
+ 315 00ce 80BD     		pop	{r7, pc}
+ 316              	.L11:
+ 317              		.align	2
+ 318              	.L10:
+ 319 00d0 00000000 		.word	Log
+ 320              		.cfi_endproc
+ 321              	.LFE1:
+ 323              		.section	.text.register_scalar,"ax",%progbits
+ 324              		.align	2
+ 325              		.global	register_scalar
+ 326              		.code	16
+ 327              		.thumb_func
+ 329              	register_scalar:
+ 330              	.LFB2:
+  63:../Sources/distantio.c **** 
+  64:../Sources/distantio.c **** uint8_t register_scalar(void* adress, datatype type, uint8_t writeable, char* name)
+  65:../Sources/distantio.c **** {
+ 331              		.loc 1 65 0
+ 332              		.cfi_startproc
+ 333 0000 90B5     		push	{r4, r7, lr}
+ 334              	.LCFI6:
+ 335              		.cfi_def_cfa_offset 12
+ 336              		.cfi_offset 4, -12
+ 337              		.cfi_offset 7, -8
+ 338              		.cfi_offset 14, -4
+ 339 0002 89B0     		sub	sp, sp, #36
+ 340              	.LCFI7:
+ 341              		.cfi_def_cfa_offset 48
+ 342 0004 02AF     		add	r7, sp, #8
+ 343              	.LCFI8:
+ 344              		.cfi_def_cfa 7, 40
+ 345 0006 F860     		str	r0, [r7, #12]
+ 346 0008 B960     		str	r1, [r7, #8]
+ 347 000a 3B60     		str	r3, [r7]
+ 348 000c FB1D     		add	r3, r7, #7
+ 349 000e 1A70     		strb	r2, [r3]
+  66:../Sources/distantio.c **** 	uint16_t octets = 0;
+ 350              		.loc 1 66 0
+ 351 0010 3B1C     		mov	r3, r7
+ 352 0012 1633     		add	r3, r3, #22
+ 353 0014 0022     		mov	r2, #0
+ 354 0016 1A80     		strh	r2, [r3]
+  67:../Sources/distantio.c **** 	switch(type)
+ 355              		.loc 1 67 0
+ 356 0018 BB68     		ldr	r3, [r7, #8]
+ 357 001a 062B     		cmp	r3, #6
+ 358 001c 28D8     		bhi	.L13
+ 359 001e BB68     		ldr	r3, [r7, #8]
+ 360 0020 9A00     		lsl	r2, r3, #2
+ 361 0022 1E4B     		ldr	r3, .L24
+ 362 0024 D318     		add	r3, r2, r3
+ 363 0026 1B68     		ldr	r3, [r3]
+ 364 0028 9F46     		mov	pc, r3
+ 365              		.section	.rodata.register_scalar,"a",%progbits
+ 366              		.align	2
+ 367              	.L21:
+ 368 0000 2A000000 		.word	.L14
+ 369 0004 34000000 		.word	.L15
+ 370 0008 3E000000 		.word	.L16
+ 371 000c 48000000 		.word	.L17
+ 372 0010 52000000 		.word	.L18
+ 373 0014 5C000000 		.word	.L19
+ 374 0018 66000000 		.word	.L20
+ 375              		.section	.text.register_scalar
+ 376              	.L14:
+  68:../Sources/distantio.c **** 	{
+  69:../Sources/distantio.c **** 	case FLOAT:
+  70:../Sources/distantio.c **** 		octets = 4;
+ 377              		.loc 1 70 0
+ 378 002a 3B1C     		mov	r3, r7
+ 379 002c 1633     		add	r3, r3, #22
+ 380 002e 0422     		mov	r2, #4
+ 381 0030 1A80     		strh	r2, [r3]
+  71:../Sources/distantio.c **** 		break;
+ 382              		.loc 1 71 0
+ 383 0032 22E0     		b	.L22
+ 384              	.L15:
+  72:../Sources/distantio.c **** 		
+  73:../Sources/distantio.c **** 	case UINT8:
+  74:../Sources/distantio.c **** 		octets = 1;
+ 385              		.loc 1 74 0
+ 386 0034 3B1C     		mov	r3, r7
+ 387 0036 1633     		add	r3, r3, #22
+ 388 0038 0122     		mov	r2, #1
+ 389 003a 1A80     		strh	r2, [r3]
+  75:../Sources/distantio.c **** 		break;
+ 390              		.loc 1 75 0
+ 391 003c 1DE0     		b	.L22
+ 392              	.L16:
+  76:../Sources/distantio.c **** 	
+  77:../Sources/distantio.c **** 	case UINT16:
+  78:../Sources/distantio.c **** 		octets = 2;
+ 393              		.loc 1 78 0
+ 394 003e 3B1C     		mov	r3, r7
+ 395 0040 1633     		add	r3, r3, #22
+ 396 0042 0222     		mov	r2, #2
+ 397 0044 1A80     		strh	r2, [r3]
+  79:../Sources/distantio.c **** 		break;
+ 398              		.loc 1 79 0
+ 399 0046 18E0     		b	.L22
+ 400              	.L17:
+  80:../Sources/distantio.c **** 	
+  81:../Sources/distantio.c **** 	case UINT32:
+  82:../Sources/distantio.c **** 		octets = 4;
+ 401              		.loc 1 82 0
+ 402 0048 3B1C     		mov	r3, r7
+ 403 004a 1633     		add	r3, r3, #22
+ 404 004c 0422     		mov	r2, #4
+ 405 004e 1A80     		strh	r2, [r3]
+  83:../Sources/distantio.c **** 		break;
+ 406              		.loc 1 83 0
+ 407 0050 13E0     		b	.L22
+ 408              	.L18:
+  84:../Sources/distantio.c **** 		
+  85:../Sources/distantio.c **** 	case INT8:
+  86:../Sources/distantio.c **** 		octets = 1;
+ 409              		.loc 1 86 0
+ 410 0052 3B1C     		mov	r3, r7
+ 411 0054 1633     		add	r3, r3, #22
+ 412 0056 0122     		mov	r2, #1
+ 413 0058 1A80     		strh	r2, [r3]
+  87:../Sources/distantio.c **** 		break;
+ 414              		.loc 1 87 0
+ 415 005a 0EE0     		b	.L22
+ 416              	.L19:
+  88:../Sources/distantio.c **** 	
+  89:../Sources/distantio.c **** 	case INT16:
+  90:../Sources/distantio.c **** 		octets = 2;
+ 417              		.loc 1 90 0
+ 418 005c 3B1C     		mov	r3, r7
+ 419 005e 1633     		add	r3, r3, #22
+ 420 0060 0222     		mov	r2, #2
+ 421 0062 1A80     		strh	r2, [r3]
+  91:../Sources/distantio.c **** 		break;
+ 422              		.loc 1 91 0
+ 423 0064 09E0     		b	.L22
+ 424              	.L20:
+  92:../Sources/distantio.c **** 		
+  93:../Sources/distantio.c **** 	case INT32:
+  94:../Sources/distantio.c **** 		octets = 4;
+ 425              		.loc 1 94 0
+ 426 0066 3B1C     		mov	r3, r7
+ 427 0068 1633     		add	r3, r3, #22
+ 428 006a 0422     		mov	r2, #4
+ 429 006c 1A80     		strh	r2, [r3]
+  95:../Sources/distantio.c **** 		break;
+ 430              		.loc 1 95 0
+ 431 006e 04E0     		b	.L22
+ 432              	.L13:
+  96:../Sources/distantio.c **** 	
+  97:../Sources/distantio.c **** 	default:
+  98:../Sources/distantio.c **** 		octets = 1;
+ 433              		.loc 1 98 0
+ 434 0070 3B1C     		mov	r3, r7
+ 435 0072 1633     		add	r3, r3, #22
+ 436 0074 0122     		mov	r2, #1
+ 437 0076 1A80     		strh	r2, [r3]
+  99:../Sources/distantio.c **** 		break;
+ 438              		.loc 1 99 0
+ 439 0078 C046     		mov	r8, r8
+ 440              	.L22:
+ 100:../Sources/distantio.c **** 	}
+ 101:../Sources/distantio.c **** 	
+ 102:../Sources/distantio.c **** 	return register_((uint8_t*)(adress), octets, type, writeable, name);
+ 441              		.loc 1 102 0
+ 442 007a F868     		ldr	r0, [r7, #12]
+ 443 007c 3B1C     		mov	r3, r7
+ 444 007e 1633     		add	r3, r3, #22
+ 445 0080 1988     		ldrh	r1, [r3]
+ 446 0082 BA68     		ldr	r2, [r7, #8]
+ 447 0084 FB1D     		add	r3, r7, #7
+ 448 0086 1B78     		ldrb	r3, [r3]
+ 449 0088 3C68     		ldr	r4, [r7]
+ 450 008a 0094     		str	r4, [sp]
+ 451 008c FFF7FEFF 		bl	register_
+ 452 0090 031C     		mov	r3, r0
+ 103:../Sources/distantio.c **** }
+ 453              		.loc 1 103 0
+ 454 0092 181C     		mov	r0, r3
+ 455 0094 BD46     		mov	sp, r7
+ 456 0096 07B0     		add	sp, sp, #28
+ 457              		@ sp needed for prologue
+ 458 0098 90BD     		pop	{r4, r7, pc}
+ 459              	.L25:
+ 460 009a C046     		.align	2
+ 461              	.L24:
+ 462 009c 00000000 		.word	.L21
+ 463              		.cfi_endproc
+ 464              	.LFE2:
+ 466              		.section	.text.register_array,"ax",%progbits
+ 467              		.align	2
+ 468              		.global	register_array
+ 469              		.code	16
+ 470              		.thumb_func
+ 472              	register_array:
+ 473              	.LFB3:
+ 104:../Sources/distantio.c **** 
+ 105:../Sources/distantio.c **** uint8_t register_array(void* adress, uint16_t size, datatype type, uint8_t writeable, char* name)
+ 106:../Sources/distantio.c **** {
+ 474              		.loc 1 106 0
+ 475              		.cfi_startproc
+ 476 0000 90B5     		push	{r4, r7, lr}
+ 477              	.LCFI9:
+ 478              		.cfi_def_cfa_offset 12
+ 479              		.cfi_offset 4, -12
+ 480              		.cfi_offset 7, -8
+ 481              		.cfi_offset 14, -4
+ 482 0002 89B0     		sub	sp, sp, #36
+ 483              	.LCFI10:
+ 484              		.cfi_def_cfa_offset 48
+ 485 0004 02AF     		add	r7, sp, #8
+ 486              	.LCFI11:
+ 487              		.cfi_def_cfa 7, 40
+ 488 0006 F860     		str	r0, [r7, #12]
+ 489 0008 7A60     		str	r2, [r7, #4]
+ 490 000a 1A1C     		mov	r2, r3
+ 491 000c 3B1C     		mov	r3, r7
+ 492 000e 0A33     		add	r3, r3, #10
+ 493 0010 1980     		strh	r1, [r3]
+ 494 0012 3B1C     		mov	r3, r7
+ 495 0014 0933     		add	r3, r3, #9
+ 496 0016 1A70     		strb	r2, [r3]
+ 107:../Sources/distantio.c **** 	uint16_t octets = 0;
+ 497              		.loc 1 107 0
+ 498 0018 3B1C     		mov	r3, r7
+ 499 001a 1633     		add	r3, r3, #22
+ 500 001c 0022     		mov	r2, #0
+ 501 001e 1A80     		strh	r2, [r3]
+ 108:../Sources/distantio.c **** 		switch(type)
+ 502              		.loc 1 108 0
+ 503 0020 7B68     		ldr	r3, [r7, #4]
+ 504 0022 062B     		cmp	r3, #6
+ 505 0024 28D8     		bhi	.L27
+ 506 0026 7B68     		ldr	r3, [r7, #4]
+ 507 0028 9A00     		lsl	r2, r3, #2
+ 508 002a 214B     		ldr	r3, .L38
+ 509 002c D318     		add	r3, r2, r3
+ 510 002e 1B68     		ldr	r3, [r3]
+ 511 0030 9F46     		mov	pc, r3
+ 512              		.section	.rodata.register_array,"a",%progbits
+ 513              		.align	2
+ 514              	.L35:
+ 515 0000 32000000 		.word	.L28
+ 516 0004 3C000000 		.word	.L29
+ 517 0008 46000000 		.word	.L30
+ 518 000c 50000000 		.word	.L31
+ 519 0010 5A000000 		.word	.L32
+ 520 0014 64000000 		.word	.L33
+ 521 0018 6E000000 		.word	.L34
+ 522              		.section	.text.register_array
+ 523              	.L28:
+ 109:../Sources/distantio.c **** 		{
+ 110:../Sources/distantio.c **** 		case FLOAT:
+ 111:../Sources/distantio.c **** 			octets = 4;
+ 524              		.loc 1 111 0
+ 525 0032 3B1C     		mov	r3, r7
+ 526 0034 1633     		add	r3, r3, #22
+ 527 0036 0422     		mov	r2, #4
+ 528 0038 1A80     		strh	r2, [r3]
+ 112:../Sources/distantio.c **** 			break;
+ 529              		.loc 1 112 0
+ 530 003a 22E0     		b	.L36
+ 531              	.L29:
+ 113:../Sources/distantio.c **** 			
+ 114:../Sources/distantio.c **** 		case UINT8:
+ 115:../Sources/distantio.c **** 			octets = 1;
+ 532              		.loc 1 115 0
+ 533 003c 3B1C     		mov	r3, r7
+ 534 003e 1633     		add	r3, r3, #22
+ 535 0040 0122     		mov	r2, #1
+ 536 0042 1A80     		strh	r2, [r3]
+ 116:../Sources/distantio.c **** 			break;
+ 537              		.loc 1 116 0
+ 538 0044 1DE0     		b	.L36
+ 539              	.L30:
+ 117:../Sources/distantio.c **** 		
+ 118:../Sources/distantio.c **** 		case UINT16:
+ 119:../Sources/distantio.c **** 			octets = 2;
+ 540              		.loc 1 119 0
+ 541 0046 3B1C     		mov	r3, r7
+ 542 0048 1633     		add	r3, r3, #22
+ 543 004a 0222     		mov	r2, #2
+ 544 004c 1A80     		strh	r2, [r3]
+ 120:../Sources/distantio.c **** 			break;
+ 545              		.loc 1 120 0
+ 546 004e 18E0     		b	.L36
+ 547              	.L31:
+ 121:../Sources/distantio.c **** 		
+ 122:../Sources/distantio.c **** 		case UINT32:
+ 123:../Sources/distantio.c **** 			octets = 4;
+ 548              		.loc 1 123 0
+ 549 0050 3B1C     		mov	r3, r7
+ 550 0052 1633     		add	r3, r3, #22
+ 551 0054 0422     		mov	r2, #4
+ 552 0056 1A80     		strh	r2, [r3]
+ 124:../Sources/distantio.c **** 			break;
+ 553              		.loc 1 124 0
+ 554 0058 13E0     		b	.L36
+ 555              	.L32:
+ 125:../Sources/distantio.c **** 			
+ 126:../Sources/distantio.c **** 		case INT8:
+ 127:../Sources/distantio.c **** 			octets = 1;
+ 556              		.loc 1 127 0
+ 557 005a 3B1C     		mov	r3, r7
+ 558 005c 1633     		add	r3, r3, #22
+ 559 005e 0122     		mov	r2, #1
+ 560 0060 1A80     		strh	r2, [r3]
+ 128:../Sources/distantio.c **** 			break;
+ 561              		.loc 1 128 0
+ 562 0062 0EE0     		b	.L36
+ 563              	.L33:
+ 129:../Sources/distantio.c **** 		
+ 130:../Sources/distantio.c **** 		case INT16:
+ 131:../Sources/distantio.c **** 			octets = 2;
+ 564              		.loc 1 131 0
+ 565 0064 3B1C     		mov	r3, r7
+ 566 0066 1633     		add	r3, r3, #22
+ 567 0068 0222     		mov	r2, #2
+ 568 006a 1A80     		strh	r2, [r3]
+ 132:../Sources/distantio.c **** 			break;
+ 569              		.loc 1 132 0
+ 570 006c 09E0     		b	.L36
+ 571              	.L34:
+ 133:../Sources/distantio.c **** 			
+ 134:../Sources/distantio.c **** 		case INT32:
+ 135:../Sources/distantio.c **** 			octets = 4;
+ 572              		.loc 1 135 0
+ 573 006e 3B1C     		mov	r3, r7
+ 574 0070 1633     		add	r3, r3, #22
+ 575 0072 0422     		mov	r2, #4
+ 576 0074 1A80     		strh	r2, [r3]
+ 136:../Sources/distantio.c **** 			break;
+ 577              		.loc 1 136 0
+ 578 0076 04E0     		b	.L36
+ 579              	.L27:
+ 137:../Sources/distantio.c **** 		
+ 138:../Sources/distantio.c **** 		default:
+ 139:../Sources/distantio.c **** 			octets = 1;
+ 580              		.loc 1 139 0
+ 581 0078 3B1C     		mov	r3, r7
+ 582 007a 1633     		add	r3, r3, #22
+ 583 007c 0122     		mov	r2, #1
+ 584 007e 1A80     		strh	r2, [r3]
+ 140:../Sources/distantio.c **** 			break;
+ 585              		.loc 1 140 0
+ 586 0080 C046     		mov	r8, r8
+ 587              	.L36:
+ 141:../Sources/distantio.c **** 		}
+ 142:../Sources/distantio.c **** 		
+ 143:../Sources/distantio.c **** 	return register_((uint8_t*)(adress), octets * size, type, writeable, name);
+ 588              		.loc 1 143 0
+ 589 0082 3B1C     		mov	r3, r7
+ 590 0084 1633     		add	r3, r3, #22
+ 591 0086 3A1C     		mov	r2, r7
+ 592 0088 0A32     		add	r2, r2, #10
+ 593 008a 1B88     		ldrh	r3, [r3]
+ 594 008c 1288     		ldrh	r2, [r2]
+ 595 008e 5343     		mul	r3, r2
+ 596 0090 99B2     		uxth	r1, r3
+ 597 0092 F868     		ldr	r0, [r7, #12]
+ 598 0094 7A68     		ldr	r2, [r7, #4]
+ 599 0096 3B1C     		mov	r3, r7
+ 600 0098 0933     		add	r3, r3, #9
+ 601 009a 1B78     		ldrb	r3, [r3]
+ 602 009c BC6A     		ldr	r4, [r7, #40]
+ 603 009e 0094     		str	r4, [sp]
+ 604 00a0 FFF7FEFF 		bl	register_
+ 605 00a4 031C     		mov	r3, r0
+ 144:../Sources/distantio.c **** }
+ 606              		.loc 1 144 0
+ 607 00a6 181C     		mov	r0, r3
+ 608 00a8 BD46     		mov	sp, r7
+ 609 00aa 07B0     		add	sp, sp, #28
+ 610              		@ sp needed for prologue
+ 611 00ac 90BD     		pop	{r4, r7, pc}
+ 612              	.L39:
+ 613 00ae C046     		.align	2
+ 614              	.L38:
+ 615 00b0 00000000 		.word	.L35
+ 616              		.cfi_endproc
+ 617              	.LFE3:
+ 619              		.section	.text.update_distantio,"ax",%progbits
+ 620              		.align	2
+ 621              		.global	update_distantio
+ 622              		.code	16
+ 623              		.thumb_func
+ 625              	update_distantio:
+ 626              	.LFB4:
+ 145:../Sources/distantio.c **** 
+ 146:../Sources/distantio.c **** void update_distantio()
+ 147:../Sources/distantio.c **** {
+ 627              		.loc 1 147 0
+ 628              		.cfi_startproc
+ 629 0000 80B5     		push	{r7, lr}
+ 630              	.LCFI12:
+ 631              		.cfi_def_cfa_offset 8
+ 632              		.cfi_offset 7, -8
+ 633              		.cfi_offset 14, -4
+ 634 0002 82B0     		sub	sp, sp, #8
+ 635              	.LCFI13:
+ 636              		.cfi_def_cfa_offset 16
+ 637 0004 00AF     		add	r7, sp, #0
+ 638              	.LCFI14:
+ 639              		.cfi_def_cfa_register 7
+ 148:../Sources/distantio.c **** 	uint16_t i;	
+ 149:../Sources/distantio.c **** 	uint16_t interval = 1;
+ 640              		.loc 1 149 0
+ 641 0006 3B1D     		add	r3, r7, #4
+ 642 0008 0122     		mov	r2, #1
+ 643 000a 1A80     		strh	r2, [r3]
+ 150:../Sources/distantio.c **** 	
+ 151:../Sources/distantio.c **** 	//Transmit data to serial - Only one variable per mainloop
+ 152:../Sources/distantio.c **** 	for(i = Log.previous_index ; i < Log.previous_index + interval ; i++)
+ 644              		.loc 1 152 0
+ 645 000c BB1D     		add	r3, r7, #6
+ 646 000e 2149     		ldr	r1, .L47
+ 647 0010 214A     		ldr	r2, .L47+4
+ 648 0012 8A5A     		ldrh	r2, [r1, r2]
+ 649 0014 1A80     		strh	r2, [r3]
+ 650 0016 16E0     		b	.L41
+ 651              	.L44:
+ 153:../Sources/distantio.c **** 	{		
+ 154:../Sources/distantio.c **** 		if(Log.variables[i].send == 0)
+ 652              		.loc 1 154 0
+ 653 0018 BB1D     		add	r3, r7, #6
+ 654 001a 1A88     		ldrh	r2, [r3]
+ 655 001c 1D49     		ldr	r1, .L47
+ 656 001e 3023     		mov	r3, #48
+ 657 0020 3420     		mov	r0, #52
+ 658 0022 4243     		mul	r2, r0
+ 659 0024 8A18     		add	r2, r1, r2
+ 660 0026 D318     		add	r3, r2, r3
+ 661 0028 1B78     		ldrb	r3, [r3]
+ 662 002a 002B     		cmp	r3, #0
+ 663 002c 05D0     		beq	.L46
+ 664              	.L42:
+ 155:../Sources/distantio.c **** 			continue;
+ 156:../Sources/distantio.c **** 		
+ 157:../Sources/distantio.c **** 		distantio_send_variable(i);
+ 665              		.loc 1 157 0
+ 666 002e BB1D     		add	r3, r7, #6
+ 667 0030 1B88     		ldrh	r3, [r3]
+ 668 0032 181C     		mov	r0, r3
+ 669 0034 FFF7FEFF 		bl	distantio_send_variable
+ 670 0038 00E0     		b	.L43
+ 671              	.L46:
+ 155:../Sources/distantio.c **** 			continue;
+ 672              		.loc 1 155 0
+ 673 003a C046     		mov	r8, r8
+ 674              	.L43:
+ 152:../Sources/distantio.c **** 	for(i = Log.previous_index ; i < Log.previous_index + interval ; i++)
+ 675              		.loc 1 152 0
+ 676 003c BB1D     		add	r3, r7, #6
+ 677 003e BA1D     		add	r2, r7, #6
+ 678 0040 1288     		ldrh	r2, [r2]
+ 679 0042 0132     		add	r2, r2, #1
+ 680 0044 1A80     		strh	r2, [r3]
+ 681              	.L41:
+ 152:../Sources/distantio.c **** 	for(i = Log.previous_index ; i < Log.previous_index + interval ; i++)
+ 682              		.loc 1 152 0 is_stmt 0
+ 683 0046 BB1D     		add	r3, r7, #6
+ 684 0048 1A88     		ldrh	r2, [r3]
+ 685 004a 1249     		ldr	r1, .L47
+ 686 004c 124B     		ldr	r3, .L47+4
+ 687 004e CB5A     		ldrh	r3, [r1, r3]
+ 688 0050 191C     		mov	r1, r3
+ 689 0052 3B1D     		add	r3, r7, #4
+ 690 0054 1B88     		ldrh	r3, [r3]
+ 691 0056 CB18     		add	r3, r1, r3
+ 692 0058 9A42     		cmp	r2, r3
+ 693 005a DDDB     		blt	.L44
+ 158:../Sources/distantio.c **** 	}
+ 159:../Sources/distantio.c **** 	
+ 160:../Sources/distantio.c **** 	
+ 161:../Sources/distantio.c **** 	Log.previous_index += interval;
+ 694              		.loc 1 161 0 is_stmt 1
+ 695 005c 0D4A     		ldr	r2, .L47
+ 696 005e 0E4B     		ldr	r3, .L47+4
+ 697 0060 D25A     		ldrh	r2, [r2, r3]
+ 698 0062 3B1D     		add	r3, r7, #4
+ 699 0064 1B88     		ldrh	r3, [r3]
+ 700 0066 D318     		add	r3, r2, r3
+ 701 0068 99B2     		uxth	r1, r3
+ 702 006a 0A4A     		ldr	r2, .L47
+ 703 006c 0A4B     		ldr	r3, .L47+4
+ 704 006e D152     		strh	r1, [r2, r3]
+ 162:../Sources/distantio.c **** 	if(Log.previous_index >= Log.current_index)
+ 705              		.loc 1 162 0
+ 706 0070 084A     		ldr	r2, .L47
+ 707 0072 094B     		ldr	r3, .L47+4
+ 708 0074 D25A     		ldrh	r2, [r2, r3]
+ 709 0076 0749     		ldr	r1, .L47
+ 710 0078 D023     		mov	r3, #208
+ 711 007a 5B01     		lsl	r3, r3, #5
+ 712 007c CB5A     		ldrh	r3, [r1, r3]
+ 713 007e 9A42     		cmp	r2, r3
+ 714 0080 03D3     		bcc	.L45
+ 163:../Sources/distantio.c **** 	{
+ 164:../Sources/distantio.c **** 		Log.previous_index = 0;
+ 715              		.loc 1 164 0
+ 716 0082 044A     		ldr	r2, .L47
+ 717 0084 044B     		ldr	r3, .L47+4
+ 718 0086 0021     		mov	r1, #0
+ 719 0088 D152     		strh	r1, [r2, r3]
+ 720              	.L45:
+ 165:../Sources/distantio.c **** 	}
+ 166:../Sources/distantio.c **** 	
+ 167:../Sources/distantio.c **** 	//Finally, let protocol process rx queue
+ 168:../Sources/distantio.c **** 	protocol_process_rx();
+ 721              		.loc 1 168 0
+ 722 008a FFF7FEFF 		bl	protocol_process_rx
+ 169:../Sources/distantio.c **** }
+ 723              		.loc 1 169 0
+ 724 008e BD46     		mov	sp, r7
+ 725 0090 02B0     		add	sp, sp, #8
+ 726              		@ sp needed for prologue
+ 727 0092 80BD     		pop	{r7, pc}
+ 728              	.L48:
+ 729              		.align	2
+ 730              	.L47:
+ 731 0094 00000000 		.word	Log
+ 732 0098 021A0000 		.word	6658
+ 733              		.cfi_endproc
+ 734              	.LFE4:
+ 736              		.section	.text.distantio_decode_rx_frame,"ax",%progbits
+ 737              		.align	2
+ 738              		.global	distantio_decode_rx_frame
+ 739              		.code	16
+ 740              		.thumb_func
+ 742              	distantio_decode_rx_frame:
+ 743              	.LFB5:
+ 170:../Sources/distantio.c **** 
+ 171:../Sources/distantio.c **** 
+ 172:../Sources/distantio.c **** void distantio_decode_rx_frame(ByteQueue* rx_queue)
+ 173:../Sources/distantio.c **** {
+ 744              		.loc 1 173 0
+ 745              		.cfi_startproc
+ 746 0000 90B5     		push	{r4, r7, lr}
+ 747              	.LCFI15:
+ 748              		.cfi_def_cfa_offset 12
+ 749              		.cfi_offset 4, -12
+ 750              		.cfi_offset 7, -8
+ 751              		.cfi_offset 14, -4
+ 752 0002 8FB0     		sub	sp, sp, #60
+ 753              	.LCFI16:
+ 754              		.cfi_def_cfa_offset 72
+ 755 0004 00AF     		add	r7, sp, #0
+ 756              	.LCFI17:
+ 757              		.cfi_def_cfa_register 7
+ 758 0006 7860     		str	r0, [r7, #4]
+ 174:../Sources/distantio.c **** 	//Get payload byte by byte
+ 175:../Sources/distantio.c **** 	
+ 176:../Sources/distantio.c **** 	uint8_t byte = ForcedByteDequeue(rx_queue);
+ 759              		.loc 1 176 0
+ 760 0008 3C1C     		mov	r4, r7
+ 761 000a 3534     		add	r4, r4, #53
+ 762 000c 7B68     		ldr	r3, [r7, #4]
+ 763 000e 181C     		mov	r0, r3
+ 764 0010 FFF7FEFF 		bl	ForcedByteDequeue
+ 765 0014 031C     		mov	r3, r0
+ 766 0016 2370     		strb	r3, [r4]
+ 177:../Sources/distantio.c **** 	uint8_t byte2;
+ 178:../Sources/distantio.c **** 	uint16_t id;
+ 179:../Sources/distantio.c **** 	
+ 180:../Sources/distantio.c **** 	void* ptr;
+ 181:../Sources/distantio.c **** 	
+ 182:../Sources/distantio.c **** 	float* tmp_float;
+ 183:../Sources/distantio.c **** 	uint32_t* tmp_uint32;
+ 184:../Sources/distantio.c **** 	uint8_t* tmp_uint8;
+ 185:../Sources/distantio.c ****     int16_t* tmp_int16; 
+ 186:../Sources/distantio.c ****    
+ 187:../Sources/distantio.c **** 	float* to_float;
+ 188:../Sources/distantio.c **** 	int32_t* to_int;
+ 189:../Sources/distantio.c ****     int16_t* to_int16;
+ 190:../Sources/distantio.c ****     uint8_t* to_uint8;
+ 191:../Sources/distantio.c ****     
+ 192:../Sources/distantio.c **** 	
+ 193:../Sources/distantio.c **** 	uint8_t bytes[4]; 
+ 194:../Sources/distantio.c **** 	
+ 195:../Sources/distantio.c **** 	//If command is return variable
+ 196:../Sources/distantio.c **** 	if(byte == 0x00 && BytesInQueue(rx_queue) >= 2)
+ 767              		.loc 1 196 0
+ 768 0018 3B1C     		mov	r3, r7
+ 769 001a 3533     		add	r3, r3, #53
+ 770 001c 1B78     		ldrb	r3, [r3]
+ 771 001e 002B     		cmp	r3, #0
+ 772 0020 3AD1     		bne	.L50
+ 773              		.loc 1 196 0 is_stmt 0
+ 774 0022 7B68     		ldr	r3, [r7, #4]
+ 775 0024 181C     		mov	r0, r3
+ 776 0026 FFF7FEFF 		bl	BytesInQueue
+ 777 002a 031C     		mov	r3, r0
+ 778 002c 012B     		cmp	r3, #1
+ 779 002e 33D9     		bls	.L50
+ 197:../Sources/distantio.c **** 	{
+ 198:../Sources/distantio.c **** 		byte = ForcedByteDequeue(rx_queue);
+ 780              		.loc 1 198 0 is_stmt 1
+ 781 0030 3C1C     		mov	r4, r7
+ 782 0032 3534     		add	r4, r4, #53
+ 783 0034 7B68     		ldr	r3, [r7, #4]
+ 784 0036 181C     		mov	r0, r3
+ 785 0038 FFF7FEFF 		bl	ForcedByteDequeue
+ 786 003c 031C     		mov	r3, r0
+ 787 003e 2370     		strb	r3, [r4]
+ 199:../Sources/distantio.c **** 		byte2 = ForcedByteDequeue(rx_queue);
+ 788              		.loc 1 199 0
+ 789 0040 3C1C     		mov	r4, r7
+ 790 0042 3434     		add	r4, r4, #52
+ 791 0044 7B68     		ldr	r3, [r7, #4]
+ 792 0046 181C     		mov	r0, r3
+ 793 0048 FFF7FEFF 		bl	ForcedByteDequeue
+ 794 004c 031C     		mov	r3, r0
+ 795 004e 2370     		strb	r3, [r4]
+ 200:../Sources/distantio.c **** 		
+ 201:../Sources/distantio.c **** 		id = byte + (byte2<<8);
+ 796              		.loc 1 201 0
+ 797 0050 3B1C     		mov	r3, r7
+ 798 0052 3533     		add	r3, r3, #53
+ 799 0054 1B78     		ldrb	r3, [r3]
+ 800 0056 99B2     		uxth	r1, r3
+ 801 0058 3B1C     		mov	r3, r7
+ 802 005a 3433     		add	r3, r3, #52
+ 803 005c 1B78     		ldrb	r3, [r3]
+ 804 005e 9BB2     		uxth	r3, r3
+ 805 0060 1B02     		lsl	r3, r3, #8
+ 806 0062 9AB2     		uxth	r2, r3
+ 807 0064 3B1C     		mov	r3, r7
+ 808 0066 3633     		add	r3, r3, #54
+ 809 0068 8A18     		add	r2, r1, r2
+ 810 006a 1A80     		strh	r2, [r3]
+ 202:../Sources/distantio.c **** 		
+ 203:../Sources/distantio.c **** 		if(id < Log.current_index)
+ 811              		.loc 1 203 0
+ 812 006c DD4A     		ldr	r2, .L67
+ 813 006e D023     		mov	r3, #208
+ 814 0070 5B01     		lsl	r3, r3, #5
+ 815 0072 D35A     		ldrh	r3, [r2, r3]
+ 816 0074 3A1C     		mov	r2, r7
+ 817 0076 3632     		add	r2, r2, #54
+ 818 0078 1288     		ldrh	r2, [r2]
+ 819 007a 9A42     		cmp	r2, r3
+ 820 007c 00D3     		bcc	.LCB732
+ 821 007e AFE1     		b	.L52	@long jump
+ 822              	.LCB732:
+ 204:../Sources/distantio.c **** 		{
+ 205:../Sources/distantio.c **** 			Log.variables[id].send = 1;
+ 823              		.loc 1 205 0
+ 824 0080 3B1C     		mov	r3, r7
+ 825 0082 3633     		add	r3, r3, #54
+ 826 0084 1A88     		ldrh	r2, [r3]
+ 827 0086 D749     		ldr	r1, .L67
+ 828 0088 3023     		mov	r3, #48
+ 829 008a 3420     		mov	r0, #52
+ 830 008c 4243     		mul	r2, r0
+ 831 008e 8A18     		add	r2, r1, r2
+ 832 0090 D318     		add	r3, r2, r3
+ 833 0092 0122     		mov	r2, #1
+ 834 0094 1A70     		strb	r2, [r3]
+ 203:../Sources/distantio.c **** 		if(id < Log.current_index)
+ 835              		.loc 1 203 0
+ 836 0096 A3E1     		b	.L52
+ 837              	.L50:
+ 206:../Sources/distantio.c **** 		}
+ 207:../Sources/distantio.c **** 	}
+ 208:../Sources/distantio.c **** 	//If command is write variable value
+ 209:../Sources/distantio.c **** 	else if(byte == 0x01)
+ 838              		.loc 1 209 0
+ 839 0098 3B1C     		mov	r3, r7
+ 840 009a 3533     		add	r3, r3, #53
+ 841 009c 1B78     		ldrb	r3, [r3]
+ 842 009e 012B     		cmp	r3, #1
+ 843 00a0 00D0     		beq	.LCB752
+ 844 00a2 2FE1     		b	.L53	@long jump
+ 845              	.LCB752:
+ 210:../Sources/distantio.c **** 	{
+ 211:../Sources/distantio.c **** 		byte = ForcedByteDequeue(rx_queue);
+ 846              		.loc 1 211 0
+ 847 00a4 3C1C     		mov	r4, r7
+ 848 00a6 3534     		add	r4, r4, #53
+ 849 00a8 7B68     		ldr	r3, [r7, #4]
+ 850 00aa 181C     		mov	r0, r3
+ 851 00ac FFF7FEFF 		bl	ForcedByteDequeue
+ 852 00b0 031C     		mov	r3, r0
+ 853 00b2 2370     		strb	r3, [r4]
+ 212:../Sources/distantio.c **** 		byte2 = ForcedByteDequeue(rx_queue);
+ 854              		.loc 1 212 0
+ 855 00b4 3C1C     		mov	r4, r7
+ 856 00b6 3434     		add	r4, r4, #52
+ 857 00b8 7B68     		ldr	r3, [r7, #4]
+ 858 00ba 181C     		mov	r0, r3
+ 859 00bc FFF7FEFF 		bl	ForcedByteDequeue
+ 860 00c0 031C     		mov	r3, r0
+ 861 00c2 2370     		strb	r3, [r4]
+ 213:../Sources/distantio.c **** 		
+ 214:../Sources/distantio.c **** 		id = byte;
+ 862              		.loc 1 214 0
+ 863 00c4 3B1C     		mov	r3, r7
+ 864 00c6 3633     		add	r3, r3, #54
+ 865 00c8 3A1C     		mov	r2, r7
+ 866 00ca 3532     		add	r2, r2, #53
+ 867 00cc 1278     		ldrb	r2, [r2]
+ 868 00ce 1A80     		strh	r2, [r3]
+ 215:../Sources/distantio.c **** 		//TOCHECK : 4 or 8 shift ?
+ 216:../Sources/distantio.c **** 		id = byte + (byte2<<8);
+ 869              		.loc 1 216 0
+ 870 00d0 3B1C     		mov	r3, r7
+ 871 00d2 3533     		add	r3, r3, #53
+ 872 00d4 1B78     		ldrb	r3, [r3]
+ 873 00d6 99B2     		uxth	r1, r3
+ 874 00d8 3B1C     		mov	r3, r7
+ 875 00da 3433     		add	r3, r3, #52
+ 876 00dc 1B78     		ldrb	r3, [r3]
+ 877 00de 9BB2     		uxth	r3, r3
+ 878 00e0 1B02     		lsl	r3, r3, #8
+ 879 00e2 9AB2     		uxth	r2, r3
+ 880 00e4 3B1C     		mov	r3, r7
+ 881 00e6 3633     		add	r3, r3, #54
+ 882 00e8 8A18     		add	r2, r1, r2
+ 883 00ea 1A80     		strh	r2, [r3]
+ 217:../Sources/distantio.c **** 		
+ 218:../Sources/distantio.c **** 		if(id < Log.current_index)
+ 884              		.loc 1 218 0
+ 885 00ec BD4A     		ldr	r2, .L67
+ 886 00ee D023     		mov	r3, #208
+ 887 00f0 5B01     		lsl	r3, r3, #5
+ 888 00f2 D35A     		ldrh	r3, [r2, r3]
+ 889 00f4 3A1C     		mov	r2, r7
+ 890 00f6 3632     		add	r2, r2, #54
+ 891 00f8 1288     		ldrh	r2, [r2]
+ 892 00fa 9A42     		cmp	r2, r3
+ 893 00fc 00D3     		bcc	.LCB795
+ 894 00fe 78E1     		b	.L65	@long jump
+ 895              	.LCB795:
+ 219:../Sources/distantio.c **** 		{
+ 220:../Sources/distantio.c **** 			if(Log.variables[id].writeable == 1)
+ 896              		.loc 1 220 0
+ 897 0100 3B1C     		mov	r3, r7
+ 898 0102 3633     		add	r3, r3, #54
+ 899 0104 1B88     		ldrh	r3, [r3]
+ 900 0106 B74A     		ldr	r2, .L67
+ 901 0108 3421     		mov	r1, #52
+ 902 010a 4B43     		mul	r3, r1
+ 903 010c D318     		add	r3, r2, r3
+ 904 010e 9B79     		ldrb	r3, [r3, #6]
+ 905 0110 012B     		cmp	r3, #1
+ 906 0112 00D0     		beq	.LCB805
+ 907 0114 6DE1     		b	.L65	@long jump
+ 908              	.LCB805:
+ 221:../Sources/distantio.c **** 			{						
+ 222:../Sources/distantio.c **** 				if(BytesInQueue(rx_queue) >= 4 && Log.variables[id].type == 0x00)
+ 909              		.loc 1 222 0
+ 910 0116 7B68     		ldr	r3, [r7, #4]
+ 911 0118 181C     		mov	r0, r3
+ 912 011a FFF7FEFF 		bl	BytesInQueue
+ 913 011e 031C     		mov	r3, r0
+ 914 0120 032B     		cmp	r3, #3
+ 915 0122 40D9     		bls	.L54
+ 916              		.loc 1 222 0 is_stmt 0
+ 917 0124 3B1C     		mov	r3, r7
+ 918 0126 3633     		add	r3, r3, #54
+ 919 0128 1B88     		ldrh	r3, [r3]
+ 920 012a AE4A     		ldr	r2, .L67
+ 921 012c 3421     		mov	r1, #52
+ 922 012e 4B43     		mul	r3, r1
+ 923 0130 D318     		add	r3, r2, r3
+ 924 0132 0C33     		add	r3, r3, #12
+ 925 0134 1B68     		ldr	r3, [r3]
+ 926 0136 002B     		cmp	r3, #0
+ 927 0138 35D1     		bne	.L54
+ 223:../Sources/distantio.c ****                 {	
+ 224:../Sources/distantio.c ****                     bytes[0] = ForcedByteDequeue(rx_queue);
+ 928              		.loc 1 224 0 is_stmt 1
+ 929 013a 7B68     		ldr	r3, [r7, #4]
+ 930 013c 181C     		mov	r0, r3
+ 931 013e FFF7FEFF 		bl	ForcedByteDequeue
+ 932 0142 031C     		mov	r3, r0
+ 933 0144 1A1C     		mov	r2, r3
+ 934 0146 3B1C     		mov	r3, r7
+ 935 0148 0C33     		add	r3, r3, #12
+ 936 014a 1A70     		strb	r2, [r3]
+ 225:../Sources/distantio.c ****                     bytes[1] = ForcedByteDequeue(rx_queue);
+ 937              		.loc 1 225 0
+ 938 014c 7B68     		ldr	r3, [r7, #4]
+ 939 014e 181C     		mov	r0, r3
+ 940 0150 FFF7FEFF 		bl	ForcedByteDequeue
+ 941 0154 031C     		mov	r3, r0
+ 942 0156 1A1C     		mov	r2, r3
+ 943 0158 3B1C     		mov	r3, r7
+ 944 015a 0C33     		add	r3, r3, #12
+ 945 015c 5A70     		strb	r2, [r3, #1]
+ 226:../Sources/distantio.c ****                     bytes[2] = ForcedByteDequeue(rx_queue);
+ 946              		.loc 1 226 0
+ 947 015e 7B68     		ldr	r3, [r7, #4]
+ 948 0160 181C     		mov	r0, r3
+ 949 0162 FFF7FEFF 		bl	ForcedByteDequeue
+ 950 0166 031C     		mov	r3, r0
+ 951 0168 1A1C     		mov	r2, r3
+ 952 016a 3B1C     		mov	r3, r7
+ 953 016c 0C33     		add	r3, r3, #12
+ 954 016e 9A70     		strb	r2, [r3, #2]
+ 227:../Sources/distantio.c ****                     bytes[3] = ForcedByteDequeue(rx_queue);             
+ 955              		.loc 1 227 0
+ 956 0170 7B68     		ldr	r3, [r7, #4]
+ 957 0172 181C     		mov	r0, r3
+ 958 0174 FFF7FEFF 		bl	ForcedByteDequeue
+ 959 0178 031C     		mov	r3, r0
+ 960 017a 1A1C     		mov	r2, r3
+ 961 017c 3B1C     		mov	r3, r7
+ 962 017e 0C33     		add	r3, r3, #12
+ 963 0180 DA70     		strb	r2, [r3, #3]
+ 228:../Sources/distantio.c **** 				
+ 229:../Sources/distantio.c ****                     to_float = (float *)(&bytes[0]);
+ 964              		.loc 1 229 0
+ 965 0182 3B1C     		mov	r3, r7
+ 966 0184 0C33     		add	r3, r3, #12
+ 967 0186 3B63     		str	r3, [r7, #48]
+ 230:../Sources/distantio.c **** 										
+ 231:../Sources/distantio.c **** 					ptr = (void *)(Log.variables[id].ptr);
+ 968              		.loc 1 231 0
+ 969 0188 3B1C     		mov	r3, r7
+ 970 018a 3633     		add	r3, r3, #54
+ 971 018c 1A88     		ldrh	r2, [r3]
+ 972 018e 954B     		ldr	r3, .L67
+ 973 0190 3421     		mov	r1, #52
+ 974 0192 4A43     		mul	r2, r1
+ 975 0194 D358     		ldr	r3, [r2, r3]
+ 976 0196 FB62     		str	r3, [r7, #44]
+ 232:../Sources/distantio.c **** 					tmp_float = (float *)(ptr);
+ 977              		.loc 1 232 0
+ 978 0198 FB6A     		ldr	r3, [r7, #44]
+ 979 019a BB62     		str	r3, [r7, #40]
+ 233:../Sources/distantio.c **** 					
+ 234:../Sources/distantio.c **** 					*tmp_float = *to_float;
+ 980              		.loc 1 234 0
+ 981 019c 3B6B     		ldr	r3, [r7, #48]
+ 982 019e 1A68     		ldr	r2, [r3]
+ 983 01a0 BB6A     		ldr	r3, [r7, #40]
+ 984 01a2 1A60     		str	r2, [r3]
+ 985 01a4 ADE0     		b	.L55
+ 986              	.L54:
+ 235:../Sources/distantio.c **** 				}
+ 236:../Sources/distantio.c **** 				else if(BytesInQueue(rx_queue) >= 4 && Log.variables[id].type == 0x06)
+ 987              		.loc 1 236 0
+ 988 01a6 7B68     		ldr	r3, [r7, #4]
+ 989 01a8 181C     		mov	r0, r3
+ 990 01aa FFF7FEFF 		bl	BytesInQueue
+ 991 01ae 031C     		mov	r3, r0
+ 992 01b0 032B     		cmp	r3, #3
+ 993 01b2 41D9     		bls	.L56
+ 994              		.loc 1 236 0 is_stmt 0
+ 995 01b4 3B1C     		mov	r3, r7
+ 996 01b6 3633     		add	r3, r3, #54
+ 997 01b8 1B88     		ldrh	r3, [r3]
+ 998 01ba 8A4A     		ldr	r2, .L67
+ 999 01bc 3421     		mov	r1, #52
+ 1000 01be 4B43     		mul	r3, r1
+ 1001 01c0 D318     		add	r3, r2, r3
+ 1002 01c2 0C33     		add	r3, r3, #12
+ 1003 01c4 1B68     		ldr	r3, [r3]
+ 1004 01c6 062B     		cmp	r3, #6
+ 1005 01c8 36D1     		bne	.L56
+ 237:../Sources/distantio.c **** 				{
+ 238:../Sources/distantio.c ****                     bytes[0] = ForcedByteDequeue(rx_queue);
+ 1006              		.loc 1 238 0 is_stmt 1
+ 1007 01ca 7B68     		ldr	r3, [r7, #4]
+ 1008 01cc 181C     		mov	r0, r3
+ 1009 01ce FFF7FEFF 		bl	ForcedByteDequeue
+ 1010 01d2 031C     		mov	r3, r0
+ 1011 01d4 1A1C     		mov	r2, r3
+ 1012 01d6 3B1C     		mov	r3, r7
+ 1013 01d8 0C33     		add	r3, r3, #12
+ 1014 01da 1A70     		strb	r2, [r3]
+ 239:../Sources/distantio.c ****                     bytes[1] = ForcedByteDequeue(rx_queue);
+ 1015              		.loc 1 239 0
+ 1016 01dc 7B68     		ldr	r3, [r7, #4]
+ 1017 01de 181C     		mov	r0, r3
+ 1018 01e0 FFF7FEFF 		bl	ForcedByteDequeue
+ 1019 01e4 031C     		mov	r3, r0
+ 1020 01e6 1A1C     		mov	r2, r3
+ 1021 01e8 3B1C     		mov	r3, r7
+ 1022 01ea 0C33     		add	r3, r3, #12
+ 1023 01ec 5A70     		strb	r2, [r3, #1]
+ 240:../Sources/distantio.c ****                     bytes[2] = ForcedByteDequeue(rx_queue);
+ 1024              		.loc 1 240 0
+ 1025 01ee 7B68     		ldr	r3, [r7, #4]
+ 1026 01f0 181C     		mov	r0, r3
+ 1027 01f2 FFF7FEFF 		bl	ForcedByteDequeue
+ 1028 01f6 031C     		mov	r3, r0
+ 1029 01f8 1A1C     		mov	r2, r3
+ 1030 01fa 3B1C     		mov	r3, r7
+ 1031 01fc 0C33     		add	r3, r3, #12
+ 1032 01fe 9A70     		strb	r2, [r3, #2]
+ 241:../Sources/distantio.c ****                     bytes[3] = ForcedByteDequeue(rx_queue);             
+ 1033              		.loc 1 241 0
+ 1034 0200 7B68     		ldr	r3, [r7, #4]
+ 1035 0202 181C     		mov	r0, r3
+ 1036 0204 FFF7FEFF 		bl	ForcedByteDequeue
+ 1037 0208 031C     		mov	r3, r0
+ 1038 020a 1A1C     		mov	r2, r3
+ 1039 020c 3B1C     		mov	r3, r7
+ 1040 020e 0C33     		add	r3, r3, #12
+ 1041 0210 DA70     		strb	r2, [r3, #3]
+ 242:../Sources/distantio.c **** 					//TODO : Use void ptr
+ 243:../Sources/distantio.c **** 					to_int = (int32_t*)(&bytes[0]);
+ 1042              		.loc 1 243 0
+ 1043 0212 3B1C     		mov	r3, r7
+ 1044 0214 0C33     		add	r3, r3, #12
+ 1045 0216 7B62     		str	r3, [r7, #36]
+ 244:../Sources/distantio.c **** 					
+ 245:../Sources/distantio.c **** 					ptr = (void *)(Log.variables[id].ptr);
+ 1046              		.loc 1 245 0
+ 1047 0218 3B1C     		mov	r3, r7
+ 1048 021a 3633     		add	r3, r3, #54
+ 1049 021c 1A88     		ldrh	r2, [r3]
+ 1050 021e 714B     		ldr	r3, .L67
+ 1051 0220 3421     		mov	r1, #52
+ 1052 0222 4A43     		mul	r2, r1
+ 1053 0224 D358     		ldr	r3, [r2, r3]
+ 1054 0226 FB62     		str	r3, [r7, #44]
+ 246:../Sources/distantio.c **** 					tmp_uint32 = (uint32_t*)(ptr);
+ 1055              		.loc 1 246 0
+ 1056 0228 FB6A     		ldr	r3, [r7, #44]
+ 1057 022a 3B62     		str	r3, [r7, #32]
+ 247:../Sources/distantio.c **** 							
+ 248:../Sources/distantio.c **** 					*tmp_uint32 = *to_int;
+ 1058              		.loc 1 248 0
+ 1059 022c 7B6A     		ldr	r3, [r7, #36]
+ 1060 022e 1B68     		ldr	r3, [r3]
+ 1061 0230 1A1C     		mov	r2, r3
+ 1062 0232 3B6A     		ldr	r3, [r7, #32]
+ 1063 0234 1A60     		str	r2, [r3]
+ 1064 0236 64E0     		b	.L55
+ 1065              	.L56:
+ 249:../Sources/distantio.c **** 				}
+ 250:../Sources/distantio.c ****                 else if(BytesInQueue(rx_queue) >= 1 && Log.variables[id].type == 0x01)
+ 1066              		.loc 1 250 0
+ 1067 0238 7B68     		ldr	r3, [r7, #4]
+ 1068 023a 181C     		mov	r0, r3
+ 1069 023c FFF7FEFF 		bl	BytesInQueue
+ 1070 0240 031C     		mov	r3, r0
+ 1071 0242 002B     		cmp	r3, #0
+ 1072 0244 25D0     		beq	.L57
+ 1073              		.loc 1 250 0 is_stmt 0
+ 1074 0246 3B1C     		mov	r3, r7
+ 1075 0248 3633     		add	r3, r3, #54
+ 1076 024a 1B88     		ldrh	r3, [r3]
+ 1077 024c 654A     		ldr	r2, .L67
+ 1078 024e 3421     		mov	r1, #52
+ 1079 0250 4B43     		mul	r3, r1
+ 1080 0252 D318     		add	r3, r2, r3
+ 1081 0254 0C33     		add	r3, r3, #12
+ 1082 0256 1B68     		ldr	r3, [r3]
+ 1083 0258 012B     		cmp	r3, #1
+ 1084 025a 1AD1     		bne	.L57
+ 251:../Sources/distantio.c **** 				{
+ 252:../Sources/distantio.c ****                     bytes[0] = ForcedByteDequeue(rx_queue);
+ 1085              		.loc 1 252 0 is_stmt 1
+ 1086 025c 7B68     		ldr	r3, [r7, #4]
+ 1087 025e 181C     		mov	r0, r3
+ 1088 0260 FFF7FEFF 		bl	ForcedByteDequeue
+ 1089 0264 031C     		mov	r3, r0
+ 1090 0266 1A1C     		mov	r2, r3
+ 1091 0268 3B1C     		mov	r3, r7
+ 1092 026a 0C33     		add	r3, r3, #12
+ 1093 026c 1A70     		strb	r2, [r3]
+ 253:../Sources/distantio.c ****             
+ 254:../Sources/distantio.c **** 					to_uint8 = (uint8_t*)(&bytes[0]);
+ 1094              		.loc 1 254 0
+ 1095 026e 3B1C     		mov	r3, r7
+ 1096 0270 0C33     		add	r3, r3, #12
+ 1097 0272 FB61     		str	r3, [r7, #28]
+ 255:../Sources/distantio.c **** 					
+ 256:../Sources/distantio.c **** 					ptr = (void *)(Log.variables[id].ptr);
+ 1098              		.loc 1 256 0
+ 1099 0274 3B1C     		mov	r3, r7
+ 1100 0276 3633     		add	r3, r3, #54
+ 1101 0278 1A88     		ldrh	r2, [r3]
+ 1102 027a 5A4B     		ldr	r3, .L67
+ 1103 027c 3421     		mov	r1, #52
+ 1104 027e 4A43     		mul	r2, r1
+ 1105 0280 D358     		ldr	r3, [r2, r3]
+ 1106 0282 FB62     		str	r3, [r7, #44]
+ 257:../Sources/distantio.c **** 					tmp_uint8 = (uint8_t*)(ptr);
+ 1107              		.loc 1 257 0
+ 1108 0284 FB6A     		ldr	r3, [r7, #44]
+ 1109 0286 BB61     		str	r3, [r7, #24]
+ 258:../Sources/distantio.c **** 							
+ 259:../Sources/distantio.c **** 					*tmp_uint8 = *to_uint8;
+ 1110              		.loc 1 259 0
+ 1111 0288 FB69     		ldr	r3, [r7, #28]
+ 1112 028a 1A78     		ldrb	r2, [r3]
+ 1113 028c BB69     		ldr	r3, [r7, #24]
+ 1114 028e 1A70     		strb	r2, [r3]
+ 1115 0290 37E0     		b	.L55
+ 1116              	.L57:
+ 260:../Sources/distantio.c **** 				}
+ 261:../Sources/distantio.c ****                 else if(BytesInQueue(rx_queue) >= 2 && Log.variables[id].type == 0x05)
+ 1117              		.loc 1 261 0
+ 1118 0292 7B68     		ldr	r3, [r7, #4]
+ 1119 0294 181C     		mov	r0, r3
+ 1120 0296 FFF7FEFF 		bl	BytesInQueue
+ 1121 029a 031C     		mov	r3, r0
+ 1122 029c 012B     		cmp	r3, #1
+ 1123 029e 00D8     		bhi	.LCB998
+ 1124 02a0 9DE0     		b	.L66	@long jump
+ 1125              	.LCB998:
+ 1126              		.loc 1 261 0 is_stmt 0
+ 1127 02a2 3B1C     		mov	r3, r7
+ 1128 02a4 3633     		add	r3, r3, #54
+ 1129 02a6 1B88     		ldrh	r3, [r3]
+ 1130 02a8 4E4A     		ldr	r2, .L67
+ 1131 02aa 3421     		mov	r1, #52
+ 1132 02ac 4B43     		mul	r3, r1
+ 1133 02ae D318     		add	r3, r2, r3
+ 1134 02b0 0C33     		add	r3, r3, #12
+ 1135 02b2 1B68     		ldr	r3, [r3]
+ 1136 02b4 052B     		cmp	r3, #5
+ 1137 02b6 00D0     		beq	.LCB1009
+ 1138 02b8 91E0     		b	.L66	@long jump
+ 1139              	.LCB1009:
+ 262:../Sources/distantio.c **** 				{
+ 263:../Sources/distantio.c ****                     bytes[0] = ForcedByteDequeue(rx_queue);
+ 1140              		.loc 1 263 0 is_stmt 1
+ 1141 02ba 7B68     		ldr	r3, [r7, #4]
+ 1142 02bc 181C     		mov	r0, r3
+ 1143 02be FFF7FEFF 		bl	ForcedByteDequeue
+ 1144 02c2 031C     		mov	r3, r0
+ 1145 02c4 1A1C     		mov	r2, r3
+ 1146 02c6 3B1C     		mov	r3, r7
+ 1147 02c8 0C33     		add	r3, r3, #12
+ 1148 02ca 1A70     		strb	r2, [r3]
+ 264:../Sources/distantio.c ****                     bytes[1] = ForcedByteDequeue(rx_queue);
+ 1149              		.loc 1 264 0
+ 1150 02cc 7B68     		ldr	r3, [r7, #4]
+ 1151 02ce 181C     		mov	r0, r3
+ 1152 02d0 FFF7FEFF 		bl	ForcedByteDequeue
+ 1153 02d4 031C     		mov	r3, r0
+ 1154 02d6 1A1C     		mov	r2, r3
+ 1155 02d8 3B1C     		mov	r3, r7
+ 1156 02da 0C33     		add	r3, r3, #12
+ 1157 02dc 5A70     		strb	r2, [r3, #1]
+ 265:../Sources/distantio.c ****                     
+ 266:../Sources/distantio.c **** 					to_int16 = (int16_t*)(&bytes[0]);
+ 1158              		.loc 1 266 0
+ 1159 02de 3B1C     		mov	r3, r7
+ 1160 02e0 0C33     		add	r3, r3, #12
+ 1161 02e2 7B61     		str	r3, [r7, #20]
+ 267:../Sources/distantio.c **** 					
+ 268:../Sources/distantio.c **** 					ptr = (void *)(Log.variables[id].ptr);
+ 1162              		.loc 1 268 0
+ 1163 02e4 3B1C     		mov	r3, r7
+ 1164 02e6 3633     		add	r3, r3, #54
+ 1165 02e8 1A88     		ldrh	r2, [r3]
+ 1166 02ea 3E4B     		ldr	r3, .L67
+ 1167 02ec 3421     		mov	r1, #52
+ 1168 02ee 4A43     		mul	r2, r1
+ 1169 02f0 D358     		ldr	r3, [r2, r3]
+ 1170 02f2 FB62     		str	r3, [r7, #44]
+ 269:../Sources/distantio.c **** 					tmp_int16 = (int16_t*)(ptr);
+ 1171              		.loc 1 269 0
+ 1172 02f4 FB6A     		ldr	r3, [r7, #44]
+ 1173 02f6 3B61     		str	r3, [r7, #16]
+ 270:../Sources/distantio.c **** 							
+ 271:../Sources/distantio.c **** 					*tmp_int16 = *to_int16;
+ 1174              		.loc 1 271 0
+ 1175 02f8 7B69     		ldr	r3, [r7, #20]
+ 1176 02fa 1A88     		ldrh	r2, [r3]
+ 1177 02fc 3B69     		ldr	r3, [r7, #16]
+ 1178 02fe 1A80     		strh	r2, [r3]
+ 1179 0300 6DE0     		b	.L66
+ 1180              	.L55:
+ 272:../Sources/distantio.c **** 				}
+ 273:../Sources/distantio.c **** 			}
+ 274:../Sources/distantio.c **** 			else
+ 275:../Sources/distantio.c **** 			{
+ 276:../Sources/distantio.c **** 				
+ 277:../Sources/distantio.c **** 			}
+ 278:../Sources/distantio.c **** 		}
+ 279:../Sources/distantio.c **** 	}
+ 280:../Sources/distantio.c **** 	//If command is return table to master
+ 281:../Sources/distantio.c **** 	else if(byte == 0x02)
+ 282:../Sources/distantio.c **** 	{
+ 283:../Sources/distantio.c **** 		distantio_send_table();
+ 284:../Sources/distantio.c **** 	}
+ 285:../Sources/distantio.c **** 	//If command is stop sending variable
+ 286:../Sources/distantio.c **** 	else if(byte == 0x03 && BytesInQueue(rx_queue) >= 2)
+ 287:../Sources/distantio.c **** 	{
+ 288:../Sources/distantio.c **** 		byte = ForcedByteDequeue(rx_queue);
+ 289:../Sources/distantio.c **** 		byte2 = ForcedByteDequeue(rx_queue);
+ 290:../Sources/distantio.c **** 		
+ 291:../Sources/distantio.c **** 		id = byte + (byte2<<8);
+ 292:../Sources/distantio.c **** 		
+ 293:../Sources/distantio.c **** 		if(id < Log.current_index)
+ 294:../Sources/distantio.c **** 		{
+ 295:../Sources/distantio.c **** 			Log.variables[id].send = 0;
+ 296:../Sources/distantio.c **** 		}
+ 297:../Sources/distantio.c **** 	}
+ 298:../Sources/distantio.c **** 	//If command is stop sending all variables
+ 299:../Sources/distantio.c **** 	else if(byte == 0x04)
+ 300:../Sources/distantio.c **** 	{
+ 301:../Sources/distantio.c **** 		for(id = 0 ; id < Log.current_index ; id++)
+ 302:../Sources/distantio.c **** 		{
+ 303:../Sources/distantio.c **** 			Log.variables[id].send = 0;
+ 304:../Sources/distantio.c **** 		}
+ 305:../Sources/distantio.c **** 	}
+ 306:../Sources/distantio.c **** 	
+ 307:../Sources/distantio.c **** 	//Clean queue
+ 308:../Sources/distantio.c **** 	while(BytesInQueue(rx_queue))
+ 1181              		.loc 1 308 0
+ 1182 0302 76E0     		b	.L65
+ 1183              	.L53:
+ 281:../Sources/distantio.c **** 	else if(byte == 0x02)
+ 1184              		.loc 1 281 0
+ 1185 0304 3B1C     		mov	r3, r7
+ 1186 0306 3533     		add	r3, r3, #53
+ 1187 0308 1B78     		ldrb	r3, [r3]
+ 1188 030a 022B     		cmp	r3, #2
+ 1189 030c 02D1     		bne	.L58
+ 283:../Sources/distantio.c **** 		distantio_send_table();
+ 1190              		.loc 1 283 0
+ 1191 030e FFF7FEFF 		bl	distantio_send_table
+ 1192              		.loc 1 308 0
+ 1193 0312 6EE0     		b	.L65
+ 1194              	.L58:
+ 286:../Sources/distantio.c **** 	else if(byte == 0x03 && BytesInQueue(rx_queue) >= 2)
+ 1195              		.loc 1 286 0
+ 1196 0314 3B1C     		mov	r3, r7
+ 1197 0316 3533     		add	r3, r3, #53
+ 1198 0318 1B78     		ldrb	r3, [r3]
+ 1199 031a 032B     		cmp	r3, #3
+ 1200 031c 39D1     		bne	.L59
+ 286:../Sources/distantio.c **** 	else if(byte == 0x03 && BytesInQueue(rx_queue) >= 2)
+ 1201              		.loc 1 286 0 is_stmt 0
+ 1202 031e 7B68     		ldr	r3, [r7, #4]
+ 1203 0320 181C     		mov	r0, r3
+ 1204 0322 FFF7FEFF 		bl	BytesInQueue
+ 1205 0326 031C     		mov	r3, r0
+ 1206 0328 012B     		cmp	r3, #1
+ 1207 032a 32D9     		bls	.L59
+ 288:../Sources/distantio.c **** 		byte = ForcedByteDequeue(rx_queue);
+ 1208              		.loc 1 288 0 is_stmt 1
+ 1209 032c 3C1C     		mov	r4, r7
+ 1210 032e 3534     		add	r4, r4, #53
+ 1211 0330 7B68     		ldr	r3, [r7, #4]
+ 1212 0332 181C     		mov	r0, r3
+ 1213 0334 FFF7FEFF 		bl	ForcedByteDequeue
+ 1214 0338 031C     		mov	r3, r0
+ 1215 033a 2370     		strb	r3, [r4]
+ 289:../Sources/distantio.c **** 		byte2 = ForcedByteDequeue(rx_queue);
+ 1216              		.loc 1 289 0
+ 1217 033c 3C1C     		mov	r4, r7
+ 1218 033e 3434     		add	r4, r4, #52
+ 1219 0340 7B68     		ldr	r3, [r7, #4]
+ 1220 0342 181C     		mov	r0, r3
+ 1221 0344 FFF7FEFF 		bl	ForcedByteDequeue
+ 1222 0348 031C     		mov	r3, r0
+ 1223 034a 2370     		strb	r3, [r4]
+ 291:../Sources/distantio.c **** 		id = byte + (byte2<<8);
+ 1224              		.loc 1 291 0
+ 1225 034c 3B1C     		mov	r3, r7
+ 1226 034e 3533     		add	r3, r3, #53
+ 1227 0350 1B78     		ldrb	r3, [r3]
+ 1228 0352 99B2     		uxth	r1, r3
+ 1229 0354 3B1C     		mov	r3, r7
+ 1230 0356 3433     		add	r3, r3, #52
+ 1231 0358 1B78     		ldrb	r3, [r3]
+ 1232 035a 9BB2     		uxth	r3, r3
+ 1233 035c 1B02     		lsl	r3, r3, #8
+ 1234 035e 9AB2     		uxth	r2, r3
+ 1235 0360 3B1C     		mov	r3, r7
+ 1236 0362 3633     		add	r3, r3, #54
+ 1237 0364 8A18     		add	r2, r1, r2
+ 1238 0366 1A80     		strh	r2, [r3]
+ 293:../Sources/distantio.c **** 		if(id < Log.current_index)
+ 1239              		.loc 1 293 0
+ 1240 0368 1E4A     		ldr	r2, .L67
+ 1241 036a D023     		mov	r3, #208
+ 1242 036c 5B01     		lsl	r3, r3, #5
+ 1243 036e D35A     		ldrh	r3, [r2, r3]
+ 1244 0370 3A1C     		mov	r2, r7
+ 1245 0372 3632     		add	r2, r2, #54
+ 1246 0374 1288     		ldrh	r2, [r2]
+ 1247 0376 9A42     		cmp	r2, r3
+ 1248 0378 32D2     		bcs	.L52
+ 295:../Sources/distantio.c **** 			Log.variables[id].send = 0;
+ 1249              		.loc 1 295 0
+ 1250 037a 3B1C     		mov	r3, r7
+ 1251 037c 3633     		add	r3, r3, #54
+ 1252 037e 1A88     		ldrh	r2, [r3]
+ 1253 0380 1849     		ldr	r1, .L67
+ 1254 0382 3023     		mov	r3, #48
+ 1255 0384 3420     		mov	r0, #52
+ 1256 0386 4243     		mul	r2, r0
+ 1257 0388 8A18     		add	r2, r1, r2
+ 1258 038a D318     		add	r3, r2, r3
+ 1259 038c 0022     		mov	r2, #0
+ 1260 038e 1A70     		strb	r2, [r3]
+ 293:../Sources/distantio.c **** 		if(id < Log.current_index)
+ 1261              		.loc 1 293 0
+ 1262 0390 26E0     		b	.L52
+ 1263              	.L59:
+ 299:../Sources/distantio.c **** 	else if(byte == 0x04)
+ 1264              		.loc 1 299 0
+ 1265 0392 3B1C     		mov	r3, r7
+ 1266 0394 3533     		add	r3, r3, #53
+ 1267 0396 1B78     		ldrb	r3, [r3]
+ 1268 0398 042B     		cmp	r3, #4
+ 1269 039a 2AD1     		bne	.L65
+ 301:../Sources/distantio.c **** 		for(id = 0 ; id < Log.current_index ; id++)
+ 1270              		.loc 1 301 0
+ 1271 039c 3B1C     		mov	r3, r7
+ 1272 039e 3633     		add	r3, r3, #54
+ 1273 03a0 0022     		mov	r2, #0
+ 1274 03a2 1A80     		strh	r2, [r3]
+ 1275 03a4 11E0     		b	.L61
+ 1276              	.L62:
+ 303:../Sources/distantio.c **** 			Log.variables[id].send = 0;
+ 1277              		.loc 1 303 0
+ 1278 03a6 3B1C     		mov	r3, r7
+ 1279 03a8 3633     		add	r3, r3, #54
+ 1280 03aa 1A88     		ldrh	r2, [r3]
+ 1281 03ac 0D49     		ldr	r1, .L67
+ 1282 03ae 3023     		mov	r3, #48
+ 1283 03b0 3420     		mov	r0, #52
+ 1284 03b2 4243     		mul	r2, r0
+ 1285 03b4 8A18     		add	r2, r1, r2
+ 1286 03b6 D318     		add	r3, r2, r3
+ 1287 03b8 0022     		mov	r2, #0
+ 1288 03ba 1A70     		strb	r2, [r3]
+ 301:../Sources/distantio.c **** 		for(id = 0 ; id < Log.current_index ; id++)
+ 1289              		.loc 1 301 0
+ 1290 03bc 3B1C     		mov	r3, r7
+ 1291 03be 3633     		add	r3, r3, #54
+ 1292 03c0 3A1C     		mov	r2, r7
+ 1293 03c2 3632     		add	r2, r2, #54
+ 1294 03c4 1288     		ldrh	r2, [r2]
+ 1295 03c6 0132     		add	r2, r2, #1
+ 1296 03c8 1A80     		strh	r2, [r3]
+ 1297              	.L61:
+ 301:../Sources/distantio.c **** 		for(id = 0 ; id < Log.current_index ; id++)
+ 1298              		.loc 1 301 0 is_stmt 0
+ 1299 03ca 064A     		ldr	r2, .L67
+ 1300 03cc D023     		mov	r3, #208
+ 1301 03ce 5B01     		lsl	r3, r3, #5
+ 1302 03d0 D35A     		ldrh	r3, [r2, r3]
+ 1303 03d2 3A1C     		mov	r2, r7
+ 1304 03d4 3632     		add	r2, r2, #54
+ 1305 03d6 1288     		ldrh	r2, [r2]
+ 1306 03d8 9A42     		cmp	r2, r3
+ 1307 03da E4D3     		bcc	.L62
+ 1308              		.loc 1 308 0 is_stmt 1
+ 1309 03dc 09E0     		b	.L65
+ 1310              	.L66:
+ 271:../Sources/distantio.c **** 					*tmp_int16 = *to_int16;
+ 1311              		.loc 1 271 0
+ 1312 03de C046     		mov	r8, r8
+ 1313              	.L52:
+ 1314              		.loc 1 308 0
+ 1315 03e0 07E0     		b	.L65
+ 1316              	.L68:
+ 1317 03e2 C046     		.align	2
+ 1318              	.L67:
+ 1319 03e4 00000000 		.word	Log
+ 1320              	.L64:
+ 309:../Sources/distantio.c **** 		ForcedByteDequeue(rx_queue);
+ 1321              		.loc 1 309 0
+ 1322 03e8 7B68     		ldr	r3, [r7, #4]
+ 1323 03ea 181C     		mov	r0, r3
+ 1324 03ec FFF7FEFF 		bl	ForcedByteDequeue
+ 1325 03f0 00E0     		b	.L63
+ 1326              	.L65:
+ 308:../Sources/distantio.c **** 	while(BytesInQueue(rx_queue))
+ 1327              		.loc 1 308 0
+ 1328 03f2 C046     		mov	r8, r8
+ 1329              	.L63:
+ 308:../Sources/distantio.c **** 	while(BytesInQueue(rx_queue))
+ 1330              		.loc 1 308 0 is_stmt 0
+ 1331 03f4 7B68     		ldr	r3, [r7, #4]
+ 1332 03f6 181C     		mov	r0, r3
+ 1333 03f8 FFF7FEFF 		bl	BytesInQueue
+ 1334 03fc 031C     		mov	r3, r0
+ 1335 03fe 002B     		cmp	r3, #0
+ 1336 0400 F2D1     		bne	.L64
+ 310:../Sources/distantio.c **** }
+ 1337              		.loc 1 310 0 is_stmt 1
+ 1338 0402 BD46     		mov	sp, r7
+ 1339 0404 0FB0     		add	sp, sp, #60
+ 1340              		@ sp needed for prologue
+ 1341 0406 90BD     		pop	{r4, r7, pc}
+ 1342              		.cfi_endproc
+ 1343              	.LFE5:
+ 1345              		.section	.text.distantio_send_table,"ax",%progbits
+ 1346              		.align	2
+ 1347              		.global	distantio_send_table
+ 1348              		.code	16
+ 1349              		.thumb_func
+ 1351              	distantio_send_table:
+ 1352              	.LFB6:
+ 311:../Sources/distantio.c **** 
+ 312:../Sources/distantio.c **** 
+ 313:../Sources/distantio.c **** void distantio_send_table()
+ 314:../Sources/distantio.c **** {
+ 1353              		.loc 1 314 0
+ 1354              		.cfi_startproc
+ 1355 0000 80B5     		push	{r7, lr}
+ 1356              	.LCFI18:
+ 1357              		.cfi_def_cfa_offset 8
+ 1358              		.cfi_offset 7, -8
+ 1359              		.cfi_offset 14, -4
+ 1360 0002 D04F     		ldr	r7, .L86
+ 1361 0004 BD44     		add	sp, sp, r7
+ 1362              	.LCFI19:
+ 1363              		.cfi_def_cfa_offset 544
+ 1364 0006 00AF     		add	r7, sp, #0
+ 1365              	.LCFI20:
+ 1366              		.cfi_def_cfa_register 7
+ 315:../Sources/distantio.c **** 	uint32_t i,j;
+ 316:../Sources/distantio.c **** 	uint8_t *temp_ptr;
+ 317:../Sources/distantio.c **** 	uint8_t type;
+ 318:../Sources/distantio.c **** 	
+ 319:../Sources/distantio.c **** 	uint8_t buffer[512] = {0};
+ 1367              		.loc 1 319 0
+ 1368 0008 CF4B     		ldr	r3, .L86+4
+ 1369 000a 8620     		mov	r0, #134
+ 1370 000c 8000     		lsl	r0, r0, #2
+ 1371 000e C019     		add	r0, r0, r7
+ 1372 0010 C318     		add	r3, r0, r3
+ 1373 0012 1A1C     		mov	r2, r3
+ 1374 0014 8023     		mov	r3, #128
+ 1375 0016 9B00     		lsl	r3, r3, #2
+ 1376 0018 101C     		mov	r0, r2
+ 1377 001a 0021     		mov	r1, #0
+ 1378 001c 1A1C     		mov	r2, r3
+ 1379 001e FFF7FEFF 		bl	memset
+ 320:../Sources/distantio.c **** 	j = 0;
+ 1380              		.loc 1 320 0
+ 1381 0022 0023     		mov	r3, #0
+ 1382 0024 8521     		mov	r1, #133
+ 1383 0026 8900     		lsl	r1, r1, #2
+ 1384 0028 C919     		add	r1, r1, r7
+ 1385 002a 0B60     		str	r3, [r1]
+ 321:../Sources/distantio.c **** 	
+ 322:../Sources/distantio.c **** 	//Return table command
+ 323:../Sources/distantio.c **** 	buffer[j] = 0x02;			j++;
+ 1386              		.loc 1 323 0
+ 1387 002c C64B     		ldr	r3, .L86+4
+ 1388 002e 8620     		mov	r0, #134
+ 1389 0030 8000     		lsl	r0, r0, #2
+ 1390 0032 C019     		add	r0, r0, r7
+ 1391 0034 C218     		add	r2, r0, r3
+ 1392 0036 8521     		mov	r1, #133
+ 1393 0038 8900     		lsl	r1, r1, #2
+ 1394 003a C919     		add	r1, r1, r7
+ 1395 003c 0B68     		ldr	r3, [r1]
+ 1396 003e D318     		add	r3, r2, r3
+ 1397 0040 0222     		mov	r2, #2
+ 1398 0042 1A70     		strb	r2, [r3]
+ 1399 0044 8522     		mov	r2, #133
+ 1400 0046 9200     		lsl	r2, r2, #2
+ 1401 0048 D219     		add	r2, r2, r7
+ 1402 004a 1368     		ldr	r3, [r2]
+ 1403 004c 0133     		add	r3, r3, #1
+ 1404 004e 8520     		mov	r0, #133
+ 1405 0050 8000     		lsl	r0, r0, #2
+ 1406 0052 C019     		add	r0, r0, r7
+ 1407 0054 0360     		str	r3, [r0]
+ 324:../Sources/distantio.c **** 	
+ 325:../Sources/distantio.c **** 	//Start frame
+ 326:../Sources/distantio.c **** 	protocol_frame_begin();
+ 1408              		.loc 1 326 0
+ 1409 0056 FFF7FEFF 		bl	protocol_frame_begin
+ 327:../Sources/distantio.c **** 	protocol_frame_append(buffer,j);
+ 1410              		.loc 1 327 0
+ 1411 005a 8521     		mov	r1, #133
+ 1412 005c 8900     		lsl	r1, r1, #2
+ 1413 005e C919     		add	r1, r1, r7
+ 1414 0060 0B68     		ldr	r3, [r1]
+ 1415 0062 9BB2     		uxth	r3, r3
+ 1416 0064 3A1D     		add	r2, r7, #4
+ 1417 0066 101C     		mov	r0, r2
+ 1418 0068 191C     		mov	r1, r3
+ 1419 006a FFF7FEFF 		bl	protocol_frame_append
+ 328:../Sources/distantio.c **** 	j = 0;
+ 1420              		.loc 1 328 0
+ 1421 006e 0023     		mov	r3, #0
+ 1422 0070 8522     		mov	r2, #133
+ 1423 0072 9200     		lsl	r2, r2, #2
+ 1424 0074 D219     		add	r2, r2, r7
+ 1425 0076 1360     		str	r3, [r2]
+ 329:../Sources/distantio.c **** 	
+ 330:../Sources/distantio.c **** 	//variables info
+ 331:../Sources/distantio.c **** 	for(i = 0 ; i < Log.current_index ; i++)
+ 1426              		.loc 1 331 0
+ 1427 0078 0023     		mov	r3, #0
+ 1428 007a 8120     		mov	r0, #129
+ 1429 007c 8000     		lsl	r0, r0, #2
+ 1430 007e C019     		add	r0, r0, r7
+ 1431 0080 0360     		str	r3, [r0]
+ 1432 0082 4BE1     		b	.L70
+ 1433              	.L85:
+ 1434              	.LBB2:
+ 332:../Sources/distantio.c **** 	{		
+ 333:../Sources/distantio.c **** 		//Write data type
+ 334:../Sources/distantio.c **** 		switch(Log.variables[i].type)
+ 1435              		.loc 1 334 0
+ 1436 0084 8121     		mov	r1, #129
+ 1437 0086 8900     		lsl	r1, r1, #2
+ 1438 0088 C919     		add	r1, r1, r7
+ 1439 008a 0B68     		ldr	r3, [r1]
+ 1440 008c AF4A     		ldr	r2, .L86+8
+ 1441 008e 3421     		mov	r1, #52
+ 1442 0090 4B43     		mul	r3, r1
+ 1443 0092 D318     		add	r3, r2, r3
+ 1444 0094 0C33     		add	r3, r3, #12
+ 1445 0096 1B68     		ldr	r3, [r3]
+ 1446 0098 052B     		cmp	r3, #5
+ 1447 009a 22D8     		bhi	.L71
+ 1448 009c 9A00     		lsl	r2, r3, #2
+ 1449 009e AC4B     		ldr	r3, .L86+12
+ 1450 00a0 D318     		add	r3, r2, r3
+ 1451 00a2 1B68     		ldr	r3, [r3]
+ 1452 00a4 9F46     		mov	pc, r3
+ 1453              		.section	.rodata.distantio_send_table,"a",%progbits
+ 1454              		.align	2
+ 1455              	.L78:
+ 1456 0000 A6000000 		.word	.L72
+ 1457 0004 B0000000 		.word	.L73
+ 1458 0008 BA000000 		.word	.L74
+ 1459 000c C4000000 		.word	.L75
+ 1460 0010 CE000000 		.word	.L76
+ 1461 0014 D8000000 		.word	.L77
+ 1462              		.section	.text.distantio_send_table
+ 1463              	.L72:
+ 335:../Sources/distantio.c **** 		{
+ 336:../Sources/distantio.c **** 			case FLOAT:
+ 337:../Sources/distantio.c **** 				type = 0x00;
+ 1464              		.loc 1 337 0
+ 1465 00a6 AB4A     		ldr	r2, .L86+16
+ 1466 00a8 BB18     		add	r3, r7, r2
+ 1467 00aa 0022     		mov	r2, #0
+ 1468 00ac 1A70     		strb	r2, [r3]
+ 338:../Sources/distantio.c **** 				break;
+ 1469              		.loc 1 338 0
+ 1470 00ae 1DE0     		b	.L79
+ 1471              	.L73:
+ 339:../Sources/distantio.c **** 			case UINT8:
+ 340:../Sources/distantio.c **** 				type = 0x01;
+ 1472              		.loc 1 340 0
+ 1473 00b0 A848     		ldr	r0, .L86+16
+ 1474 00b2 3B18     		add	r3, r7, r0
+ 1475 00b4 0122     		mov	r2, #1
+ 1476 00b6 1A70     		strb	r2, [r3]
+ 341:../Sources/distantio.c **** 				break;
+ 1477              		.loc 1 341 0
+ 1478 00b8 18E0     		b	.L79
+ 1479              	.L74:
+ 342:../Sources/distantio.c **** 			
+ 343:../Sources/distantio.c **** 			case UINT16:
+ 344:../Sources/distantio.c **** 				type = 0x02;
+ 1480              		.loc 1 344 0
+ 1481 00ba A649     		ldr	r1, .L86+16
+ 1482 00bc 7B18     		add	r3, r7, r1
+ 1483 00be 0222     		mov	r2, #2
+ 1484 00c0 1A70     		strb	r2, [r3]
+ 345:../Sources/distantio.c **** 				break;
+ 1485              		.loc 1 345 0
+ 1486 00c2 13E0     		b	.L79
+ 1487              	.L75:
+ 346:../Sources/distantio.c **** 			
+ 347:../Sources/distantio.c **** 			case UINT32:
+ 348:../Sources/distantio.c **** 				type = 0x03;
+ 1488              		.loc 1 348 0
+ 1489 00c4 A34A     		ldr	r2, .L86+16
+ 1490 00c6 BB18     		add	r3, r7, r2
+ 1491 00c8 0322     		mov	r2, #3
+ 1492 00ca 1A70     		strb	r2, [r3]
+ 349:../Sources/distantio.c **** 				break;
+ 1493              		.loc 1 349 0
+ 1494 00cc 0EE0     		b	.L79
+ 1495              	.L76:
+ 350:../Sources/distantio.c **** 				
+ 351:../Sources/distantio.c **** 			case INT8:
+ 352:../Sources/distantio.c **** 				type = 0x04;
+ 1496              		.loc 1 352 0
+ 1497 00ce A148     		ldr	r0, .L86+16
+ 1498 00d0 3B18     		add	r3, r7, r0
+ 1499 00d2 0422     		mov	r2, #4
+ 1500 00d4 1A70     		strb	r2, [r3]
+ 353:../Sources/distantio.c **** 				break;
+ 1501              		.loc 1 353 0
+ 1502 00d6 09E0     		b	.L79
+ 1503              	.L77:
+ 354:../Sources/distantio.c **** 			
+ 355:../Sources/distantio.c **** 			case INT16:
+ 356:../Sources/distantio.c **** 				type = 0x05;
+ 1504              		.loc 1 356 0
+ 1505 00d8 9E49     		ldr	r1, .L86+16
+ 1506 00da 7B18     		add	r3, r7, r1
+ 1507 00dc 0522     		mov	r2, #5
+ 1508 00de 1A70     		strb	r2, [r3]
+ 357:../Sources/distantio.c **** 				break;
+ 1509              		.loc 1 357 0
+ 1510 00e0 04E0     		b	.L79
+ 1511              	.L71:
+ 358:../Sources/distantio.c **** 				
+ 359:../Sources/distantio.c **** 			case INT32:
+ 360:../Sources/distantio.c **** 			default:
+ 361:../Sources/distantio.c **** 				type = 0x06;
+ 1512              		.loc 1 361 0
+ 1513 00e2 9C4A     		ldr	r2, .L86+16
+ 1514 00e4 BB18     		add	r3, r7, r2
+ 1515 00e6 0622     		mov	r2, #6
+ 1516 00e8 1A70     		strb	r2, [r3]
+ 362:../Sources/distantio.c **** 				break;
+ 1517              		.loc 1 362 0
+ 1518 00ea C046     		mov	r8, r8
+ 1519              	.L79:
+ 363:../Sources/distantio.c **** 		}
+ 364:../Sources/distantio.c **** 		
+ 365:../Sources/distantio.c **** 		if(Log.variables[i].writeable == 1)
+ 1520              		.loc 1 365 0
+ 1521 00ec 8120     		mov	r0, #129
+ 1522 00ee 8000     		lsl	r0, r0, #2
+ 1523 00f0 C019     		add	r0, r0, r7
+ 1524 00f2 0368     		ldr	r3, [r0]
+ 1525 00f4 954A     		ldr	r2, .L86+8
+ 1526 00f6 3421     		mov	r1, #52
+ 1527 00f8 4B43     		mul	r3, r1
+ 1528 00fa D318     		add	r3, r2, r3
+ 1529 00fc 9B79     		ldrb	r3, [r3, #6]
+ 1530 00fe 012B     		cmp	r3, #1
+ 1531 0100 06D1     		bne	.L80
+ 366:../Sources/distantio.c **** 			type += 0xF0;
+ 1532              		.loc 1 366 0
+ 1533 0102 9449     		ldr	r1, .L86+16
+ 1534 0104 7B18     		add	r3, r7, r1
+ 1535 0106 9348     		ldr	r0, .L86+16
+ 1536 0108 3A18     		add	r2, r7, r0
+ 1537 010a 1278     		ldrb	r2, [r2]
+ 1538 010c 103A     		sub	r2, r2, #16
+ 1539 010e 1A70     		strb	r2, [r3]
+ 1540              	.L80:
+ 367:../Sources/distantio.c **** 		
+ 368:../Sources/distantio.c **** 		buffer[j] = type;			j++;
+ 1541              		.loc 1 368 0
+ 1542 0110 8D4B     		ldr	r3, .L86+4
+ 1543 0112 8621     		mov	r1, #134
+ 1544 0114 8900     		lsl	r1, r1, #2
+ 1545 0116 C919     		add	r1, r1, r7
+ 1546 0118 CA18     		add	r2, r1, r3
+ 1547 011a 8520     		mov	r0, #133
+ 1548 011c 8000     		lsl	r0, r0, #2
+ 1549 011e C019     		add	r0, r0, r7
+ 1550 0120 0368     		ldr	r3, [r0]
+ 1551 0122 D318     		add	r3, r2, r3
+ 1552 0124 8B49     		ldr	r1, .L86+16
+ 1553 0126 7A18     		add	r2, r7, r1
+ 1554 0128 1278     		ldrb	r2, [r2]
+ 1555 012a 1A70     		strb	r2, [r3]
+ 1556 012c 8522     		mov	r2, #133
+ 1557 012e 9200     		lsl	r2, r2, #2
+ 1558 0130 D219     		add	r2, r2, r7
+ 1559 0132 1368     		ldr	r3, [r2]
+ 1560 0134 0133     		add	r3, r3, #1
+ 1561 0136 8520     		mov	r0, #133
+ 1562 0138 8000     		lsl	r0, r0, #2
+ 1563 013a C019     		add	r0, r0, r7
+ 1564 013c 0360     		str	r3, [r0]
+ 369:../Sources/distantio.c **** 		
+ 370:../Sources/distantio.c **** 		//Data id
+ 371:../Sources/distantio.c **** 		//TODO : USE void* instead ???
+ 372:../Sources/distantio.c **** 		temp_ptr = (uint8_t*)(&i);
+ 1565              		.loc 1 372 0
+ 1566 013e 8121     		mov	r1, #129
+ 1567 0140 8900     		lsl	r1, r1, #2
+ 1568 0142 7B18     		add	r3, r7, r1
+ 1569 0144 8222     		mov	r2, #130
+ 1570 0146 9200     		lsl	r2, r2, #2
+ 1571 0148 D219     		add	r2, r2, r7
+ 1572 014a 1360     		str	r3, [r2]
+ 373:../Sources/distantio.c **** 		buffer[j] = *temp_ptr;		j++;
+ 1573              		.loc 1 373 0
+ 1574 014c 8220     		mov	r0, #130
+ 1575 014e 8000     		lsl	r0, r0, #2
+ 1576 0150 C019     		add	r0, r0, r7
+ 1577 0152 0368     		ldr	r3, [r0]
+ 1578 0154 1A78     		ldrb	r2, [r3]
+ 1579 0156 7C4B     		ldr	r3, .L86+4
+ 1580 0158 8620     		mov	r0, #134
+ 1581 015a 8000     		lsl	r0, r0, #2
+ 1582 015c C019     		add	r0, r0, r7
+ 1583 015e C118     		add	r1, r0, r3
+ 1584 0160 8520     		mov	r0, #133
+ 1585 0162 8000     		lsl	r0, r0, #2
+ 1586 0164 C019     		add	r0, r0, r7
+ 1587 0166 0368     		ldr	r3, [r0]
+ 1588 0168 CB18     		add	r3, r1, r3
+ 1589 016a 1A70     		strb	r2, [r3]
+ 1590 016c 8521     		mov	r1, #133
+ 1591 016e 8900     		lsl	r1, r1, #2
+ 1592 0170 C919     		add	r1, r1, r7
+ 1593 0172 0B68     		ldr	r3, [r1]
+ 1594 0174 0133     		add	r3, r3, #1
+ 1595 0176 8522     		mov	r2, #133
+ 1596 0178 9200     		lsl	r2, r2, #2
+ 1597 017a D219     		add	r2, r2, r7
+ 1598 017c 1360     		str	r3, [r2]
+ 374:../Sources/distantio.c **** 		buffer[j] = *(temp_ptr+1);	j++;
+ 1599              		.loc 1 374 0
+ 1600 017e 8220     		mov	r0, #130
+ 1601 0180 8000     		lsl	r0, r0, #2
+ 1602 0182 C019     		add	r0, r0, r7
+ 1603 0184 0368     		ldr	r3, [r0]
+ 1604 0186 5A78     		ldrb	r2, [r3, #1]
+ 1605 0188 6F4B     		ldr	r3, .L86+4
+ 1606 018a 8620     		mov	r0, #134
+ 1607 018c 8000     		lsl	r0, r0, #2
+ 1608 018e C019     		add	r0, r0, r7
+ 1609 0190 C118     		add	r1, r0, r3
+ 1610 0192 8520     		mov	r0, #133
+ 1611 0194 8000     		lsl	r0, r0, #2
+ 1612 0196 C019     		add	r0, r0, r7
+ 1613 0198 0368     		ldr	r3, [r0]
+ 1614 019a CB18     		add	r3, r1, r3
+ 1615 019c 1A70     		strb	r2, [r3]
+ 1616 019e 8521     		mov	r1, #133
+ 1617 01a0 8900     		lsl	r1, r1, #2
+ 1618 01a2 C919     		add	r1, r1, r7
+ 1619 01a4 0B68     		ldr	r3, [r1]
+ 1620 01a6 0133     		add	r3, r3, #1
+ 1621 01a8 8522     		mov	r2, #133
+ 1622 01aa 9200     		lsl	r2, r2, #2
+ 1623 01ac D219     		add	r2, r2, r7
+ 1624 01ae 1360     		str	r3, [r2]
+ 375:../Sources/distantio.c **** 		
+ 376:../Sources/distantio.c **** 		temp_ptr = (uint8_t*)(&(Log.variables[i].size));
+ 1625              		.loc 1 376 0
+ 1626 01b0 8120     		mov	r0, #129
+ 1627 01b2 8000     		lsl	r0, r0, #2
+ 1628 01b4 C019     		add	r0, r0, r7
+ 1629 01b6 0368     		ldr	r3, [r0]
+ 1630 01b8 3422     		mov	r2, #52
+ 1631 01ba 5A43     		mul	r2, r3
+ 1632 01bc 634B     		ldr	r3, .L86+8
+ 1633 01be D318     		add	r3, r2, r3
+ 1634 01c0 0433     		add	r3, r3, #4
+ 1635 01c2 8221     		mov	r1, #130
+ 1636 01c4 8900     		lsl	r1, r1, #2
+ 1637 01c6 C919     		add	r1, r1, r7
+ 1638 01c8 0B60     		str	r3, [r1]
+ 377:../Sources/distantio.c **** 		buffer[j] = *temp_ptr;		j++;
+ 1639              		.loc 1 377 0
+ 1640 01ca 8222     		mov	r2, #130
+ 1641 01cc 9200     		lsl	r2, r2, #2
+ 1642 01ce D219     		add	r2, r2, r7
+ 1643 01d0 1368     		ldr	r3, [r2]
+ 1644 01d2 1A78     		ldrb	r2, [r3]
+ 1645 01d4 5C4B     		ldr	r3, .L86+4
+ 1646 01d6 8620     		mov	r0, #134
+ 1647 01d8 8000     		lsl	r0, r0, #2
+ 1648 01da C019     		add	r0, r0, r7
+ 1649 01dc C118     		add	r1, r0, r3
+ 1650 01de 8520     		mov	r0, #133
+ 1651 01e0 8000     		lsl	r0, r0, #2
+ 1652 01e2 C019     		add	r0, r0, r7
+ 1653 01e4 0368     		ldr	r3, [r0]
+ 1654 01e6 CB18     		add	r3, r1, r3
+ 1655 01e8 1A70     		strb	r2, [r3]
+ 1656 01ea 8521     		mov	r1, #133
+ 1657 01ec 8900     		lsl	r1, r1, #2
+ 1658 01ee C919     		add	r1, r1, r7
+ 1659 01f0 0B68     		ldr	r3, [r1]
+ 1660 01f2 0133     		add	r3, r3, #1
+ 1661 01f4 8522     		mov	r2, #133
+ 1662 01f6 9200     		lsl	r2, r2, #2
+ 1663 01f8 D219     		add	r2, r2, r7
+ 1664 01fa 1360     		str	r3, [r2]
+ 378:../Sources/distantio.c **** 		buffer[j] = *(temp_ptr+1);	j++;				
+ 1665              		.loc 1 378 0
+ 1666 01fc 8220     		mov	r0, #130
+ 1667 01fe 8000     		lsl	r0, r0, #2
+ 1668 0200 C019     		add	r0, r0, r7
+ 1669 0202 0368     		ldr	r3, [r0]
+ 1670 0204 5A78     		ldrb	r2, [r3, #1]
+ 1671 0206 504B     		ldr	r3, .L86+4
+ 1672 0208 8620     		mov	r0, #134
+ 1673 020a 8000     		lsl	r0, r0, #2
+ 1674 020c C019     		add	r0, r0, r7
+ 1675 020e C118     		add	r1, r0, r3
+ 1676 0210 8520     		mov	r0, #133
+ 1677 0212 8000     		lsl	r0, r0, #2
+ 1678 0214 C019     		add	r0, r0, r7
+ 1679 0216 0368     		ldr	r3, [r0]
+ 1680 0218 CB18     		add	r3, r1, r3
+ 1681 021a 1A70     		strb	r2, [r3]
+ 1682 021c 8521     		mov	r1, #133
+ 1683 021e 8900     		lsl	r1, r1, #2
+ 1684 0220 C919     		add	r1, r1, r7
+ 1685 0222 0B68     		ldr	r3, [r1]
+ 1686 0224 0133     		add	r3, r3, #1
+ 1687 0226 8522     		mov	r2, #133
+ 1688 0228 9200     		lsl	r2, r2, #2
+ 1689 022a D219     		add	r2, r2, r7
+ 1690 022c 1360     		str	r3, [r2]
+ 379:../Sources/distantio.c **** 		
+ 380:../Sources/distantio.c **** 		//Write name
+ 381:../Sources/distantio.c **** 		uint32_t k = 0;
+ 1691              		.loc 1 381 0
+ 1692 022e 0023     		mov	r3, #0
+ 1693 0230 8320     		mov	r0, #131
+ 1694 0232 8000     		lsl	r0, r0, #2
+ 1695 0234 C019     		add	r0, r0, r7
+ 1696 0236 0360     		str	r3, [r0]
+ 382:../Sources/distantio.c **** 		
+ 383:../Sources/distantio.c **** 		for(k = 0 ; k < 32 ; k++)
+ 1697              		.loc 1 383 0
+ 1698 0238 0023     		mov	r3, #0
+ 1699 023a 8321     		mov	r1, #131
+ 1700 023c 8900     		lsl	r1, r1, #2
+ 1701 023e C919     		add	r1, r1, r7
+ 1702 0240 0B60     		str	r3, [r1]
+ 1703 0242 4DE0     		b	.L81
+ 1704              	.L84:
+ 384:../Sources/distantio.c **** 		{
+ 385:../Sources/distantio.c **** 			if(k < strlen(Log.variables[i].name))
+ 1705              		.loc 1 385 0
+ 1706 0244 8122     		mov	r2, #129
+ 1707 0246 9200     		lsl	r2, r2, #2
+ 1708 0248 D219     		add	r2, r2, r7
+ 1709 024a 1368     		ldr	r3, [r2]
+ 1710 024c 3422     		mov	r2, #52
+ 1711 024e 5343     		mul	r3, r2
+ 1712 0250 1A1C     		mov	r2, r3
+ 1713 0252 1032     		add	r2, r2, #16
+ 1714 0254 3D4B     		ldr	r3, .L86+8
+ 1715 0256 D318     		add	r3, r2, r3
+ 1716 0258 181C     		mov	r0, r3
+ 1717 025a FFF7FEFF 		bl	strlen
+ 1718 025e 021C     		mov	r2, r0
+ 1719 0260 8320     		mov	r0, #131
+ 1720 0262 8000     		lsl	r0, r0, #2
+ 1721 0264 C019     		add	r0, r0, r7
+ 1722 0266 0368     		ldr	r3, [r0]
+ 1723 0268 9A42     		cmp	r2, r3
+ 1724 026a 1BD9     		bls	.L82
+ 386:../Sources/distantio.c **** 				buffer[j] = Log.variables[i].name[k];
+ 1725              		.loc 1 386 0
+ 1726 026c 8121     		mov	r1, #129
+ 1727 026e 8900     		lsl	r1, r1, #2
+ 1728 0270 C919     		add	r1, r1, r7
+ 1729 0272 0A68     		ldr	r2, [r1]
+ 1730 0274 3549     		ldr	r1, .L86+8
+ 1731 0276 1023     		mov	r3, #16
+ 1732 0278 3420     		mov	r0, #52
+ 1733 027a 4243     		mul	r2, r0
+ 1734 027c 8918     		add	r1, r1, r2
+ 1735 027e 8320     		mov	r0, #131
+ 1736 0280 8000     		lsl	r0, r0, #2
+ 1737 0282 C019     		add	r0, r0, r7
+ 1738 0284 0268     		ldr	r2, [r0]
+ 1739 0286 8A18     		add	r2, r1, r2
+ 1740 0288 D318     		add	r3, r2, r3
+ 1741 028a 1A78     		ldrb	r2, [r3]
+ 1742 028c 2E4B     		ldr	r3, .L86+4
+ 1743 028e 8620     		mov	r0, #134
+ 1744 0290 8000     		lsl	r0, r0, #2
+ 1745 0292 C019     		add	r0, r0, r7
+ 1746 0294 C118     		add	r1, r0, r3
+ 1747 0296 8520     		mov	r0, #133
+ 1748 0298 8000     		lsl	r0, r0, #2
+ 1749 029a C019     		add	r0, r0, r7
+ 1750 029c 0368     		ldr	r3, [r0]
+ 1751 029e CB18     		add	r3, r1, r3
+ 1752 02a0 1A70     		strb	r2, [r3]
+ 1753 02a2 0BE0     		b	.L83
+ 1754              	.L82:
+ 387:../Sources/distantio.c **** 			else
+ 388:../Sources/distantio.c **** 				buffer[j] = 0;
+ 1755              		.loc 1 388 0
+ 1756 02a4 284B     		ldr	r3, .L86+4
+ 1757 02a6 8621     		mov	r1, #134
+ 1758 02a8 8900     		lsl	r1, r1, #2
+ 1759 02aa C919     		add	r1, r1, r7
+ 1760 02ac CA18     		add	r2, r1, r3
+ 1761 02ae 8520     		mov	r0, #133
+ 1762 02b0 8000     		lsl	r0, r0, #2
+ 1763 02b2 C019     		add	r0, r0, r7
+ 1764 02b4 0368     		ldr	r3, [r0]
+ 1765 02b6 D318     		add	r3, r2, r3
+ 1766 02b8 0022     		mov	r2, #0
+ 1767 02ba 1A70     		strb	r2, [r3]
+ 1768              	.L83:
+ 389:../Sources/distantio.c **** 			j++;
+ 1769              		.loc 1 389 0
+ 1770 02bc 8521     		mov	r1, #133
+ 1771 02be 8900     		lsl	r1, r1, #2
+ 1772 02c0 C919     		add	r1, r1, r7
+ 1773 02c2 0B68     		ldr	r3, [r1]
+ 1774 02c4 0133     		add	r3, r3, #1
+ 1775 02c6 8522     		mov	r2, #133
+ 1776 02c8 9200     		lsl	r2, r2, #2
+ 1777 02ca D219     		add	r2, r2, r7
+ 1778 02cc 1360     		str	r3, [r2]
+ 383:../Sources/distantio.c **** 		for(k = 0 ; k < 32 ; k++)
+ 1779              		.loc 1 383 0
+ 1780 02ce 8320     		mov	r0, #131
+ 1781 02d0 8000     		lsl	r0, r0, #2
+ 1782 02d2 C019     		add	r0, r0, r7
+ 1783 02d4 0368     		ldr	r3, [r0]
+ 1784 02d6 0133     		add	r3, r3, #1
+ 1785 02d8 8321     		mov	r1, #131
+ 1786 02da 8900     		lsl	r1, r1, #2
+ 1787 02dc C919     		add	r1, r1, r7
+ 1788 02de 0B60     		str	r3, [r1]
+ 1789              	.L81:
+ 383:../Sources/distantio.c **** 		for(k = 0 ; k < 32 ; k++)
+ 1790              		.loc 1 383 0 is_stmt 0
+ 1791 02e0 8322     		mov	r2, #131
+ 1792 02e2 9200     		lsl	r2, r2, #2
+ 1793 02e4 D219     		add	r2, r2, r7
+ 1794 02e6 1368     		ldr	r3, [r2]
+ 1795 02e8 1F2B     		cmp	r3, #31
+ 1796 02ea ABD9     		bls	.L84
+ 390:../Sources/distantio.c **** 		}
+ 391:../Sources/distantio.c **** 		protocol_frame_append(buffer,j);
+ 1797              		.loc 1 391 0 is_stmt 1
+ 1798 02ec 8520     		mov	r0, #133
+ 1799 02ee 8000     		lsl	r0, r0, #2
+ 1800 02f0 C019     		add	r0, r0, r7
+ 1801 02f2 0368     		ldr	r3, [r0]
+ 1802 02f4 9BB2     		uxth	r3, r3
+ 1803 02f6 3A1D     		add	r2, r7, #4
+ 1804 02f8 101C     		mov	r0, r2
+ 1805 02fa 191C     		mov	r1, r3
+ 1806 02fc FFF7FEFF 		bl	protocol_frame_append
+ 392:../Sources/distantio.c **** 		j = 0;
+ 1807              		.loc 1 392 0
+ 1808 0300 0023     		mov	r3, #0
+ 1809 0302 8521     		mov	r1, #133
+ 1810 0304 8900     		lsl	r1, r1, #2
+ 1811 0306 C919     		add	r1, r1, r7
+ 1812 0308 0B60     		str	r3, [r1]
+ 1813              	.LBE2:
+ 331:../Sources/distantio.c **** 	for(i = 0 ; i < Log.current_index ; i++)
+ 1814              		.loc 1 331 0
+ 1815 030a 8122     		mov	r2, #129
+ 1816 030c 9200     		lsl	r2, r2, #2
+ 1817 030e D219     		add	r2, r2, r7
+ 1818 0310 1368     		ldr	r3, [r2]
+ 1819 0312 0133     		add	r3, r3, #1
+ 1820 0314 8120     		mov	r0, #129
+ 1821 0316 8000     		lsl	r0, r0, #2
+ 1822 0318 C019     		add	r0, r0, r7
+ 1823 031a 0360     		str	r3, [r0]
+ 1824              	.L70:
+ 331:../Sources/distantio.c **** 	for(i = 0 ; i < Log.current_index ; i++)
+ 1825              		.loc 1 331 0 is_stmt 0
+ 1826 031c 0B4A     		ldr	r2, .L86+8
+ 1827 031e D023     		mov	r3, #208
+ 1828 0320 5B01     		lsl	r3, r3, #5
+ 1829 0322 D35A     		ldrh	r3, [r2, r3]
+ 1830 0324 1A1C     		mov	r2, r3
+ 1831 0326 8121     		mov	r1, #129
+ 1832 0328 8900     		lsl	r1, r1, #2
+ 1833 032a C919     		add	r1, r1, r7
+ 1834 032c 0B68     		ldr	r3, [r1]
+ 1835 032e 9A42     		cmp	r2, r3
+ 1836 0330 00D9     		bls	.LCB1670
+ 1837 0332 A7E6     		b	.L85	@long jump
+ 1838              	.LCB1670:
+ 393:../Sources/distantio.c **** 	
+ 394:../Sources/distantio.c **** 	}
+ 395:../Sources/distantio.c **** 	protocol_frame_end();
+ 1839              		.loc 1 395 0 is_stmt 1
+ 1840 0334 FFF7FEFF 		bl	protocol_frame_end
+ 396:../Sources/distantio.c **** }
+ 1841              		.loc 1 396 0
+ 1842 0338 BD46     		mov	sp, r7
+ 1843 033a 8623     		mov	r3, #134
+ 1844 033c 9B00     		lsl	r3, r3, #2
+ 1845 033e 9D44     		add	sp, sp, r3
+ 1846              		@ sp needed for prologue
+ 1847 0340 80BD     		pop	{r7, pc}
+ 1848              	.L87:
+ 1849 0342 C046     		.align	2
+ 1850              	.L86:
+ 1851 0344 E8FDFFFF 		.word	-536
+ 1852 0348 ECFDFFFF 		.word	-532
+ 1853 034c 00000000 		.word	Log
+ 1854 0350 00000000 		.word	.L78
+ 1855 0354 13020000 		.word	531
+ 1856              		.cfi_endproc
+ 1857              	.LFE6:
+ 1859              		.global	__aeabi_f2uiz
+ 1860              		.section	.text.distantio_send_variable,"ax",%progbits
+ 1861              		.align	2
+ 1862              		.global	distantio_send_variable
+ 1863              		.code	16
+ 1864              		.thumb_func
+ 1866              	distantio_send_variable:
+ 1867              	.LFB7:
+ 397:../Sources/distantio.c **** 
+ 398:../Sources/distantio.c **** uint32_t distantio_send_variable(uint16_t i)
+ 399:../Sources/distantio.c **** {
+ 1868              		.loc 1 399 0
+ 1869              		.cfi_startproc
+ 1870 0000 80B5     		push	{r7, lr}
+ 1871              	.LCFI21:
+ 1872              		.cfi_def_cfa_offset 8
+ 1873              		.cfi_offset 7, -8
+ 1874              		.cfi_offset 14, -4
+ 1875 0002 8E4F     		ldr	r7, .L92
+ 1876 0004 BD44     		add	sp, sp, r7
+ 1877              	.LCFI22:
+ 1878              		.cfi_def_cfa_offset 536
+ 1879 0006 00AF     		add	r7, sp, #0
+ 1880              	.LCFI23:
+ 1881              		.cfi_def_cfa_register 7
+ 1882 0008 021C     		mov	r2, r0
+ 1883 000a 8D4B     		ldr	r3, .L92+4
+ 1884 000c 8420     		mov	r0, #132
+ 1885 000e 8000     		lsl	r0, r0, #2
+ 1886 0010 C019     		add	r0, r0, r7
+ 1887 0012 C318     		add	r3, r0, r3
+ 1888 0014 1A80     		strh	r2, [r3]
+ 400:../Sources/distantio.c **** 	uint16_t j,k;
+ 401:../Sources/distantio.c **** 	uint8_t *temp_ptr;
+ 402:../Sources/distantio.c **** 	uint8_t buffer[512];
+ 403:../Sources/distantio.c **** 	j = 0;
+ 1889              		.loc 1 403 0
+ 1890 0016 8321     		mov	r1, #131
+ 1891 0018 8900     		lsl	r1, r1, #2
+ 1892 001a 7B18     		add	r3, r7, r1
+ 1893 001c 0022     		mov	r2, #0
+ 1894 001e 1A80     		strh	r2, [r3]
+ 404:../Sources/distantio.c **** 	
+ 405:../Sources/distantio.c **** 	//Write command
+ 406:../Sources/distantio.c **** 	buffer[j] = 0x00;			j++;
+ 1895              		.loc 1 406 0
+ 1896 0020 8322     		mov	r2, #131
+ 1897 0022 9200     		lsl	r2, r2, #2
+ 1898 0024 BB18     		add	r3, r7, r2
+ 1899 0026 1B88     		ldrh	r3, [r3]
+ 1900 0028 864A     		ldr	r2, .L92+8
+ 1901 002a 8420     		mov	r0, #132
+ 1902 002c 8000     		lsl	r0, r0, #2
+ 1903 002e C019     		add	r0, r0, r7
+ 1904 0030 8218     		add	r2, r0, r2
+ 1905 0032 0021     		mov	r1, #0
+ 1906 0034 D154     		strb	r1, [r2, r3]
+ 1907 0036 8321     		mov	r1, #131
+ 1908 0038 8900     		lsl	r1, r1, #2
+ 1909 003a 7B18     		add	r3, r7, r1
+ 1910 003c 8320     		mov	r0, #131
+ 1911 003e 8000     		lsl	r0, r0, #2
+ 1912 0040 3A18     		add	r2, r7, r0
+ 1913 0042 1288     		ldrh	r2, [r2]
+ 1914 0044 0132     		add	r2, r2, #1
+ 1915 0046 1A80     		strh	r2, [r3]
+ 407:../Sources/distantio.c **** 	
+ 408:../Sources/distantio.c **** 	//Write variable ID
+ 409:../Sources/distantio.c **** 	temp_ptr = (uint8_t*)(&i);
+ 1916              		.loc 1 409 0
+ 1917 0048 BB1D     		add	r3, r7, #6
+ 1918 004a 8221     		mov	r1, #130
+ 1919 004c 8900     		lsl	r1, r1, #2
+ 1920 004e C919     		add	r1, r1, r7
+ 1921 0050 0B60     		str	r3, [r1]
+ 410:../Sources/distantio.c **** 	
+ 411:../Sources/distantio.c **** 	buffer[j] = *temp_ptr;		j++;
+ 1922              		.loc 1 411 0
+ 1923 0052 8322     		mov	r2, #131
+ 1924 0054 9200     		lsl	r2, r2, #2
+ 1925 0056 BB18     		add	r3, r7, r2
+ 1926 0058 1B88     		ldrh	r3, [r3]
+ 1927 005a 8220     		mov	r0, #130
+ 1928 005c 8000     		lsl	r0, r0, #2
+ 1929 005e C019     		add	r0, r0, r7
+ 1930 0060 0268     		ldr	r2, [r0]
+ 1931 0062 1178     		ldrb	r1, [r2]
+ 1932 0064 774A     		ldr	r2, .L92+8
+ 1933 0066 8420     		mov	r0, #132
+ 1934 0068 8000     		lsl	r0, r0, #2
+ 1935 006a C019     		add	r0, r0, r7
+ 1936 006c 8218     		add	r2, r0, r2
+ 1937 006e D154     		strb	r1, [r2, r3]
+ 1938 0070 8321     		mov	r1, #131
+ 1939 0072 8900     		lsl	r1, r1, #2
+ 1940 0074 7B18     		add	r3, r7, r1
+ 1941 0076 8320     		mov	r0, #131
+ 1942 0078 8000     		lsl	r0, r0, #2
+ 1943 007a 3A18     		add	r2, r7, r0
+ 1944 007c 1288     		ldrh	r2, [r2]
+ 1945 007e 0132     		add	r2, r2, #1
+ 1946 0080 1A80     		strh	r2, [r3]
+ 412:../Sources/distantio.c **** 	buffer[j] = *(temp_ptr+1);	j++;
+ 1947              		.loc 1 412 0
+ 1948 0082 8321     		mov	r1, #131
+ 1949 0084 8900     		lsl	r1, r1, #2
+ 1950 0086 7B18     		add	r3, r7, r1
+ 1951 0088 1B88     		ldrh	r3, [r3]
+ 1952 008a 8220     		mov	r0, #130
+ 1953 008c 8000     		lsl	r0, r0, #2
+ 1954 008e C019     		add	r0, r0, r7
+ 1955 0090 0268     		ldr	r2, [r0]
+ 1956 0092 5178     		ldrb	r1, [r2, #1]
+ 1957 0094 6B4A     		ldr	r2, .L92+8
+ 1958 0096 8420     		mov	r0, #132
+ 1959 0098 8000     		lsl	r0, r0, #2
+ 1960 009a C019     		add	r0, r0, r7
+ 1961 009c 8218     		add	r2, r0, r2
+ 1962 009e D154     		strb	r1, [r2, r3]
+ 1963 00a0 8321     		mov	r1, #131
+ 1964 00a2 8900     		lsl	r1, r1, #2
+ 1965 00a4 7B18     		add	r3, r7, r1
+ 1966 00a6 8320     		mov	r0, #131
+ 1967 00a8 8000     		lsl	r0, r0, #2
+ 1968 00aa 3A18     		add	r2, r7, r0
+ 1969 00ac 1288     		ldrh	r2, [r2]
+ 1970 00ae 0132     		add	r2, r2, #1
+ 1971 00b0 1A80     		strh	r2, [r3]
+ 413:../Sources/distantio.c **** 	
+ 414:../Sources/distantio.c **** 	//Write time
+ 415:../Sources/distantio.c **** 	update(&chr);
+ 1972              		.loc 1 415 0
+ 1973 00b2 654B     		ldr	r3, .L92+12
+ 1974 00b4 181C     		mov	r0, r3
+ 1975 00b6 FFF7FEFF 		bl	update
+ 416:../Sources/distantio.c **** 	tmp = us(&chr);
+ 1976              		.loc 1 416 0
+ 1977 00ba 634B     		ldr	r3, .L92+12
+ 1978 00bc 181C     		mov	r0, r3
+ 1979 00be FFF7FEFF 		bl	us
+ 1980 00c2 031C     		add	r3, r0, #0
+ 1981 00c4 181C     		add	r0, r3, #0
+ 1982 00c6 FFF7FEFF 		bl	__aeabi_f2uiz
+ 1983 00ca 021C     		mov	r2, r0
+ 1984 00cc 5F4B     		ldr	r3, .L92+16
+ 1985 00ce 1A60     		str	r2, [r3]
+ 417:../Sources/distantio.c **** 	temp_ptr = (uint8_t*)(&tmp);
+ 1986              		.loc 1 417 0
+ 1987 00d0 5E4B     		ldr	r3, .L92+16
+ 1988 00d2 8221     		mov	r1, #130
+ 1989 00d4 8900     		lsl	r1, r1, #2
+ 1990 00d6 C919     		add	r1, r1, r7
+ 1991 00d8 0B60     		str	r3, [r1]
+ 418:../Sources/distantio.c **** 		
+ 419:../Sources/distantio.c **** 	buffer[j] = *temp_ptr;		j++;
+ 1992              		.loc 1 419 0
+ 1993 00da 8322     		mov	r2, #131
+ 1994 00dc 9200     		lsl	r2, r2, #2
+ 1995 00de BB18     		add	r3, r7, r2
+ 1996 00e0 1B88     		ldrh	r3, [r3]
+ 1997 00e2 8220     		mov	r0, #130
+ 1998 00e4 8000     		lsl	r0, r0, #2
+ 1999 00e6 C019     		add	r0, r0, r7
+ 2000 00e8 0268     		ldr	r2, [r0]
+ 2001 00ea 1178     		ldrb	r1, [r2]
+ 2002 00ec 554A     		ldr	r2, .L92+8
+ 2003 00ee 8420     		mov	r0, #132
+ 2004 00f0 8000     		lsl	r0, r0, #2
+ 2005 00f2 C019     		add	r0, r0, r7
+ 2006 00f4 8218     		add	r2, r0, r2
+ 2007 00f6 D154     		strb	r1, [r2, r3]
+ 2008 00f8 8321     		mov	r1, #131
+ 2009 00fa 8900     		lsl	r1, r1, #2
+ 2010 00fc 7B18     		add	r3, r7, r1
+ 2011 00fe 8320     		mov	r0, #131
+ 2012 0100 8000     		lsl	r0, r0, #2
+ 2013 0102 3A18     		add	r2, r7, r0
+ 2014 0104 1288     		ldrh	r2, [r2]
+ 2015 0106 0132     		add	r2, r2, #1
+ 2016 0108 1A80     		strh	r2, [r3]
+ 420:../Sources/distantio.c **** 	buffer[j] = *(temp_ptr+1);	j++;
+ 2017              		.loc 1 420 0
+ 2018 010a 8321     		mov	r1, #131
+ 2019 010c 8900     		lsl	r1, r1, #2
+ 2020 010e 7B18     		add	r3, r7, r1
+ 2021 0110 1B88     		ldrh	r3, [r3]
+ 2022 0112 8220     		mov	r0, #130
+ 2023 0114 8000     		lsl	r0, r0, #2
+ 2024 0116 C019     		add	r0, r0, r7
+ 2025 0118 0268     		ldr	r2, [r0]
+ 2026 011a 5178     		ldrb	r1, [r2, #1]
+ 2027 011c 494A     		ldr	r2, .L92+8
+ 2028 011e 8420     		mov	r0, #132
+ 2029 0120 8000     		lsl	r0, r0, #2
+ 2030 0122 C019     		add	r0, r0, r7
+ 2031 0124 8218     		add	r2, r0, r2
+ 2032 0126 D154     		strb	r1, [r2, r3]
+ 2033 0128 8321     		mov	r1, #131
+ 2034 012a 8900     		lsl	r1, r1, #2
+ 2035 012c 7B18     		add	r3, r7, r1
+ 2036 012e 8320     		mov	r0, #131
+ 2037 0130 8000     		lsl	r0, r0, #2
+ 2038 0132 3A18     		add	r2, r7, r0
+ 2039 0134 1288     		ldrh	r2, [r2]
+ 2040 0136 0132     		add	r2, r2, #1
+ 2041 0138 1A80     		strh	r2, [r3]
+ 421:../Sources/distantio.c **** 	buffer[j] = *(temp_ptr+2);	j++;
+ 2042              		.loc 1 421 0
+ 2043 013a 8321     		mov	r1, #131
+ 2044 013c 8900     		lsl	r1, r1, #2
+ 2045 013e 7B18     		add	r3, r7, r1
+ 2046 0140 1B88     		ldrh	r3, [r3]
+ 2047 0142 8220     		mov	r0, #130
+ 2048 0144 8000     		lsl	r0, r0, #2
+ 2049 0146 C019     		add	r0, r0, r7
+ 2050 0148 0268     		ldr	r2, [r0]
+ 2051 014a 9178     		ldrb	r1, [r2, #2]
+ 2052 014c 3D4A     		ldr	r2, .L92+8
+ 2053 014e 8420     		mov	r0, #132
+ 2054 0150 8000     		lsl	r0, r0, #2
+ 2055 0152 C019     		add	r0, r0, r7
+ 2056 0154 8218     		add	r2, r0, r2
+ 2057 0156 D154     		strb	r1, [r2, r3]
+ 2058 0158 8321     		mov	r1, #131
+ 2059 015a 8900     		lsl	r1, r1, #2
+ 2060 015c 7B18     		add	r3, r7, r1
+ 2061 015e 8320     		mov	r0, #131
+ 2062 0160 8000     		lsl	r0, r0, #2
+ 2063 0162 3A18     		add	r2, r7, r0
+ 2064 0164 1288     		ldrh	r2, [r2]
+ 2065 0166 0132     		add	r2, r2, #1
+ 2066 0168 1A80     		strh	r2, [r3]
+ 422:../Sources/distantio.c **** 	buffer[j] = *(temp_ptr+3);	j++;
+ 2067              		.loc 1 422 0
+ 2068 016a 8321     		mov	r1, #131
+ 2069 016c 8900     		lsl	r1, r1, #2
+ 2070 016e 7B18     		add	r3, r7, r1
+ 2071 0170 1B88     		ldrh	r3, [r3]
+ 2072 0172 8220     		mov	r0, #130
+ 2073 0174 8000     		lsl	r0, r0, #2
+ 2074 0176 C019     		add	r0, r0, r7
+ 2075 0178 0268     		ldr	r2, [r0]
+ 2076 017a D178     		ldrb	r1, [r2, #3]
+ 2077 017c 314A     		ldr	r2, .L92+8
+ 2078 017e 8420     		mov	r0, #132
+ 2079 0180 8000     		lsl	r0, r0, #2
+ 2080 0182 C019     		add	r0, r0, r7
+ 2081 0184 8218     		add	r2, r0, r2
+ 2082 0186 D154     		strb	r1, [r2, r3]
+ 2083 0188 8321     		mov	r1, #131
+ 2084 018a 8900     		lsl	r1, r1, #2
+ 2085 018c 7B18     		add	r3, r7, r1
+ 2086 018e 8320     		mov	r0, #131
+ 2087 0190 8000     		lsl	r0, r0, #2
+ 2088 0192 3A18     		add	r2, r7, r0
+ 2089 0194 1288     		ldrh	r2, [r2]
+ 2090 0196 0132     		add	r2, r2, #1
+ 2091 0198 1A80     		strh	r2, [r3]
+ 423:../Sources/distantio.c **** 	
+ 424:../Sources/distantio.c **** 	//Start frame. send CMD,DATAID,time to protocol
+ 425:../Sources/distantio.c **** 	protocol_frame_begin();
+ 2092              		.loc 1 425 0
+ 2093 019a FFF7FEFF 		bl	protocol_frame_begin
+ 426:../Sources/distantio.c **** 	protocol_frame_append(buffer,j);
+ 2094              		.loc 1 426 0
+ 2095 019e 3A1C     		mov	r2, r7
+ 2096 01a0 0832     		add	r2, r2, #8
+ 2097 01a2 8321     		mov	r1, #131
+ 2098 01a4 8900     		lsl	r1, r1, #2
+ 2099 01a6 7B18     		add	r3, r7, r1
+ 2100 01a8 1B88     		ldrh	r3, [r3]
+ 2101 01aa 101C     		mov	r0, r2
+ 2102 01ac 191C     		mov	r1, r3
+ 2103 01ae FFF7FEFF 		bl	protocol_frame_append
+ 427:../Sources/distantio.c **** 	j = 0;
+ 2104              		.loc 1 427 0
+ 2105 01b2 8322     		mov	r2, #131
+ 2106 01b4 9200     		lsl	r2, r2, #2
+ 2107 01b6 BB18     		add	r3, r7, r2
+ 2108 01b8 0022     		mov	r2, #0
+ 2109 01ba 1A80     		strh	r2, [r3]
+ 428:../Sources/distantio.c **** 	
+ 429:../Sources/distantio.c **** 	//Write data
+ 430:../Sources/distantio.c **** 	for(k = 0 ; k < Log.variables[i].size ; k++)
+ 2110              		.loc 1 430 0
+ 2111 01bc 2448     		ldr	r0, .L92+20
+ 2112 01be 3B18     		add	r3, r7, r0
+ 2113 01c0 0022     		mov	r2, #0
+ 2114 01c2 1A80     		strh	r2, [r3]
+ 2115 01c4 21E0     		b	.L89
+ 2116              	.L90:
+ 431:../Sources/distantio.c **** 	{
+ 432:../Sources/distantio.c **** 		temp_ptr = Log.variables[i].ptr + k;
+ 2117              		.loc 1 432 0
+ 2118 01c6 1E4B     		ldr	r3, .L92+4
+ 2119 01c8 8421     		mov	r1, #132
+ 2120 01ca 8900     		lsl	r1, r1, #2
+ 2121 01cc C919     		add	r1, r1, r7
+ 2122 01ce CB18     		add	r3, r1, r3
+ 2123 01d0 1B88     		ldrh	r3, [r3]
+ 2124 01d2 1A1C     		mov	r2, r3
+ 2125 01d4 1F4B     		ldr	r3, .L92+24
+ 2126 01d6 3421     		mov	r1, #52
+ 2127 01d8 4A43     		mul	r2, r1
+ 2128 01da D258     		ldr	r2, [r2, r3]
+ 2129 01dc 1C48     		ldr	r0, .L92+20
+ 2130 01de 3B18     		add	r3, r7, r0
+ 2131 01e0 1B88     		ldrh	r3, [r3]
+ 2132 01e2 D318     		add	r3, r2, r3
+ 2133 01e4 8221     		mov	r1, #130
+ 2134 01e6 8900     		lsl	r1, r1, #2
+ 2135 01e8 C919     		add	r1, r1, r7
+ 2136 01ea 0B60     		str	r3, [r1]
+ 433:../Sources/distantio.c **** 		
+ 434:../Sources/distantio.c **** 		protocol_frame_append(temp_ptr,1);
+ 2137              		.loc 1 434 0
+ 2138 01ec 8222     		mov	r2, #130
+ 2139 01ee 9200     		lsl	r2, r2, #2
+ 2140 01f0 D219     		add	r2, r2, r7
+ 2141 01f2 1368     		ldr	r3, [r2]
+ 2142 01f4 181C     		mov	r0, r3
+ 2143 01f6 0121     		mov	r1, #1
+ 2144 01f8 FFF7FEFF 		bl	protocol_frame_append
+ 430:../Sources/distantio.c **** 	for(k = 0 ; k < Log.variables[i].size ; k++)
+ 2145              		.loc 1 430 0
+ 2146 01fc 1448     		ldr	r0, .L92+20
+ 2147 01fe 3B18     		add	r3, r7, r0
+ 2148 0200 1349     		ldr	r1, .L92+20
+ 2149 0202 7A18     		add	r2, r7, r1
+ 2150 0204 1288     		ldrh	r2, [r2]
+ 2151 0206 0132     		add	r2, r2, #1
+ 2152 0208 1A80     		strh	r2, [r3]
+ 2153              	.L89:
+ 430:../Sources/distantio.c **** 	for(k = 0 ; k < Log.variables[i].size ; k++)
+ 2154              		.loc 1 430 0 is_stmt 0
+ 2155 020a 0D4B     		ldr	r3, .L92+4
+ 2156 020c 8422     		mov	r2, #132
+ 2157 020e 9200     		lsl	r2, r2, #2
+ 2158 0210 D219     		add	r2, r2, r7
+ 2159 0212 D318     		add	r3, r2, r3
+ 2160 0214 1B88     		ldrh	r3, [r3]
+ 2161 0216 0F4A     		ldr	r2, .L92+24
+ 2162 0218 3421     		mov	r1, #52
+ 2163 021a 4B43     		mul	r3, r1
+ 2164 021c D318     		add	r3, r2, r3
+ 2165 021e 9B88     		ldrh	r3, [r3, #4]
+ 2166 0220 0B48     		ldr	r0, .L92+20
+ 2167 0222 3A18     		add	r2, r7, r0
+ 2168 0224 1288     		ldrh	r2, [r2]
+ 2169 0226 9A42     		cmp	r2, r3
+ 2170 0228 CDD3     		bcc	.L90
+ 435:../Sources/distantio.c **** 	}
+ 436:../Sources/distantio.c **** 	protocol_frame_end();
+ 2171              		.loc 1 436 0 is_stmt 1
+ 2172 022a FFF7FEFF 		bl	protocol_frame_end
+ 437:../Sources/distantio.c **** 	
+ 438:../Sources/distantio.c **** 	return 0;
+ 2173              		.loc 1 438 0
+ 2174 022e 0023     		mov	r3, #0
+ 439:../Sources/distantio.c **** }
+ 2175              		.loc 1 439 0
+ 2176 0230 181C     		mov	r0, r3
+ 2177 0232 BD46     		mov	sp, r7
+ 2178 0234 8423     		mov	r3, #132
+ 2179 0236 9B00     		lsl	r3, r3, #2
+ 2180 0238 9D44     		add	sp, sp, r3
+ 2181              		@ sp needed for prologue
+ 2182 023a 80BD     		pop	{r7, pc}
+ 2183              	.L93:
+ 2184              		.align	2
+ 2185              	.L92:
+ 2186 023c F0FDFFFF 		.word	-528
+ 2187 0240 F6FDFFFF 		.word	-522
+ 2188 0244 F8FDFFFF 		.word	-520
+ 2189 0248 00000000 		.word	chr
+ 2190 024c 00000000 		.word	tmp
+ 2191 0250 0E020000 		.word	526
+ 2192 0254 00000000 		.word	Log
+ 2193              		.cfi_endproc
+ 2194              	.LFE7:
+ 2196              		.text
+ 2197              	.Letext0:
+ 2198              		.file 2 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+ 2199              		.file 3 "C:/Users/B48861/TFC/Carcode/Project_Headers/TFC\\TFC_Queue.h"
+ 2200              		.file 4 "C:/Users/B48861/TFC/Carcode/Project_Headers/distantio.h"
+ 2201              		.file 5 "C:/Users/B48861/TFC/Carcode/Project_Headers/chrono.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 distantio.c
+                            *COM*:00001a04 Log
+                            *COM*:00000004 tmp
+                            *COM*:0000000c chr
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:21     .rodata:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:25     .text.init_distantio:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:30     .text.init_distantio:00000000 init_distantio
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:171    .text.init_distantio:000000dc $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:180    .text.register_:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:185    .text.register_:00000000 register_
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:319    .text.register_:000000d0 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:324    .text.register_scalar:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:329    .text.register_scalar:00000000 register_scalar
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:366    .rodata.register_scalar:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:462    .text.register_scalar:0000009c $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:467    .text.register_array:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:472    .text.register_array:00000000 register_array
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:513    .rodata.register_array:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:615    .text.register_array:000000b0 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:620    .text.update_distantio:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:625    .text.update_distantio:00000000 update_distantio
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:1866   .text.distantio_send_variable:00000000 distantio_send_variable
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:731    .text.update_distantio:00000094 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:737    .text.distantio_decode_rx_frame:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:742    .text.distantio_decode_rx_frame:00000000 distantio_decode_rx_frame
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:1351   .text.distantio_send_table:00000000 distantio_send_table
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:1319   .text.distantio_decode_rx_frame:000003e4 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:1322   .text.distantio_decode_rx_frame:000003e8 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:1346   .text.distantio_send_table:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:1454   .rodata.distantio_send_table:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:1851   .text.distantio_send_table:00000344 $d
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:1861   .text.distantio_send_variable:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccsfw7RC.s:2186   .text.distantio_send_variable:0000023c $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+strcpy
+reset
+protocol_process_rx
+ForcedByteDequeue
+BytesInQueue
+memset
+protocol_frame_begin
+protocol_frame_append
+strlen
+protocol_frame_end
+__aeabi_f2uiz
+update
+us

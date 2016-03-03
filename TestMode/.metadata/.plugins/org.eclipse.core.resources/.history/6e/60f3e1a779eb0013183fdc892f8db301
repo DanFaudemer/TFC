@@ -1,0 +1,31 @@
+/*
+ * constants.h
+ *
+ *  Created on: May 1, 2014
+ *      Author: Dan
+ */
+
+#ifndef CONSTANTS_H_
+#define CONSTANTS_H_
+
+#define LIMITCAMMIN 20
+#define LIMITCAMMAX 118
+#define LINECENTER 70
+
+#define SEUIL_DETECTION 200
+#define SEUIL_DETECTION_1 (SEUIL_DETECTION/4)
+#define SEUIL_DETECTION_2 (SEUIL_DETECTION/2)
+#define SEUIL_DETECTION_3 (SEUIL_DETECTION-SEUIL_DETECTION/4)
+#define SEUIL_DETECTION_4 (SEUIL_DETECTION)
+
+#define SERVOMIN -0.450
+#define SERVOMAX 0.660
+
+
+
+
+/* PID Coefficient */
+#define COEFF_P 1
+#define COEFF_D 0
+#define COEFF_I 0
+#endif /* CONSTANTS_H_ */

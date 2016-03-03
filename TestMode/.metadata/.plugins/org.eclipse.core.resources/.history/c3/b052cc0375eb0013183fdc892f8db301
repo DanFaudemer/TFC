@@ -1,0 +1,128 @@
+#include "derivative.h" /* include peripheral declarations */
+#include "TFC\TFC.h"
+#include "constants.h"
+#include "signalProcessing.h"
+uint16_t getLinePos( uint16_t  *LineScanImage)
+{
+	unsigned char i ;
+	int16_t derivate[128] = {0};
+	int16_t derivate2[128] ={0};
+	for (i=1; i < 128; i++)
+	{
+		derivate[i] = (LineScanImage[i] - LineScanImage[i-1])/2;
+	}
+	for (i=1; i < 128; i++)
+	{	
+		derivate2[i] = (derivate[i] - derivate[i-1])/2;
+	}
+
+	int16_t detect_pic = 0;
+	int16_t debut_l=0;
+	int16_t fin_l=0;
+
+	uint16_t posLine = 0,index_debut_l = 0 ;
+	for (i = LIMITCAMMIN+1;i <= LIMITCAMMAX;i++) {
+		if ( derivate2[i] <= -SEUIL_DETECTION)// Detection de la pente descende
+		{
+			detect_pic = -1;
+			//TERMINAL_PRINTF("LOW\n\r");
+		}
+		else if ( derivate2[i] >= SEUIL_DETECTION)// Pente qui monte
+		{
+			detect_pic = 1;
+			//TERMINAL_PRINTF("High \n \r");
+		}	
+		else
+			detect_pic = 0;
+
+		//TERMINAL_PRINTF("detect_pic %d debut_l %d fin_l %d \n\r",detect_pic, debut_l, fin_l );
+		if (detect_pic == -1 && debut_l==0 && fin_l==0)
+		{
+			debut_l = 1;
+			index_debut_l = i;
+			//TERMINAL_PRINTF("aaaa\n\r");
+		}
+		else if (detect_pic == 1 && debut_l ==1 && fin_l==0)
+		{
+			debut_l = 0;
+			fin_l=1;
+			//TERMINAL_PRINTF("bbbb\n\r");
+		}
+		else if ( detect_pic == -1 && debut_l==0 && fin_l==1)
+		{
+			posLine = (i+index_debut_l)/2; /* Line found */
+			//TERMINAL_PRINTF("ccc\n\r");
+			break;
+		}
+		else if ((i-index_debut_l) >=20)
+		{
+			debut_l=0;
+			fin_l=0;
+		}
+	}
+	int16_t min_cam =0, max_cam =0;
+	/* Update Min the Led battery (Signal Quality ) */
+	minmaxcam(derivate2, &min_cam, &max_cam);
+	TERMINAL_PRINTF("Max value : %d \n\r", max_cam);
+	if(max_cam > SEUIL_DETECTION_4)
+	{
+		TFC_BAT_LED0_ON;
+		TFC_BAT_LED1_ON;
+		TFC_BAT_LED2_ON;
+		TFC_BAT_LED3_ON;
+		//TFC_BAT_LED(0x0F);
+		
+	}
+	else if (max_cam >= SEUIL_DETECTION_3)
+	{
+		TFC_BAT_LED0_ON;
+		TFC_BAT_LED1_ON;
+		TFC_BAT_LED2_ON;
+		TFC_BAT_LED3_OFF;
+		
+		//TFC_BAT_LED(0x07);
+	}				
+	else if (max_cam >= SEUIL_DETECTION_2)
+	{
+		TFC_BAT_LED0_ON;
+		TFC_BAT_LED1_ON;
+		TFC_BAT_LED2_OFF;
+		TFC_BAT_LED3_OFF;	
+		//TFC_BAT_LED(0x03);
+
+	}
+
+	else if (max_cam >= SEUIL_DETECTION_1)
+	{
+		TFC_BAT_LED0_ON;
+		TFC_BAT_LED1_OFF;
+		TFC_BAT_LED2_OFF;
+		TFC_BAT_LED3_OFF;
+		//TFC_BAT_LED(0x01);
+	}
+	else
+	{
+		TFC_BAT_LED0_OFF;
+		TFC_BAT_LED1_OFF;
+		TFC_BAT_LED2_OFF;
+		TFC_BAT_LED3_OFF;
+		//TFC_BAT_LED(0x00);
+	}
+	
+	return  posLine;
+}
+
+void minmaxcam (int16_t  *table ,int16_t  *min ,int16_t  *max)
+{
+	unsigned char i;
+	*min = table[0]; *max = table[0];
+	
+	for(i=1; i <128; i++)
+	{
+		if(table[i] < *min)
+			*min = table[i];
+		if(table[i] > *max)
+			*max = table[i];
+	}
+	
+}

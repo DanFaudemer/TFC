@@ -1,0 +1,1082 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"logger.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.global	log_full
+  18              		.section	.bss.log_full,"aw",%nobits
+  21              	log_full:
+  22 0000 00       		.space	1
+  23              		.comm	saveData,0,4
+  24              		.global	posLog
+  25              		.section	.bss.posLog,"aw",%nobits
+  26              		.align	2
+  29              	posLog:
+  30 0000 00000000 		.space	4
+  31              		.section	.text.logger,"ax",%progbits
+  32              		.align	2
+  33              		.global	logger
+  34              		.code	16
+  35              		.thumb_func
+  37              	logger:
+  38              	.LFB0:
+  39              		.file 1 "../Sources/logger.c"
+   1:../Sources/logger.c **** /*
+   2:../Sources/logger.c ****  * logger.c
+   3:../Sources/logger.c ****  *
+   4:../Sources/logger.c ****  *  Created on: Jul 28, 2014
+   5:../Sources/logger.c ****  *      Author: B48861
+   6:../Sources/logger.c ****  */
+   7:../Sources/logger.c **** 
+   8:../Sources/logger.c **** #include "logger.h"
+   9:../Sources/logger.c **** 
+  10:../Sources/logger.c **** #define WAIT_TIME 30000 //Slow speed for python script & buffer 
+  11:../Sources/logger.c **** 
+  12:../Sources/logger.c **** uint8_t log_full = 0; 
+  13:../Sources/logger.c **** 
+  14:../Sources/logger.c **** dataLog saveData[LOG_SIZE];
+  15:../Sources/logger.c **** 
+  16:../Sources/logger.c **** unsigned int posLog =0;
+  17:../Sources/logger.c **** void logger(dataLog data)
+  18:../Sources/logger.c **** {
+  40              		.loc 1 18 0
+  41              		.cfi_startproc
+  42 0000 80B5     		push	{r7, lr}
+  43              	.LCFI0:
+  44              		.cfi_def_cfa_offset 8
+  45              		.cfi_offset 7, -8
+  46              		.cfi_offset 14, -4
+  47 0002 82B0     		sub	sp, sp, #8
+  48              	.LCFI1:
+  49              		.cfi_def_cfa_offset 16
+  50 0004 00AF     		add	r7, sp, #0
+  51              	.LCFI2:
+  52              		.cfi_def_cfa_register 7
+  53 0006 3B1C     		mov	r3, r7
+  54 0008 1860     		str	r0, [r3]
+  55 000a 5960     		str	r1, [r3, #4]
+  19:../Sources/logger.c **** 
+  20:../Sources/logger.c **** 	// To continue... 
+  21:../Sources/logger.c **** 
+  22:../Sources/logger.c **** 	saveData[posLog] = data;
+  56              		.loc 1 22 0
+  57 000c 0E4B     		ldr	r3, .L3
+  58 000e 1A68     		ldr	r2, [r3]
+  59 0010 0E49     		ldr	r1, .L3+4
+  60 0012 131C     		mov	r3, r2
+  61 0014 9B00     		lsl	r3, r3, #2
+  62 0016 9B18     		add	r3, r3, r2
+  63 0018 3A1C     		mov	r2, r7
+  64 001a C918     		add	r1, r1, r3
+  65 001c 0523     		mov	r3, #5
+  66 001e 081C     		mov	r0, r1
+  67 0020 111C     		mov	r1, r2
+  68 0022 1A1C     		mov	r2, r3
+  69 0024 FFF7FEFF 		bl	memcpy
+  23:../Sources/logger.c **** 	posLog++;
+  70              		.loc 1 23 0
+  71 0028 074B     		ldr	r3, .L3
+  72 002a 1B68     		ldr	r3, [r3]
+  73 002c 5A1C     		add	r2, r3, #1
+  74 002e 064B     		ldr	r3, .L3
+  75 0030 1A60     		str	r2, [r3]
+  24:../Sources/logger.c **** 	if(posLog >= LOG_SIZE)
+  25:../Sources/logger.c **** 	{
+  26:../Sources/logger.c **** 		posLog = 0;
+  76              		.loc 1 26 0
+  77 0032 054B     		ldr	r3, .L3
+  78 0034 0022     		mov	r2, #0
+  79 0036 1A60     		str	r2, [r3]
+  27:../Sources/logger.c **** 		log_full = 1;
+  80              		.loc 1 27 0
+  81 0038 054B     		ldr	r3, .L3+8
+  82 003a 0122     		mov	r2, #1
+  83 003c 1A70     		strb	r2, [r3]
+  28:../Sources/logger.c **** 	}
+  29:../Sources/logger.c **** 
+  30:../Sources/logger.c **** 	return ;
+  84              		.loc 1 30 0
+  85 003e C046     		mov	r8, r8
+  31:../Sources/logger.c **** }
+  86              		.loc 1 31 0
+  87 0040 BD46     		mov	sp, r7
+  88 0042 02B0     		add	sp, sp, #8
+  89              		@ sp needed for prologue
+  90 0044 80BD     		pop	{r7, pc}
+  91              	.L4:
+  92 0046 C046     		.align	2
+  93              	.L3:
+  94 0048 00000000 		.word	posLog
+  95 004c 00000000 		.word	saveData
+  96 0050 00000000 		.word	log_full
+  97              		.cfi_endproc
+  98              	.LFE0:
+ 100              		.section	.rodata
+ 101              		.align	2
+ 102              	.LC6:
+ 103 0000 4C696E65 		.ascii	"Line Pos : %d\015\012\000"
+ 103      20506F73 
+ 103      203A2025 
+ 103      640D0A00 
+ 104              		.align	2
+ 105              	.LC8:
+ 106 0010 5469636B 		.ascii	"Ticker : %d\015\012\000"
+ 106      6572203A 
+ 106      2025640D 
+ 106      0A00
+ 107 001e 0000     		.align	2
+ 108              	.LC10:
+ 109 0020 56697465 		.ascii	"VitesseG : %d\015\012\000"
+ 109      73736547 
+ 109      203A2025 
+ 109      640D0A00 
+ 110              		.align	2
+ 111              	.LC12:
+ 112 0030 56697465 		.ascii	"VitesseD : %d\015\012\000"
+ 112      73736544 
+ 112      203A2025 
+ 112      640D0A00 
+ 113              		.align	2
+ 114              	.LC14:
+ 115 0040 44697265 		.ascii	"Direction pos : %d\015\012\000"
+ 115      6374696F 
+ 115      6E20706F 
+ 115      73203A20 
+ 115      25640D0A 
+ 116 0055 000000   		.align	2
+ 117              	.LC16:
+ 118 0058 506F7320 		.ascii	"Pos in log buffer : %d\015\012\000"
+ 118      696E206C 
+ 118      6F672062 
+ 118      75666665 
+ 118      72203A20 
+ 119              		.section	.text.printLastLog,"ax",%progbits
+ 120              		.align	2
+ 121              		.global	printLastLog
+ 122              		.code	16
+ 123              		.thumb_func
+ 125              	printLastLog:
+ 126              	.LFB1:
+  32:../Sources/logger.c **** 
+  33:../Sources/logger.c **** void printLastLog()
+  34:../Sources/logger.c **** {
+ 127              		.loc 1 34 0
+ 128              		.cfi_startproc
+ 129 0000 80B5     		push	{r7, lr}
+ 130              	.LCFI3:
+ 131              		.cfi_def_cfa_offset 8
+ 132              		.cfi_offset 7, -8
+ 133              		.cfi_offset 14, -4
+ 134 0002 82B0     		sub	sp, sp, #8
+ 135              	.LCFI4:
+ 136              		.cfi_def_cfa_offset 16
+ 137 0004 00AF     		add	r7, sp, #0
+ 138              	.LCFI5:
+ 139              		.cfi_def_cfa_register 7
+  35:../Sources/logger.c **** 	unsigned int lastDataPos = posLog - 1;
+ 140              		.loc 1 35 0
+ 141 0006 2C4B     		ldr	r3, .L6
+ 142 0008 1B68     		ldr	r3, [r3]
+ 143 000a 013B     		sub	r3, r3, #1
+ 144 000c 7B60     		str	r3, [r7, #4]
+  36:../Sources/logger.c **** 	TERMINAL_PRINTF("Line Pos : %d\r\n", saveData[lastDataPos].linePos);
+ 145              		.loc 1 36 0
+ 146 000e 2B49     		ldr	r1, .L6+4
+ 147 0010 7A68     		ldr	r2, [r7, #4]
+ 148 0012 131C     		mov	r3, r2
+ 149 0014 9B00     		lsl	r3, r3, #2
+ 150 0016 9B18     		add	r3, r3, r2
+ 151 0018 CB18     		add	r3, r1, r3
+ 152 001a 1B79     		ldrb	r3, [r3, #4]
+ 153 001c 5BB2     		sxtb	r3, r3
+ 154 001e 2849     		ldr	r1, .L6+8
+ 155 0020 284A     		ldr	r2, .L6+12
+ 156 0022 081C     		mov	r0, r1
+ 157 0024 111C     		mov	r1, r2
+ 158 0026 1A1C     		mov	r2, r3
+ 159 0028 FFF7FEFF 		bl	Qprintf
+  37:../Sources/logger.c **** 	TERMINAL_PRINTF("Ticker : %d\r\n", saveData[lastDataPos].ticker);
+ 160              		.loc 1 37 0
+ 161 002c 2349     		ldr	r1, .L6+4
+ 162 002e 7A68     		ldr	r2, [r7, #4]
+ 163 0030 131C     		mov	r3, r2
+ 164 0032 9B00     		lsl	r3, r3, #2
+ 165 0034 9B18     		add	r3, r3, r2
+ 166 0036 5B5C     		ldrb	r3, [r3, r1]
+ 167 0038 2149     		ldr	r1, .L6+8
+ 168 003a 234A     		ldr	r2, .L6+16
+ 169 003c 081C     		mov	r0, r1
+ 170 003e 111C     		mov	r1, r2
+ 171 0040 1A1C     		mov	r2, r3
+ 172 0042 FFF7FEFF 		bl	Qprintf
+  38:../Sources/logger.c **** 	TERMINAL_PRINTF("VitesseG : %d\r\n", saveData[lastDataPos].vitesseG);
+ 173              		.loc 1 38 0
+ 174 0046 1D49     		ldr	r1, .L6+4
+ 175 0048 7A68     		ldr	r2, [r7, #4]
+ 176 004a 131C     		mov	r3, r2
+ 177 004c 9B00     		lsl	r3, r3, #2
+ 178 004e 9B18     		add	r3, r3, r2
+ 179 0050 CB18     		add	r3, r1, r3
+ 180 0052 5B78     		ldrb	r3, [r3, #1]
+ 181 0054 5BB2     		sxtb	r3, r3
+ 182 0056 1A49     		ldr	r1, .L6+8
+ 183 0058 1C4A     		ldr	r2, .L6+20
+ 184 005a 081C     		mov	r0, r1
+ 185 005c 111C     		mov	r1, r2
+ 186 005e 1A1C     		mov	r2, r3
+ 187 0060 FFF7FEFF 		bl	Qprintf
+  39:../Sources/logger.c **** 	TERMINAL_PRINTF("VitesseD : %d\r\n", saveData[lastDataPos].vitesseD);
+ 188              		.loc 1 39 0
+ 189 0064 1549     		ldr	r1, .L6+4
+ 190 0066 7A68     		ldr	r2, [r7, #4]
+ 191 0068 131C     		mov	r3, r2
+ 192 006a 9B00     		lsl	r3, r3, #2
+ 193 006c 9B18     		add	r3, r3, r2
+ 194 006e CB18     		add	r3, r1, r3
+ 195 0070 9B78     		ldrb	r3, [r3, #2]
+ 196 0072 5BB2     		sxtb	r3, r3
+ 197 0074 1249     		ldr	r1, .L6+8
+ 198 0076 164A     		ldr	r2, .L6+24
+ 199 0078 081C     		mov	r0, r1
+ 200 007a 111C     		mov	r1, r2
+ 201 007c 1A1C     		mov	r2, r3
+ 202 007e FFF7FEFF 		bl	Qprintf
+  40:../Sources/logger.c **** 	TERMINAL_PRINTF("Direction pos : %d\r\n", saveData[lastDataPos].pos);
+ 203              		.loc 1 40 0
+ 204 0082 0E49     		ldr	r1, .L6+4
+ 205 0084 7A68     		ldr	r2, [r7, #4]
+ 206 0086 131C     		mov	r3, r2
+ 207 0088 9B00     		lsl	r3, r3, #2
+ 208 008a 9B18     		add	r3, r3, r2
+ 209 008c CB18     		add	r3, r1, r3
+ 210 008e DB78     		ldrb	r3, [r3, #3]
+ 211 0090 5BB2     		sxtb	r3, r3
+ 212 0092 0B49     		ldr	r1, .L6+8
+ 213 0094 0F4A     		ldr	r2, .L6+28
+ 214 0096 081C     		mov	r0, r1
+ 215 0098 111C     		mov	r1, r2
+ 216 009a 1A1C     		mov	r2, r3
+ 217 009c FFF7FEFF 		bl	Qprintf
+  41:../Sources/logger.c **** 	TERMINAL_PRINTF("Pos in log buffer : %d\r\n", lastDataPos);
+ 218              		.loc 1 41 0
+ 219 00a0 0749     		ldr	r1, .L6+8
+ 220 00a2 0D4A     		ldr	r2, .L6+32
+ 221 00a4 7B68     		ldr	r3, [r7, #4]
+ 222 00a6 081C     		mov	r0, r1
+ 223 00a8 111C     		mov	r1, r2
+ 224 00aa 1A1C     		mov	r2, r3
+ 225 00ac FFF7FEFF 		bl	Qprintf
+  42:../Sources/logger.c **** }
+ 226              		.loc 1 42 0
+ 227 00b0 BD46     		mov	sp, r7
+ 228 00b2 02B0     		add	sp, sp, #8
+ 229              		@ sp needed for prologue
+ 230 00b4 80BD     		pop	{r7, pc}
+ 231              	.L7:
+ 232 00b6 C046     		.align	2
+ 233              	.L6:
+ 234 00b8 00000000 		.word	posLog
+ 235 00bc 00000000 		.word	saveData
+ 236 00c0 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 237 00c4 00000000 		.word	.LC6
+ 238 00c8 10000000 		.word	.LC8
+ 239 00cc 20000000 		.word	.LC10
+ 240 00d0 30000000 		.word	.LC12
+ 241 00d4 40000000 		.word	.LC14
+ 242 00d8 58000000 		.word	.LC16
+ 243              		.cfi_endproc
+ 244              	.LFE1:
+ 246              		.section	.rodata
+ 247 0071 000000   		.align	2
+ 248              	.LC21:
+ 249 0074 42454749 		.ascii	"BEGIN_LOG\015\012\000"
+ 249      4E5F4C4F 
+ 249      470D0A00 
+ 250              		.align	2
+ 251              	.LC23:
+ 252 0080 4C696E65 		.ascii	"Line Pos : \015\012\000"
+ 252      20506F73 
+ 252      203A200D 
+ 252      0A00
+ 253 008e 0000     		.align	2
+ 254              	.LC26:
+ 255 0090 25640D0A 		.ascii	"%d\015\012\000"
+ 255      00
+ 256 0095 000000   		.align	2
+ 257              	.LC28:
+ 258 0098 5469636B 		.ascii	"Ticker : \015\012\000"
+ 258      6572203A 
+ 258      200D0A00 
+ 259              		.align	2
+ 260              	.LC30:
+ 261 00a4 56697465 		.ascii	"VitesseG : \015\012\000"
+ 261      73736547 
+ 261      203A200D 
+ 261      0A00
+ 262 00b2 0000     		.align	2
+ 263              	.LC32:
+ 264 00b4 56697465 		.ascii	"VitesseD : \015\012\000"
+ 264      73736544 
+ 264      203A200D 
+ 264      0A00
+ 265 00c2 0000     		.align	2
+ 266              	.LC34:
+ 267 00c4 44697265 		.ascii	"Direction pos : \015\012\000"
+ 267      6374696F 
+ 267      6E20706F 
+ 267      73203A20 
+ 267      0D0A00
+ 268 00d7 00       		.align	2
+ 269              	.LC36:
+ 270 00d8 454E445F 		.ascii	"END_LOG\015\012\000"
+ 270      4C4F470D 
+ 270      0A00
+ 271 00e2 0000     		.section	.text.printLogger,"ax",%progbits
+ 272              		.align	2
+ 273              		.global	printLogger
+ 274              		.code	16
+ 275              		.thumb_func
+ 277              	printLogger:
+ 278              	.LFB2:
+  43:../Sources/logger.c **** void printLogger()
+  44:../Sources/logger.c **** {
+ 279              		.loc 1 44 0
+ 280              		.cfi_startproc
+ 281 0000 80B5     		push	{r7, lr}
+ 282              	.LCFI6:
+ 283              		.cfi_def_cfa_offset 8
+ 284              		.cfi_offset 7, -8
+ 285              		.cfi_offset 14, -4
+ 286 0002 84B0     		sub	sp, sp, #16
+ 287              	.LCFI7:
+ 288              		.cfi_def_cfa_offset 24
+ 289 0004 00AF     		add	r7, sp, #0
+ 290              	.LCFI8:
+ 291              		.cfi_def_cfa_register 7
+  45:../Sources/logger.c **** 	unsigned int start=0, i, temp, junk;
+ 292              		.loc 1 45 0
+ 293 0006 0023     		mov	r3, #0
+ 294 0008 FB60     		str	r3, [r7, #12]
+  46:../Sources/logger.c **** 	unsigned int end = LOG_SIZE;
+ 295              		.loc 1 46 0
+ 296 000a 0023     		mov	r3, #0
+ 297 000c 3B60     		str	r3, [r7]
+  47:../Sources/logger.c **** 	if(log_full)
+ 298              		.loc 1 47 0
+ 299 000e C94B     		ldr	r3, .L51
+ 300 0010 1B78     		ldrb	r3, [r3]
+ 301 0012 002B     		cmp	r3, #0
+ 302 0014 04D0     		beq	.L9
+  48:../Sources/logger.c **** 		start = posLog+1;
+ 303              		.loc 1 48 0
+ 304 0016 C84B     		ldr	r3, .L51+4
+ 305 0018 1B68     		ldr	r3, [r3]
+ 306 001a 0133     		add	r3, r3, #1
+ 307 001c FB60     		str	r3, [r7, #12]
+ 308 001e 03E0     		b	.L10
+ 309              	.L9:
+  49:../Sources/logger.c **** 	else
+  50:../Sources/logger.c **** 		end = posLog+1;
+ 310              		.loc 1 50 0
+ 311 0020 C54B     		ldr	r3, .L51+4
+ 312 0022 1B68     		ldr	r3, [r3]
+ 313 0024 0133     		add	r3, r3, #1
+ 314 0026 3B60     		str	r3, [r7]
+ 315              	.L10:
+  51:../Sources/logger.c **** 	TERMINAL_PRINTF("BEGIN_LOG\r\n");
+ 316              		.loc 1 51 0
+ 317 0028 C44A     		ldr	r2, .L51+8
+ 318 002a C54B     		ldr	r3, .L51+12
+ 319 002c 101C     		mov	r0, r2
+ 320 002e 191C     		mov	r1, r3
+ 321 0030 FFF7FEFF 		bl	Qprintf
+  52:../Sources/logger.c **** 	TERMINAL_PRINTF("Line Pos : \r\n");
+ 322              		.loc 1 52 0
+ 323 0034 C14A     		ldr	r2, .L51+8
+ 324 0036 C34B     		ldr	r3, .L51+16
+ 325 0038 101C     		mov	r0, r2
+ 326 003a 191C     		mov	r1, r3
+ 327 003c FFF7FEFF 		bl	Qprintf
+  53:../Sources/logger.c **** 	
+  54:../Sources/logger.c **** 	for(i=start; i < end; i++)
+ 328              		.loc 1 54 0
+ 329 0040 FB68     		ldr	r3, [r7, #12]
+ 330 0042 BB60     		str	r3, [r7, #8]
+ 331 0044 1DE0     		b	.L11
+ 332              	.L14:
+  55:../Sources/logger.c **** 	{
+  56:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].linePos);
+ 333              		.loc 1 56 0
+ 334 0046 C049     		ldr	r1, .L51+20
+ 335 0048 BA68     		ldr	r2, [r7, #8]
+ 336 004a 131C     		mov	r3, r2
+ 337 004c 9B00     		lsl	r3, r3, #2
+ 338 004e 9B18     		add	r3, r3, r2
+ 339 0050 CB18     		add	r3, r1, r3
+ 340 0052 1B79     		ldrb	r3, [r3, #4]
+ 341 0054 5BB2     		sxtb	r3, r3
+ 342 0056 B949     		ldr	r1, .L51+8
+ 343 0058 BC4A     		ldr	r2, .L51+24
+ 344 005a 081C     		mov	r0, r1
+ 345 005c 111C     		mov	r1, r2
+ 346 005e 1A1C     		mov	r2, r3
+ 347 0060 FFF7FEFF 		bl	Qprintf
+  57:../Sources/logger.c **** 		TFC_UART_Process();
+ 348              		.loc 1 57 0
+ 349 0064 FFF7FEFF 		bl	TFC_UART_Process
+  58:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 350              		.loc 1 58 0
+ 351 0068 0023     		mov	r3, #0
+ 352 006a 7B60     		str	r3, [r7, #4]
+ 353 006c 02E0     		b	.L12
+ 354              	.L13:
+ 355              		.loc 1 58 0 is_stmt 0
+ 356 006e 7B68     		ldr	r3, [r7, #4]
+ 357 0070 0133     		add	r3, r3, #1
+ 358 0072 7B60     		str	r3, [r7, #4]
+ 359              	.L12:
+ 360              		.loc 1 58 0
+ 361 0074 7A68     		ldr	r2, [r7, #4]
+ 362 0076 B64B     		ldr	r3, .L51+28
+ 363 0078 9A42     		cmp	r2, r3
+ 364 007a F8D9     		bls	.L13
+  54:../Sources/logger.c **** 	for(i=start; i < end; i++)
+ 365              		.loc 1 54 0 is_stmt 1
+ 366 007c BB68     		ldr	r3, [r7, #8]
+ 367 007e 0133     		add	r3, r3, #1
+ 368 0080 BB60     		str	r3, [r7, #8]
+ 369              	.L11:
+  54:../Sources/logger.c **** 	for(i=start; i < end; i++)
+ 370              		.loc 1 54 0 is_stmt 0
+ 371 0082 BA68     		ldr	r2, [r7, #8]
+ 372 0084 3B68     		ldr	r3, [r7]
+ 373 0086 9A42     		cmp	r2, r3
+ 374 0088 DDD3     		bcc	.L14
+  59:../Sources/logger.c **** 		{
+  60:../Sources/logger.c **** 			
+  61:../Sources/logger.c **** 		}
+  62:../Sources/logger.c **** 		
+  63:../Sources/logger.c **** 	}
+  64:../Sources/logger.c **** 	for(i=0; i < start; i++)
+ 375              		.loc 1 64 0 is_stmt 1
+ 376 008a 0023     		mov	r3, #0
+ 377 008c BB60     		str	r3, [r7, #8]
+ 378 008e 1DE0     		b	.L15
+ 379              	.L18:
+  65:../Sources/logger.c **** 	{
+  66:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].linePos);
+ 380              		.loc 1 66 0
+ 381 0090 AD49     		ldr	r1, .L51+20
+ 382 0092 BA68     		ldr	r2, [r7, #8]
+ 383 0094 131C     		mov	r3, r2
+ 384 0096 9B00     		lsl	r3, r3, #2
+ 385 0098 9B18     		add	r3, r3, r2
+ 386 009a CB18     		add	r3, r1, r3
+ 387 009c 1B79     		ldrb	r3, [r3, #4]
+ 388 009e 5BB2     		sxtb	r3, r3
+ 389 00a0 A649     		ldr	r1, .L51+8
+ 390 00a2 AA4A     		ldr	r2, .L51+24
+ 391 00a4 081C     		mov	r0, r1
+ 392 00a6 111C     		mov	r1, r2
+ 393 00a8 1A1C     		mov	r2, r3
+ 394 00aa FFF7FEFF 		bl	Qprintf
+  67:../Sources/logger.c **** 		TFC_UART_Process();
+ 395              		.loc 1 67 0
+ 396 00ae FFF7FEFF 		bl	TFC_UART_Process
+  68:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 397              		.loc 1 68 0
+ 398 00b2 0023     		mov	r3, #0
+ 399 00b4 7B60     		str	r3, [r7, #4]
+ 400 00b6 02E0     		b	.L16
+ 401              	.L17:
+ 402              		.loc 1 68 0 is_stmt 0
+ 403 00b8 7B68     		ldr	r3, [r7, #4]
+ 404 00ba 0133     		add	r3, r3, #1
+ 405 00bc 7B60     		str	r3, [r7, #4]
+ 406              	.L16:
+ 407              		.loc 1 68 0
+ 408 00be 7A68     		ldr	r2, [r7, #4]
+ 409 00c0 A34B     		ldr	r3, .L51+28
+ 410 00c2 9A42     		cmp	r2, r3
+ 411 00c4 F8D9     		bls	.L17
+  64:../Sources/logger.c **** 	for(i=0; i < start; i++)
+ 412              		.loc 1 64 0 is_stmt 1
+ 413 00c6 BB68     		ldr	r3, [r7, #8]
+ 414 00c8 0133     		add	r3, r3, #1
+ 415 00ca BB60     		str	r3, [r7, #8]
+ 416              	.L15:
+  64:../Sources/logger.c **** 	for(i=0; i < start; i++)
+ 417              		.loc 1 64 0 is_stmt 0
+ 418 00cc BA68     		ldr	r2, [r7, #8]
+ 419 00ce FB68     		ldr	r3, [r7, #12]
+ 420 00d0 9A42     		cmp	r2, r3
+ 421 00d2 DDD3     		bcc	.L18
+  69:../Sources/logger.c **** 		{
+  70:../Sources/logger.c **** 		}
+  71:../Sources/logger.c **** 	}
+  72:../Sources/logger.c **** 
+  73:../Sources/logger.c **** 	TERMINAL_PRINTF("Ticker : \r\n");
+ 422              		.loc 1 73 0 is_stmt 1
+ 423 00d4 994A     		ldr	r2, .L51+8
+ 424 00d6 9F4B     		ldr	r3, .L51+32
+ 425 00d8 101C     		mov	r0, r2
+ 426 00da 191C     		mov	r1, r3
+ 427 00dc FFF7FEFF 		bl	Qprintf
+  74:../Sources/logger.c **** 	for(i=start; i < end; i++)
+ 428              		.loc 1 74 0
+ 429 00e0 FB68     		ldr	r3, [r7, #12]
+ 430 00e2 BB60     		str	r3, [r7, #8]
+ 431 00e4 1BE0     		b	.L19
+ 432              	.L22:
+  75:../Sources/logger.c **** 	{
+  76:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].ticker);
+ 433              		.loc 1 76 0
+ 434 00e6 9849     		ldr	r1, .L51+20
+ 435 00e8 BA68     		ldr	r2, [r7, #8]
+ 436 00ea 131C     		mov	r3, r2
+ 437 00ec 9B00     		lsl	r3, r3, #2
+ 438 00ee 9B18     		add	r3, r3, r2
+ 439 00f0 5B5C     		ldrb	r3, [r3, r1]
+ 440 00f2 9249     		ldr	r1, .L51+8
+ 441 00f4 954A     		ldr	r2, .L51+24
+ 442 00f6 081C     		mov	r0, r1
+ 443 00f8 111C     		mov	r1, r2
+ 444 00fa 1A1C     		mov	r2, r3
+ 445 00fc FFF7FEFF 		bl	Qprintf
+  77:../Sources/logger.c **** 		TFC_UART_Process();
+ 446              		.loc 1 77 0
+ 447 0100 FFF7FEFF 		bl	TFC_UART_Process
+  78:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 448              		.loc 1 78 0
+ 449 0104 0023     		mov	r3, #0
+ 450 0106 7B60     		str	r3, [r7, #4]
+ 451 0108 02E0     		b	.L20
+ 452              	.L21:
+ 453              		.loc 1 78 0 is_stmt 0
+ 454 010a 7B68     		ldr	r3, [r7, #4]
+ 455 010c 0133     		add	r3, r3, #1
+ 456 010e 7B60     		str	r3, [r7, #4]
+ 457              	.L20:
+ 458              		.loc 1 78 0
+ 459 0110 7A68     		ldr	r2, [r7, #4]
+ 460 0112 8F4B     		ldr	r3, .L51+28
+ 461 0114 9A42     		cmp	r2, r3
+ 462 0116 F8D9     		bls	.L21
+  74:../Sources/logger.c **** 	for(i=start; i < end; i++)
+ 463              		.loc 1 74 0 is_stmt 1
+ 464 0118 BB68     		ldr	r3, [r7, #8]
+ 465 011a 0133     		add	r3, r3, #1
+ 466 011c BB60     		str	r3, [r7, #8]
+ 467              	.L19:
+  74:../Sources/logger.c **** 	for(i=start; i < end; i++)
+ 468              		.loc 1 74 0 is_stmt 0
+ 469 011e BA68     		ldr	r2, [r7, #8]
+ 470 0120 3B68     		ldr	r3, [r7]
+ 471 0122 9A42     		cmp	r2, r3
+ 472 0124 DFD3     		bcc	.L22
+  79:../Sources/logger.c **** 		{
+  80:../Sources/logger.c **** 		}
+  81:../Sources/logger.c **** 	}
+  82:../Sources/logger.c **** 	for(i=0; i < start; i++)
+ 473              		.loc 1 82 0 is_stmt 1
+ 474 0126 0023     		mov	r3, #0
+ 475 0128 BB60     		str	r3, [r7, #8]
+ 476 012a 1BE0     		b	.L23
+ 477              	.L26:
+  83:../Sources/logger.c **** 	{
+  84:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].ticker);
+ 478              		.loc 1 84 0
+ 479 012c 8649     		ldr	r1, .L51+20
+ 480 012e BA68     		ldr	r2, [r7, #8]
+ 481 0130 131C     		mov	r3, r2
+ 482 0132 9B00     		lsl	r3, r3, #2
+ 483 0134 9B18     		add	r3, r3, r2
+ 484 0136 5B5C     		ldrb	r3, [r3, r1]
+ 485 0138 8049     		ldr	r1, .L51+8
+ 486 013a 844A     		ldr	r2, .L51+24
+ 487 013c 081C     		mov	r0, r1
+ 488 013e 111C     		mov	r1, r2
+ 489 0140 1A1C     		mov	r2, r3
+ 490 0142 FFF7FEFF 		bl	Qprintf
+  85:../Sources/logger.c **** 		TFC_UART_Process();
+ 491              		.loc 1 85 0
+ 492 0146 FFF7FEFF 		bl	TFC_UART_Process
+  86:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 493              		.loc 1 86 0
+ 494 014a 0023     		mov	r3, #0
+ 495 014c 7B60     		str	r3, [r7, #4]
+ 496 014e 02E0     		b	.L24
+ 497              	.L25:
+ 498              		.loc 1 86 0 is_stmt 0
+ 499 0150 7B68     		ldr	r3, [r7, #4]
+ 500 0152 0133     		add	r3, r3, #1
+ 501 0154 7B60     		str	r3, [r7, #4]
+ 502              	.L24:
+ 503              		.loc 1 86 0
+ 504 0156 7A68     		ldr	r2, [r7, #4]
+ 505 0158 7D4B     		ldr	r3, .L51+28
+ 506 015a 9A42     		cmp	r2, r3
+ 507 015c F8D9     		bls	.L25
+  82:../Sources/logger.c **** 	for(i=0; i < start; i++)
+ 508              		.loc 1 82 0 is_stmt 1
+ 509 015e BB68     		ldr	r3, [r7, #8]
+ 510 0160 0133     		add	r3, r3, #1
+ 511 0162 BB60     		str	r3, [r7, #8]
+ 512              	.L23:
+  82:../Sources/logger.c **** 	for(i=0; i < start; i++)
+ 513              		.loc 1 82 0 is_stmt 0
+ 514 0164 BA68     		ldr	r2, [r7, #8]
+ 515 0166 FB68     		ldr	r3, [r7, #12]
+ 516 0168 9A42     		cmp	r2, r3
+ 517 016a DFD3     		bcc	.L26
+  87:../Sources/logger.c **** 		{
+  88:../Sources/logger.c **** 		}
+  89:../Sources/logger.c **** 	}
+  90:../Sources/logger.c **** 
+  91:../Sources/logger.c **** 
+  92:../Sources/logger.c **** 	TERMINAL_PRINTF("VitesseG : \r\n");
+ 518              		.loc 1 92 0 is_stmt 1
+ 519 016c 734A     		ldr	r2, .L51+8
+ 520 016e 7A4B     		ldr	r3, .L51+36
+ 521 0170 101C     		mov	r0, r2
+ 522 0172 191C     		mov	r1, r3
+ 523 0174 FFF7FEFF 		bl	Qprintf
+  93:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 524              		.loc 1 93 0
+ 525 0178 FB68     		ldr	r3, [r7, #12]
+ 526 017a BB60     		str	r3, [r7, #8]
+ 527 017c 1DE0     		b	.L27
+ 528              	.L30:
+  94:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].vitesseG);
+ 529              		.loc 1 94 0
+ 530 017e 7249     		ldr	r1, .L51+20
+ 531 0180 BA68     		ldr	r2, [r7, #8]
+ 532 0182 131C     		mov	r3, r2
+ 533 0184 9B00     		lsl	r3, r3, #2
+ 534 0186 9B18     		add	r3, r3, r2
+ 535 0188 CB18     		add	r3, r1, r3
+ 536 018a 5B78     		ldrb	r3, [r3, #1]
+ 537 018c 5BB2     		sxtb	r3, r3
+ 538 018e 6B49     		ldr	r1, .L51+8
+ 539 0190 6E4A     		ldr	r2, .L51+24
+ 540 0192 081C     		mov	r0, r1
+ 541 0194 111C     		mov	r1, r2
+ 542 0196 1A1C     		mov	r2, r3
+ 543 0198 FFF7FEFF 		bl	Qprintf
+  95:../Sources/logger.c **** 		TFC_UART_Process();
+ 544              		.loc 1 95 0
+ 545 019c FFF7FEFF 		bl	TFC_UART_Process
+  96:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 546              		.loc 1 96 0
+ 547 01a0 0023     		mov	r3, #0
+ 548 01a2 7B60     		str	r3, [r7, #4]
+ 549 01a4 02E0     		b	.L28
+ 550              	.L29:
+ 551              		.loc 1 96 0 is_stmt 0
+ 552 01a6 7B68     		ldr	r3, [r7, #4]
+ 553 01a8 0133     		add	r3, r3, #1
+ 554 01aa 7B60     		str	r3, [r7, #4]
+ 555              	.L28:
+ 556              		.loc 1 96 0
+ 557 01ac 7A68     		ldr	r2, [r7, #4]
+ 558 01ae 684B     		ldr	r3, .L51+28
+ 559 01b0 9A42     		cmp	r2, r3
+ 560 01b2 F8D9     		bls	.L29
+  93:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 561              		.loc 1 93 0 is_stmt 1
+ 562 01b4 BB68     		ldr	r3, [r7, #8]
+ 563 01b6 0133     		add	r3, r3, #1
+ 564 01b8 BB60     		str	r3, [r7, #8]
+ 565              	.L27:
+  93:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 566              		.loc 1 93 0 is_stmt 0
+ 567 01ba BA68     		ldr	r2, [r7, #8]
+ 568 01bc 3B68     		ldr	r3, [r7]
+ 569 01be 9A42     		cmp	r2, r3
+ 570 01c0 DDD3     		bcc	.L30
+  97:../Sources/logger.c **** 		{
+  98:../Sources/logger.c **** 		}
+  99:../Sources/logger.c **** 	}
+ 100:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 571              		.loc 1 100 0 is_stmt 1
+ 572 01c2 0023     		mov	r3, #0
+ 573 01c4 BB60     		str	r3, [r7, #8]
+ 574 01c6 1DE0     		b	.L31
+ 575              	.L34:
+ 101:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].vitesseG);
+ 576              		.loc 1 101 0
+ 577 01c8 5F49     		ldr	r1, .L51+20
+ 578 01ca BA68     		ldr	r2, [r7, #8]
+ 579 01cc 131C     		mov	r3, r2
+ 580 01ce 9B00     		lsl	r3, r3, #2
+ 581 01d0 9B18     		add	r3, r3, r2
+ 582 01d2 CB18     		add	r3, r1, r3
+ 583 01d4 5B78     		ldrb	r3, [r3, #1]
+ 584 01d6 5BB2     		sxtb	r3, r3
+ 585 01d8 5849     		ldr	r1, .L51+8
+ 586 01da 5C4A     		ldr	r2, .L51+24
+ 587 01dc 081C     		mov	r0, r1
+ 588 01de 111C     		mov	r1, r2
+ 589 01e0 1A1C     		mov	r2, r3
+ 590 01e2 FFF7FEFF 		bl	Qprintf
+ 102:../Sources/logger.c **** 		TFC_UART_Process();
+ 591              		.loc 1 102 0
+ 592 01e6 FFF7FEFF 		bl	TFC_UART_Process
+ 103:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 593              		.loc 1 103 0
+ 594 01ea 0023     		mov	r3, #0
+ 595 01ec 7B60     		str	r3, [r7, #4]
+ 596 01ee 02E0     		b	.L32
+ 597              	.L33:
+ 598              		.loc 1 103 0 is_stmt 0
+ 599 01f0 7B68     		ldr	r3, [r7, #4]
+ 600 01f2 0133     		add	r3, r3, #1
+ 601 01f4 7B60     		str	r3, [r7, #4]
+ 602              	.L32:
+ 603              		.loc 1 103 0
+ 604 01f6 7A68     		ldr	r2, [r7, #4]
+ 605 01f8 554B     		ldr	r3, .L51+28
+ 606 01fa 9A42     		cmp	r2, r3
+ 607 01fc F8D9     		bls	.L33
+ 100:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 608              		.loc 1 100 0 is_stmt 1
+ 609 01fe BB68     		ldr	r3, [r7, #8]
+ 610 0200 0133     		add	r3, r3, #1
+ 611 0202 BB60     		str	r3, [r7, #8]
+ 612              	.L31:
+ 100:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 613              		.loc 1 100 0 is_stmt 0
+ 614 0204 BA68     		ldr	r2, [r7, #8]
+ 615 0206 FB68     		ldr	r3, [r7, #12]
+ 616 0208 9A42     		cmp	r2, r3
+ 617 020a DDD3     		bcc	.L34
+ 104:../Sources/logger.c **** 		{
+ 105:../Sources/logger.c **** 		}
+ 106:../Sources/logger.c **** 	}
+ 107:../Sources/logger.c **** 
+ 108:../Sources/logger.c **** 	TERMINAL_PRINTF("VitesseD : \r\n");
+ 618              		.loc 1 108 0 is_stmt 1
+ 619 020c 4B4A     		ldr	r2, .L51+8
+ 620 020e 534B     		ldr	r3, .L51+40
+ 621 0210 101C     		mov	r0, r2
+ 622 0212 191C     		mov	r1, r3
+ 623 0214 FFF7FEFF 		bl	Qprintf
+ 109:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 624              		.loc 1 109 0
+ 625 0218 FB68     		ldr	r3, [r7, #12]
+ 626 021a BB60     		str	r3, [r7, #8]
+ 627 021c 1DE0     		b	.L35
+ 628              	.L38:
+ 110:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].vitesseD);
+ 629              		.loc 1 110 0
+ 630 021e 4A49     		ldr	r1, .L51+20
+ 631 0220 BA68     		ldr	r2, [r7, #8]
+ 632 0222 131C     		mov	r3, r2
+ 633 0224 9B00     		lsl	r3, r3, #2
+ 634 0226 9B18     		add	r3, r3, r2
+ 635 0228 CB18     		add	r3, r1, r3
+ 636 022a 9B78     		ldrb	r3, [r3, #2]
+ 637 022c 5BB2     		sxtb	r3, r3
+ 638 022e 4349     		ldr	r1, .L51+8
+ 639 0230 464A     		ldr	r2, .L51+24
+ 640 0232 081C     		mov	r0, r1
+ 641 0234 111C     		mov	r1, r2
+ 642 0236 1A1C     		mov	r2, r3
+ 643 0238 FFF7FEFF 		bl	Qprintf
+ 111:../Sources/logger.c **** 		TFC_UART_Process();
+ 644              		.loc 1 111 0
+ 645 023c FFF7FEFF 		bl	TFC_UART_Process
+ 112:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 646              		.loc 1 112 0
+ 647 0240 0023     		mov	r3, #0
+ 648 0242 7B60     		str	r3, [r7, #4]
+ 649 0244 02E0     		b	.L36
+ 650              	.L37:
+ 651              		.loc 1 112 0 is_stmt 0
+ 652 0246 7B68     		ldr	r3, [r7, #4]
+ 653 0248 0133     		add	r3, r3, #1
+ 654 024a 7B60     		str	r3, [r7, #4]
+ 655              	.L36:
+ 656              		.loc 1 112 0
+ 657 024c 7A68     		ldr	r2, [r7, #4]
+ 658 024e 404B     		ldr	r3, .L51+28
+ 659 0250 9A42     		cmp	r2, r3
+ 660 0252 F8D9     		bls	.L37
+ 109:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 661              		.loc 1 109 0 is_stmt 1
+ 662 0254 BB68     		ldr	r3, [r7, #8]
+ 663 0256 0133     		add	r3, r3, #1
+ 664 0258 BB60     		str	r3, [r7, #8]
+ 665              	.L35:
+ 109:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 666              		.loc 1 109 0 is_stmt 0
+ 667 025a BA68     		ldr	r2, [r7, #8]
+ 668 025c 3B68     		ldr	r3, [r7]
+ 669 025e 9A42     		cmp	r2, r3
+ 670 0260 DDD3     		bcc	.L38
+ 113:../Sources/logger.c **** 		{
+ 114:../Sources/logger.c **** 		}
+ 115:../Sources/logger.c **** 	}
+ 116:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 671              		.loc 1 116 0 is_stmt 1
+ 672 0262 0023     		mov	r3, #0
+ 673 0264 BB60     		str	r3, [r7, #8]
+ 674 0266 1DE0     		b	.L39
+ 675              	.L42:
+ 117:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].vitesseD);
+ 676              		.loc 1 117 0
+ 677 0268 3749     		ldr	r1, .L51+20
+ 678 026a BA68     		ldr	r2, [r7, #8]
+ 679 026c 131C     		mov	r3, r2
+ 680 026e 9B00     		lsl	r3, r3, #2
+ 681 0270 9B18     		add	r3, r3, r2
+ 682 0272 CB18     		add	r3, r1, r3
+ 683 0274 9B78     		ldrb	r3, [r3, #2]
+ 684 0276 5BB2     		sxtb	r3, r3
+ 685 0278 3049     		ldr	r1, .L51+8
+ 686 027a 344A     		ldr	r2, .L51+24
+ 687 027c 081C     		mov	r0, r1
+ 688 027e 111C     		mov	r1, r2
+ 689 0280 1A1C     		mov	r2, r3
+ 690 0282 FFF7FEFF 		bl	Qprintf
+ 118:../Sources/logger.c **** 		TFC_UART_Process();
+ 691              		.loc 1 118 0
+ 692 0286 FFF7FEFF 		bl	TFC_UART_Process
+ 119:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 693              		.loc 1 119 0
+ 694 028a 0023     		mov	r3, #0
+ 695 028c 7B60     		str	r3, [r7, #4]
+ 696 028e 02E0     		b	.L40
+ 697              	.L41:
+ 698              		.loc 1 119 0 is_stmt 0
+ 699 0290 7B68     		ldr	r3, [r7, #4]
+ 700 0292 0133     		add	r3, r3, #1
+ 701 0294 7B60     		str	r3, [r7, #4]
+ 702              	.L40:
+ 703              		.loc 1 119 0
+ 704 0296 7A68     		ldr	r2, [r7, #4]
+ 705 0298 2D4B     		ldr	r3, .L51+28
+ 706 029a 9A42     		cmp	r2, r3
+ 707 029c F8D9     		bls	.L41
+ 116:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 708              		.loc 1 116 0 is_stmt 1
+ 709 029e BB68     		ldr	r3, [r7, #8]
+ 710 02a0 0133     		add	r3, r3, #1
+ 711 02a2 BB60     		str	r3, [r7, #8]
+ 712              	.L39:
+ 116:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 713              		.loc 1 116 0 is_stmt 0
+ 714 02a4 BA68     		ldr	r2, [r7, #8]
+ 715 02a6 FB68     		ldr	r3, [r7, #12]
+ 716 02a8 9A42     		cmp	r2, r3
+ 717 02aa DDD3     		bcc	.L42
+ 120:../Sources/logger.c **** 		{
+ 121:../Sources/logger.c **** 		}
+ 122:../Sources/logger.c **** 	}
+ 123:../Sources/logger.c **** 
+ 124:../Sources/logger.c **** 	TERMINAL_PRINTF("Direction pos : \r\n");
+ 718              		.loc 1 124 0 is_stmt 1
+ 719 02ac 234A     		ldr	r2, .L51+8
+ 720 02ae 2C4B     		ldr	r3, .L51+44
+ 721 02b0 101C     		mov	r0, r2
+ 722 02b2 191C     		mov	r1, r3
+ 723 02b4 FFF7FEFF 		bl	Qprintf
+ 125:../Sources/logger.c **** 	TFC_UART_Process();
+ 724              		.loc 1 125 0
+ 725 02b8 FFF7FEFF 		bl	TFC_UART_Process
+ 126:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 726              		.loc 1 126 0
+ 727 02bc FB68     		ldr	r3, [r7, #12]
+ 728 02be BB60     		str	r3, [r7, #8]
+ 729 02c0 1DE0     		b	.L43
+ 730              	.L46:
+ 127:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].pos);
+ 731              		.loc 1 127 0
+ 732 02c2 2149     		ldr	r1, .L51+20
+ 733 02c4 BA68     		ldr	r2, [r7, #8]
+ 734 02c6 131C     		mov	r3, r2
+ 735 02c8 9B00     		lsl	r3, r3, #2
+ 736 02ca 9B18     		add	r3, r3, r2
+ 737 02cc CB18     		add	r3, r1, r3
+ 738 02ce DB78     		ldrb	r3, [r3, #3]
+ 739 02d0 5BB2     		sxtb	r3, r3
+ 740 02d2 1A49     		ldr	r1, .L51+8
+ 741 02d4 1D4A     		ldr	r2, .L51+24
+ 742 02d6 081C     		mov	r0, r1
+ 743 02d8 111C     		mov	r1, r2
+ 744 02da 1A1C     		mov	r2, r3
+ 745 02dc FFF7FEFF 		bl	Qprintf
+ 128:../Sources/logger.c **** 		TFC_UART_Process();
+ 746              		.loc 1 128 0
+ 747 02e0 FFF7FEFF 		bl	TFC_UART_Process
+ 129:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 748              		.loc 1 129 0
+ 749 02e4 0023     		mov	r3, #0
+ 750 02e6 7B60     		str	r3, [r7, #4]
+ 751 02e8 02E0     		b	.L44
+ 752              	.L45:
+ 753              		.loc 1 129 0 is_stmt 0
+ 754 02ea 7B68     		ldr	r3, [r7, #4]
+ 755 02ec 0133     		add	r3, r3, #1
+ 756 02ee 7B60     		str	r3, [r7, #4]
+ 757              	.L44:
+ 758              		.loc 1 129 0
+ 759 02f0 7A68     		ldr	r2, [r7, #4]
+ 760 02f2 174B     		ldr	r3, .L51+28
+ 761 02f4 9A42     		cmp	r2, r3
+ 762 02f6 F8D9     		bls	.L45
+ 126:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 763              		.loc 1 126 0 is_stmt 1
+ 764 02f8 BB68     		ldr	r3, [r7, #8]
+ 765 02fa 0133     		add	r3, r3, #1
+ 766 02fc BB60     		str	r3, [r7, #8]
+ 767              	.L43:
+ 126:../Sources/logger.c **** 	for(i=start; i < end; i++){
+ 768              		.loc 1 126 0 is_stmt 0
+ 769 02fe BA68     		ldr	r2, [r7, #8]
+ 770 0300 3B68     		ldr	r3, [r7]
+ 771 0302 9A42     		cmp	r2, r3
+ 772 0304 DDD3     		bcc	.L46
+ 130:../Sources/logger.c **** 		{
+ 131:../Sources/logger.c **** 		}
+ 132:../Sources/logger.c **** 	}
+ 133:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 773              		.loc 1 133 0 is_stmt 1
+ 774 0306 0023     		mov	r3, #0
+ 775 0308 BB60     		str	r3, [r7, #8]
+ 776 030a 35E0     		b	.L47
+ 777              	.L50:
+ 134:../Sources/logger.c **** 		TERMINAL_PRINTF("%d\r\n", saveData[i].pos);
+ 778              		.loc 1 134 0
+ 779 030c 0E49     		ldr	r1, .L51+20
+ 780 030e BA68     		ldr	r2, [r7, #8]
+ 781 0310 131C     		mov	r3, r2
+ 782 0312 9B00     		lsl	r3, r3, #2
+ 783 0314 9B18     		add	r3, r3, r2
+ 784 0316 CB18     		add	r3, r1, r3
+ 785 0318 DB78     		ldrb	r3, [r3, #3]
+ 786 031a 5BB2     		sxtb	r3, r3
+ 787 031c 0749     		ldr	r1, .L51+8
+ 788 031e 0B4A     		ldr	r2, .L51+24
+ 789 0320 081C     		mov	r0, r1
+ 790 0322 111C     		mov	r1, r2
+ 791 0324 1A1C     		mov	r2, r3
+ 792 0326 FFF7FEFF 		bl	Qprintf
+ 135:../Sources/logger.c **** 		TFC_UART_Process();
+ 793              		.loc 1 135 0
+ 794 032a FFF7FEFF 		bl	TFC_UART_Process
+ 136:../Sources/logger.c **** 		for(temp = 0;temp<WAIT_TIME;temp++)
+ 795              		.loc 1 136 0
+ 796 032e 0023     		mov	r3, #0
+ 797 0330 7B60     		str	r3, [r7, #4]
+ 798 0332 1AE0     		b	.L48
+ 799              	.L52:
+ 800              		.align	2
+ 801              	.L51:
+ 802 0334 00000000 		.word	log_full
+ 803 0338 00000000 		.word	posLog
+ 804 033c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 805 0340 74000000 		.word	.LC21
+ 806 0344 80000000 		.word	.LC23
+ 807 0348 00000000 		.word	saveData
+ 808 034c 90000000 		.word	.LC26
+ 809 0350 2F750000 		.word	29999
+ 810 0354 98000000 		.word	.LC28
+ 811 0358 A4000000 		.word	.LC30
+ 812 035c B4000000 		.word	.LC32
+ 813 0360 C4000000 		.word	.LC34
+ 814              	.L49:
+ 815              		.loc 1 136 0 is_stmt 0
+ 816 0364 7B68     		ldr	r3, [r7, #4]
+ 817 0366 0133     		add	r3, r3, #1
+ 818 0368 7B60     		str	r3, [r7, #4]
+ 819              	.L48:
+ 820              		.loc 1 136 0
+ 821 036a 7A68     		ldr	r2, [r7, #4]
+ 822 036c 0A4B     		ldr	r3, .L53
+ 823 036e 9A42     		cmp	r2, r3
+ 824 0370 F8D9     		bls	.L49
+ 133:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 825              		.loc 1 133 0 is_stmt 1
+ 826 0372 BB68     		ldr	r3, [r7, #8]
+ 827 0374 0133     		add	r3, r3, #1
+ 828 0376 BB60     		str	r3, [r7, #8]
+ 829              	.L47:
+ 133:../Sources/logger.c **** 	for(i=0; i < start; i++){
+ 830              		.loc 1 133 0 is_stmt 0
+ 831 0378 BA68     		ldr	r2, [r7, #8]
+ 832 037a FB68     		ldr	r3, [r7, #12]
+ 833 037c 9A42     		cmp	r2, r3
+ 834 037e C5D3     		bcc	.L50
+ 137:../Sources/logger.c **** 		{
+ 138:../Sources/logger.c **** 		}
+ 139:../Sources/logger.c **** 	}
+ 140:../Sources/logger.c **** 	
+ 141:../Sources/logger.c **** 	TERMINAL_PRINTF("END_LOG\r\n");
+ 835              		.loc 1 141 0 is_stmt 1
+ 836 0380 064A     		ldr	r2, .L53+4
+ 837 0382 074B     		ldr	r3, .L53+8
+ 838 0384 101C     		mov	r0, r2
+ 839 0386 191C     		mov	r1, r3
+ 840 0388 FFF7FEFF 		bl	Qprintf
+ 142:../Sources/logger.c **** 	TFC_UART_Process();
+ 841              		.loc 1 142 0
+ 842 038c FFF7FEFF 		bl	TFC_UART_Process
+ 143:../Sources/logger.c **** 
+ 144:../Sources/logger.c **** }
+ 843              		.loc 1 144 0
+ 844 0390 BD46     		mov	sp, r7
+ 845 0392 04B0     		add	sp, sp, #16
+ 846              		@ sp needed for prologue
+ 847 0394 80BD     		pop	{r7, pc}
+ 848              	.L54:
+ 849 0396 C046     		.align	2
+ 850              	.L53:
+ 851 0398 2F750000 		.word	29999
+ 852 039c 00000000 		.word	SDA_SERIAL_OUTGOING_QUEUE
+ 853 03a0 D8000000 		.word	.LC36
+ 854              		.cfi_endproc
+ 855              	.LFE2:
+ 857              		.text
+ 858              	.Letext0:
+ 859              		.file 2 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+ 860              		.file 3 "C:/Users/B48861/TFC/Carcode/Project_Headers/TFC\\TFC_Queue.h"
+ 861              		.file 4 "C:/Users/B48861/TFC/Carcode/Project_Headers/logger.h"
+ 862              		.file 5 "C:/Users/B48861/TFC/Carcode/Project_Headers/TFC\\TFC_UART.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 logger.c
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:21     .bss.log_full:00000000 log_full
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:22     .bss.log_full:00000000 $d
+                            *COM*:00000000 saveData
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:29     .bss.posLog:00000000 posLog
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:26     .bss.posLog:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:32     .text.logger:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:37     .text.logger:00000000 logger
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:94     .text.logger:00000048 $d
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:101    .rodata:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:120    .text.printLastLog:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:125    .text.printLastLog:00000000 printLastLog
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:234    .text.printLastLog:000000b8 $d
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:272    .text.printLogger:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:277    .text.printLogger:00000000 printLogger
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:802    .text.printLogger:00000334 $d
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:816    .text.printLogger:00000364 $t
+C:\Users\B48861\AppData\Local\Temp\ccwO5UMI.s:851    .text.printLogger:00000398 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+memcpy
+Qprintf
+SDA_SERIAL_OUTGOING_QUEUE
+TFC_UART_Process

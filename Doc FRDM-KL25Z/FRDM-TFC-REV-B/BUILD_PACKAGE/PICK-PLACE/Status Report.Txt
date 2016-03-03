@@ -1,0 +1,15 @@
+Project Outputs Generation Report
+---------------------------------
+Start Output Generation At 1:41:26 PM On 3/22/2013
+
+Output: Generates pick and place files
+Type  : Pick Place
+From  : Variant [MAIN_BUILD] of PCB Document [FRDM-TFC.PcbDoc]
+   Generated File[Pick Place for FRDM-TFC(MAIN_BUILD).txt]
+   Generated File[Pick Place for FRDM-TFC(MAIN_BUILD).csv]
+
+
+Files Generated   : 2
+Documents Printed : 0
+
+Finished Output Generation At 1:41:27 PM On 3/22/2013

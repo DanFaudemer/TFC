@@ -1,0 +1,129 @@
+#include "derivative.h" /* include peripheral declarations */
+#include "TFC\TFC.h"
+#include "constants.h"
+#include "signalProcessing.h"
+
+extern int8_t cur_state;
+uint16_t seuil_detection=200;
+int16_t min_d2 =0, max_d2 =0;
+uint8_t copy_nb_line=0;
+uint16_t getLinePos( uint16_t  *LineScanImage)
+{
+	unsigned char i ;
+	static uint16_t posLine[7] = {60,0,0,0,0,0,0}; // posline[0] est utilisé pour la valeur choisie (précédente)
+	
+	//int16_t derivate[128] = {0};
+	int16_t derivate2[128] ={0};
+	
+	/* calcul de la dérivée seconde  + min et max */
+	for (i=2; i < 128; i++)
+	{
+		derivate2[i] = (LineScanImage[i] + LineScanImage[i-2])/2 - LineScanImage[i-1];
+		if(derivate2[i] < min_d2) min_d2 = derivate2[i];
+		if(derivate2[i] > max_d2) max_d2 = derivate2[i];
+	}
+
+
+	int16_t detect_pic = 0;
+	int16_t debut_l=0;
+	int16_t fin_l=0;
+	
+
+	uint16_t index_debut_l = 0 ;
+	uint16_t linewidth = 0;
+	uint8_t nb_line=0;
+	
+	for (i = LIMITCAMMIN+1;i <= LIMITCAMMAX;i++) {
+		if ( derivate2[i] <= -seuil_detection)// Detection de la pente descende
+			detect_pic = -1;
+		else if ( derivate2[i] >= seuil_detection)// Pente qui monte
+			detect_pic = 1;
+		else
+			detect_pic = 0;
+
+		//TERMINAL_PRINTF("detect_pic %d debut_l %d fin_l %d \n\r",detect_pic, debut_l, fin_l );
+		if (detect_pic == -1 &&  fin_l==0 )
+		{ /* début ligne possible */
+			debut_l = 1;
+
+		}
+		else if (detect_pic == 1 && debut_l ==1 && fin_l==0)
+		{ /* confirmation début ligne */
+			index_debut_l = i;
+			debut_l = 0;
+			fin_l=1;
+		}
+		else if ( detect_pic == 0 && debut_l== 0 && fin_l==1)
+		{ /* attente fin de ligne */
+			debut_l=1;
+			fin_l=1;
+			//break;
+		}
+		else if ( detect_pic == 1 && debut_l == 1 && fin_l == 1)
+		{/* fin de ligne possible */	
+			fin_l=2;
+		}
+		else if ( detect_pic == -1 && fin_l==2)
+		{ /* confirmation fin de ligne */
+		    linewidth = i+index_debut_l;
+			if(linewidth >= 6) // taille mini pour rejeter les faux positifs
+			{
+				posLine[nb_line+1] = linewidth/2; /* Line found */
+				nb_line++;
+			}
+			debut_l=0;
+			fin_l=0;
+		}
+		else if ((i-index_debut_l) >=30 && fin_l != 0)
+		{ /* une ligne trop longue n'est pas une ligne */
+			debut_l=0;
+			fin_l=0;
+		}
+	}
+	
+	uint8_t select=0;
+	uint16_t err_sel=0xFFFF;
+	/* on cherche la ligne détectée minimisant l'écart avec la position précédente */
+	for(i=nb_line; i!=0; i--)
+	{
+		if(posLine[i]-posLine[0] < 0)
+		{	
+			if(posLine[0]-posLine[i] < err_sel)
+				{
+					err_sel=posLine[0]-posLine[i];
+					select=i;
+				}
+		}
+		else
+		{
+			if(posLine[i]-posLine[0] < err_sel)
+				{
+					err_sel=posLine[0]-posLine[i];
+		            select=i;
+				}
+		}
+	}
+	posLine[0]=posLine[select];
+	
+   //TERMINAL_PRINTF("\r nbline : %d \n\r", nb_line);
+	
+	copy_nb_line = nb_line;
+	return posLine[0];
+	
+}
+	
+
+void minmaxcam (int16_t  *table ,int16_t  *min ,int16_t  *max)
+{
+	unsigned char i;
+	*min = table[0]; *max = table[0];
+	
+	for(i=1; i <128; i++)
+	{
+		if(table[i] < *min)
+			*min = table[i];
+		if(table[i] > *max)
+			*max = table[i];
+	}
+	
+}

@@ -1,0 +1,37 @@
+
+while (1)
+        {
+            //Reprint receive command 
+            
+            //Do not forget to set uart at 9600 !!!!!!!
+            
+            
+            for(;;) //Try AT Command 
+            {
+                TFC_Task();
+                
+                if(TFC_Ticker[0]>1000)
+                {                    
+                    TFC_Ticker[0] = 0;
+                    TERMINAL_PRINTF("AT\r\n");
+                    TERMINAL_PRINTF("AT+NAME\r\n");
+                    TERMINAL_PRINTF("AT+UART\r\n");
+                }
+            }
+            
+            //Set baud rate 
+            for(;;) //Try AT Command 
+            {    
+                TFC_Task();
+                
+                if(TFC_Ticker[0]>1000)
+                {                    
+                    TFC_Ticker[0] = 0;
+                    TERMINAL_PRINTF("AT\r\n");
+                        TERMINAL_PRINTF("AT+UART=921600\r\n");
+                    
+                    /*Reset uart */
+                    uart0_init (CORE_CLOCK/2/1000, SDA_SERIAL_BAUD);
+                }
+            }                                            
+        }

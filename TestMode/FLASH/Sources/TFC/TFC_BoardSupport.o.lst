@@ -1,0 +1,390 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"TFC_BoardSupport.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.text.TFC_InitGPIO,"ax",%progbits
+  18              		.align	2
+  19              		.global	TFC_InitGPIO
+  20              		.code	16
+  21              		.thumb_func
+  23              	TFC_InitGPIO:
+  24              	.LFB0:
+  25              		.file 1 "../Sources/TFC/TFC_BoardSupport.c"
+   1:../Sources/TFC/TFC_BoardSupport.c **** #include "TFC\TFC.h"
+   2:../Sources/TFC/TFC_BoardSupport.c **** 
+   3:../Sources/TFC/TFC_BoardSupport.c **** 
+   4:../Sources/TFC/TFC_BoardSupport.c **** //set I/O for H-BRIDGE enables, switches and LEDs
+   5:../Sources/TFC/TFC_BoardSupport.c **** void TFC_InitGPIO()
+   6:../Sources/TFC/TFC_BoardSupport.c **** {
+  26              		.loc 1 6 0
+  27              		.cfi_startproc
+  28 0000 80B5     		push	{r7, lr}
+  29              	.LCFI0:
+  30              		.cfi_def_cfa_offset 8
+  31              		.cfi_offset 7, -8
+  32              		.cfi_offset 14, -4
+  33 0002 00AF     		add	r7, sp, #0
+  34              	.LCFI1:
+  35              		.cfi_def_cfa_register 7
+   7:../Sources/TFC/TFC_BoardSupport.c **** 	//enable Clocks to all ports
+   8:../Sources/TFC/TFC_BoardSupport.c **** 	
+   9:../Sources/TFC/TFC_BoardSupport.c **** 	SIM_SCGC5 |= SIM_SCGC5_PORTA_MASK | SIM_SCGC5_PORTB_MASK | SIM_SCGC5_PORTC_MASK | SIM_SCGC5_PORTD_
+  36              		.loc 1 9 0
+  37 0004 244A     		ldr	r2, .L2
+  38 0006 2449     		ldr	r1, .L2
+  39 0008 244B     		ldr	r3, .L2+4
+  40 000a CB58     		ldr	r3, [r1, r3]
+  41 000c F821     		mov	r1, #248
+  42 000e 8901     		lsl	r1, r1, #6
+  43 0010 1943     		orr	r1, r3
+  44 0012 224B     		ldr	r3, .L2+4
+  45 0014 D150     		str	r1, [r2, r3]
+  10:../Sources/TFC/TFC_BoardSupport.c **** 
+  11:../Sources/TFC/TFC_BoardSupport.c **** 	//Setup Pins as GPIO
+  12:../Sources/TFC/TFC_BoardSupport.c **** 	PORTE_PCR21 = PORT_PCR_MUX(1) | PORT_PCR_DSE_MASK;   
+  46              		.loc 1 12 0
+  47 0016 224B     		ldr	r3, .L2+8
+  48 0018 A022     		mov	r2, #160
+  49 001a 5200     		lsl	r2, r2, #1
+  50 001c 5A65     		str	r2, [r3, #84]
+  13:../Sources/TFC/TFC_BoardSupport.c **** 	PORTE_PCR20 = PORT_PCR_MUX(1);    
+  51              		.loc 1 13 0
+  52 001e 204B     		ldr	r3, .L2+8
+  53 0020 8022     		mov	r2, #128
+  54 0022 5200     		lsl	r2, r2, #1
+  55 0024 1A65     		str	r2, [r3, #80]
+  14:../Sources/TFC/TFC_BoardSupport.c **** 	
+  15:../Sources/TFC/TFC_BoardSupport.c **** 	//Port for Pushbuttons
+  16:../Sources/TFC/TFC_BoardSupport.c **** 	PORTC_PCR13 = PORT_PCR_MUX(1);   
+  56              		.loc 1 16 0
+  57 0026 1F4B     		ldr	r3, .L2+12
+  58 0028 8022     		mov	r2, #128
+  59 002a 5200     		lsl	r2, r2, #1
+  60 002c 5A63     		str	r2, [r3, #52]
+  17:../Sources/TFC/TFC_BoardSupport.c **** 	PORTC_PCR17 = PORT_PCR_MUX(1);   
+  61              		.loc 1 17 0
+  62 002e 1D4B     		ldr	r3, .L2+12
+  63 0030 8022     		mov	r2, #128
+  64 0032 5200     		lsl	r2, r2, #1
+  65 0034 5A64     		str	r2, [r3, #68]
+  18:../Sources/TFC/TFC_BoardSupport.c **** 	
+  19:../Sources/TFC/TFC_BoardSupport.c **** 	
+  20:../Sources/TFC/TFC_BoardSupport.c **** 	//Ports for DIP Switches
+  21:../Sources/TFC/TFC_BoardSupport.c **** 	PORTE_PCR2 = PORT_PCR_MUX(1); 
+  66              		.loc 1 21 0
+  67 0036 1A4B     		ldr	r3, .L2+8
+  68 0038 8022     		mov	r2, #128
+  69 003a 5200     		lsl	r2, r2, #1
+  70 003c 9A60     		str	r2, [r3, #8]
+  22:../Sources/TFC/TFC_BoardSupport.c **** 	PORTE_PCR3 = PORT_PCR_MUX(1);
+  71              		.loc 1 22 0
+  72 003e 184B     		ldr	r3, .L2+8
+  73 0040 8022     		mov	r2, #128
+  74 0042 5200     		lsl	r2, r2, #1
+  75 0044 DA60     		str	r2, [r3, #12]
+  23:../Sources/TFC/TFC_BoardSupport.c **** 	PORTE_PCR4 = PORT_PCR_MUX(1); 
+  76              		.loc 1 23 0
+  77 0046 164B     		ldr	r3, .L2+8
+  78 0048 8022     		mov	r2, #128
+  79 004a 5200     		lsl	r2, r2, #1
+  80 004c 1A61     		str	r2, [r3, #16]
+  24:../Sources/TFC/TFC_BoardSupport.c **** 	PORTE_PCR5 = PORT_PCR_MUX(1);
+  81              		.loc 1 24 0
+  82 004e 144B     		ldr	r3, .L2+8
+  83 0050 8022     		mov	r2, #128
+  84 0052 5200     		lsl	r2, r2, #1
+  85 0054 5A61     		str	r2, [r3, #20]
+  25:../Sources/TFC/TFC_BoardSupport.c **** 	
+  26:../Sources/TFC/TFC_BoardSupport.c **** 	//Ports for LEDs
+  27:../Sources/TFC/TFC_BoardSupport.c **** 	PORTB_PCR8 = PORT_PCR_MUX(1) | PORT_PCR_DSE_MASK;   
+  86              		.loc 1 27 0
+  87 0056 144B     		ldr	r3, .L2+16
+  88 0058 A022     		mov	r2, #160
+  89 005a 5200     		lsl	r2, r2, #1
+  90 005c 1A62     		str	r2, [r3, #32]
+  28:../Sources/TFC/TFC_BoardSupport.c **** 	PORTB_PCR9 = PORT_PCR_MUX(1) | PORT_PCR_DSE_MASK;   
+  91              		.loc 1 28 0
+  92 005e 124B     		ldr	r3, .L2+16
+  93 0060 A022     		mov	r2, #160
+  94 0062 5200     		lsl	r2, r2, #1
+  95 0064 5A62     		str	r2, [r3, #36]
+  29:../Sources/TFC/TFC_BoardSupport.c **** 	PORTB_PCR10 = PORT_PCR_MUX(1) | PORT_PCR_DSE_MASK;   
+  96              		.loc 1 29 0
+  97 0066 104B     		ldr	r3, .L2+16
+  98 0068 A022     		mov	r2, #160
+  99 006a 5200     		lsl	r2, r2, #1
+ 100 006c 9A62     		str	r2, [r3, #40]
+  30:../Sources/TFC/TFC_BoardSupport.c **** 	PORTB_PCR11 = PORT_PCR_MUX(1) | PORT_PCR_DSE_MASK;   
+ 101              		.loc 1 30 0
+ 102 006e 0E4B     		ldr	r3, .L2+16
+ 103 0070 A022     		mov	r2, #160
+ 104 0072 5200     		lsl	r2, r2, #1
+ 105 0074 DA62     		str	r2, [r3, #44]
+  31:../Sources/TFC/TFC_BoardSupport.c **** 	
+  32:../Sources/TFC/TFC_BoardSupport.c **** 	
+  33:../Sources/TFC/TFC_BoardSupport.c **** 	//Setup the output pins
+  34:../Sources/TFC/TFC_BoardSupport.c ****     GPIOE_PDDR =  TFC_HBRIDGE_EN_LOC;  
+ 106              		.loc 1 34 0
+ 107 0076 0D4B     		ldr	r3, .L2+20
+ 108 0078 8022     		mov	r2, #128
+ 109 007a 9203     		lsl	r2, r2, #14
+ 110 007c 5A61     		str	r2, [r3, #20]
+  35:../Sources/TFC/TFC_BoardSupport.c ****     GPIOB_PDDR =  TFC_BAT_LED0_LOC	| TFC_BAT_LED1_LOC | TFC_BAT_LED2_LOC | TFC_BAT_LED3_LOC;
+ 111              		.loc 1 35 0
+ 112 007e 0C4B     		ldr	r3, .L2+24
+ 113 0080 F022     		mov	r2, #240
+ 114 0082 1201     		lsl	r2, r2, #4
+ 115 0084 5A61     		str	r2, [r3, #20]
+  36:../Sources/TFC/TFC_BoardSupport.c **** 
+  37:../Sources/TFC/TFC_BoardSupport.c ****     TFC_SetBatteryLED_Level(0);
+ 116              		.loc 1 37 0
+ 117 0086 0020     		mov	r0, #0
+ 118 0088 FFF7FEFF 		bl	TFC_SetBatteryLED_Level
+  38:../Sources/TFC/TFC_BoardSupport.c ****     TFC_HBRIDGE_DISABLE;
+ 119              		.loc 1 38 0
+ 120 008c 074B     		ldr	r3, .L2+20
+ 121 008e 8022     		mov	r2, #128
+ 122 0090 9203     		lsl	r2, r2, #14
+ 123 0092 9A60     		str	r2, [r3, #8]
+  39:../Sources/TFC/TFC_BoardSupport.c ****     
+  40:../Sources/TFC/TFC_BoardSupport.c **** }
+ 124              		.loc 1 40 0
+ 125 0094 BD46     		mov	sp, r7
+ 126              		@ sp needed for prologue
+ 127 0096 80BD     		pop	{r7, pc}
+ 128              	.L3:
+ 129              		.align	2
+ 130              	.L2:
+ 131 0098 00700440 		.word	1074032640
+ 132 009c 38100000 		.word	4152
+ 133 00a0 00D00440 		.word	1074057216
+ 134 00a4 00B00440 		.word	1074049024
+ 135 00a8 00A00440 		.word	1074044928
+ 136 00ac 00F10F40 		.word	1074786560
+ 137 00b0 40F00F40 		.word	1074786368
+ 138              		.cfi_endproc
+ 139              	.LFE0:
+ 141              		.section	.text.TFC_SetBatteryLED_Level,"ax",%progbits
+ 142              		.align	2
+ 143              		.global	TFC_SetBatteryLED_Level
+ 144              		.code	16
+ 145              		.thumb_func
+ 147              	TFC_SetBatteryLED_Level:
+ 148              	.LFB1:
+  41:../Sources/TFC/TFC_BoardSupport.c **** 
+  42:../Sources/TFC/TFC_BoardSupport.c **** 
+  43:../Sources/TFC/TFC_BoardSupport.c **** void TFC_SetBatteryLED_Level(uint8_t BattLevel)
+  44:../Sources/TFC/TFC_BoardSupport.c **** {
+ 149              		.loc 1 44 0
+ 150              		.cfi_startproc
+ 151 0000 80B5     		push	{r7, lr}
+ 152              	.LCFI2:
+ 153              		.cfi_def_cfa_offset 8
+ 154              		.cfi_offset 7, -8
+ 155              		.cfi_offset 14, -4
+ 156 0002 82B0     		sub	sp, sp, #8
+ 157              	.LCFI3:
+ 158              		.cfi_def_cfa_offset 16
+ 159 0004 00AF     		add	r7, sp, #0
+ 160              	.LCFI4:
+ 161              		.cfi_def_cfa_register 7
+ 162 0006 021C     		mov	r2, r0
+ 163 0008 FB1D     		add	r3, r7, #7
+ 164 000a 1A70     		strb	r2, [r3]
+  45:../Sources/TFC/TFC_BoardSupport.c **** 	switch(BattLevel)
+ 165              		.loc 1 45 0
+ 166 000c FB1D     		add	r3, r7, #7
+ 167 000e 1B78     		ldrb	r3, [r3]
+ 168 0010 022B     		cmp	r3, #2
+ 169 0012 15D0     		beq	.L7
+ 170 0014 02DC     		bgt	.L10
+ 171 0016 012B     		cmp	r3, #1
+ 172 0018 09D0     		beq	.L6
+ 173 001a 03E0     		b	.L5
+ 174              	.L10:
+ 175 001c 032B     		cmp	r3, #3
+ 176 001e 18D0     		beq	.L8
+ 177 0020 042B     		cmp	r3, #4
+ 178 0022 1FD0     		beq	.L9
+ 179              	.L5:
+  46:../Sources/TFC/TFC_BoardSupport.c **** 	{
+  47:../Sources/TFC/TFC_BoardSupport.c **** 		default:
+  48:../Sources/TFC/TFC_BoardSupport.c **** 		case 0:
+  49:../Sources/TFC/TFC_BoardSupport.c **** 			GPIOB_PCOR = 0xF<<8;
+ 180              		.loc 1 49 0
+ 181 0024 134B     		ldr	r3, .L12
+ 182 0026 F022     		mov	r2, #240
+ 183 0028 1201     		lsl	r2, r2, #4
+ 184 002a 9A60     		str	r2, [r3, #8]
+  50:../Sources/TFC/TFC_BoardSupport.c **** 		break;
+ 185              		.loc 1 50 0
+ 186 002c 1FE0     		b	.L4
+ 187              	.L6:
+  51:../Sources/TFC/TFC_BoardSupport.c **** 	
+  52:../Sources/TFC/TFC_BoardSupport.c **** 		case 1:
+  53:../Sources/TFC/TFC_BoardSupport.c **** 			GPIOB_PSOR = 0x01<<8;
+ 188              		.loc 1 53 0
+ 189 002e 114B     		ldr	r3, .L12
+ 190 0030 8022     		mov	r2, #128
+ 191 0032 5200     		lsl	r2, r2, #1
+ 192 0034 5A60     		str	r2, [r3, #4]
+  54:../Sources/TFC/TFC_BoardSupport.c **** 			GPIOB_PCOR = ~(0x01<<8) & (0xF<<8);
+ 193              		.loc 1 54 0
+ 194 0036 0F4B     		ldr	r3, .L12
+ 195 0038 E022     		mov	r2, #224
+ 196 003a 1201     		lsl	r2, r2, #4
+ 197 003c 9A60     		str	r2, [r3, #8]
+  55:../Sources/TFC/TFC_BoardSupport.c **** 		break;
+ 198              		.loc 1 55 0
+ 199 003e 16E0     		b	.L4
+ 200              	.L7:
+  56:../Sources/TFC/TFC_BoardSupport.c **** 		
+  57:../Sources/TFC/TFC_BoardSupport.c **** 		case 2:
+  58:../Sources/TFC/TFC_BoardSupport.c **** 			GPIOB_PSOR = 0x03<<8;
+ 201              		.loc 1 58 0
+ 202 0040 0C4B     		ldr	r3, .L12
+ 203 0042 C022     		mov	r2, #192
+ 204 0044 9200     		lsl	r2, r2, #2
+ 205 0046 5A60     		str	r2, [r3, #4]
+  59:../Sources/TFC/TFC_BoardSupport.c **** 			GPIOB_PCOR = ~(0x03<<8) & (0xF<<8) ;
+ 206              		.loc 1 59 0
+ 207 0048 0A4B     		ldr	r3, .L12
+ 208 004a C022     		mov	r2, #192
+ 209 004c 1201     		lsl	r2, r2, #4
+ 210 004e 9A60     		str	r2, [r3, #8]
+  60:../Sources/TFC/TFC_BoardSupport.c **** 		break;
+ 211              		.loc 1 60 0
+ 212 0050 0DE0     		b	.L4
+ 213              	.L8:
+  61:../Sources/TFC/TFC_BoardSupport.c **** 		
+  62:../Sources/TFC/TFC_BoardSupport.c **** 		case 3:
+  63:../Sources/TFC/TFC_BoardSupport.c **** 			GPIOB_PSOR = 0x07<<8;
+ 214              		.loc 1 63 0
+ 215 0052 084B     		ldr	r3, .L12
+ 216 0054 E022     		mov	r2, #224
+ 217 0056 D200     		lsl	r2, r2, #3
+ 218 0058 5A60     		str	r2, [r3, #4]
+  64:../Sources/TFC/TFC_BoardSupport.c **** 			GPIOB_PCOR = ~(0x07<<8) & (0xF<<8);
+ 219              		.loc 1 64 0
+ 220 005a 064B     		ldr	r3, .L12
+ 221 005c 8022     		mov	r2, #128
+ 222 005e 1201     		lsl	r2, r2, #4
+ 223 0060 9A60     		str	r2, [r3, #8]
+  65:../Sources/TFC/TFC_BoardSupport.c **** 		break;
+ 224              		.loc 1 65 0
+ 225 0062 04E0     		b	.L4
+ 226              	.L9:
+  66:../Sources/TFC/TFC_BoardSupport.c **** 		
+  67:../Sources/TFC/TFC_BoardSupport.c **** 		case 4:
+  68:../Sources/TFC/TFC_BoardSupport.c **** 			GPIOB_PSOR = 0x0F<<8;
+ 227              		.loc 1 68 0
+ 228 0064 034B     		ldr	r3, .L12
+ 229 0066 F022     		mov	r2, #240
+ 230 0068 1201     		lsl	r2, r2, #4
+ 231 006a 5A60     		str	r2, [r3, #4]
+  69:../Sources/TFC/TFC_BoardSupport.c **** 		break;
+ 232              		.loc 1 69 0
+ 233 006c C046     		mov	r8, r8
+ 234              	.L4:
+  70:../Sources/TFC/TFC_BoardSupport.c **** 		
+  71:../Sources/TFC/TFC_BoardSupport.c **** 	}
+  72:../Sources/TFC/TFC_BoardSupport.c **** }
+ 235              		.loc 1 72 0
+ 236 006e BD46     		mov	sp, r7
+ 237 0070 02B0     		add	sp, sp, #8
+ 238              		@ sp needed for prologue
+ 239 0072 80BD     		pop	{r7, pc}
+ 240              	.L13:
+ 241              		.align	2
+ 242              	.L12:
+ 243 0074 40F00F40 		.word	1074786368
+ 244              		.cfi_endproc
+ 245              	.LFE1:
+ 247              		.section	.text.TFC_GetDIP_Switch,"ax",%progbits
+ 248              		.align	2
+ 249              		.global	TFC_GetDIP_Switch
+ 250              		.code	16
+ 251              		.thumb_func
+ 253              	TFC_GetDIP_Switch:
+ 254              	.LFB2:
+  73:../Sources/TFC/TFC_BoardSupport.c **** 
+  74:../Sources/TFC/TFC_BoardSupport.c **** 
+  75:../Sources/TFC/TFC_BoardSupport.c **** uint8_t TFC_GetDIP_Switch()
+  76:../Sources/TFC/TFC_BoardSupport.c **** {
+ 255              		.loc 1 76 0
+ 256              		.cfi_startproc
+ 257 0000 80B5     		push	{r7, lr}
+ 258              	.LCFI5:
+ 259              		.cfi_def_cfa_offset 8
+ 260              		.cfi_offset 7, -8
+ 261              		.cfi_offset 14, -4
+ 262 0002 82B0     		sub	sp, sp, #8
+ 263              	.LCFI6:
+ 264              		.cfi_def_cfa_offset 16
+ 265 0004 00AF     		add	r7, sp, #0
+ 266              	.LCFI7:
+ 267              		.cfi_def_cfa_register 7
+  77:../Sources/TFC/TFC_BoardSupport.c **** 	uint8_t DIP_Val=0;
+ 268              		.loc 1 77 0
+ 269 0006 FB1D     		add	r3, r7, #7
+ 270 0008 0022     		mov	r2, #0
+ 271 000a 1A70     		strb	r2, [r3]
+  78:../Sources/TFC/TFC_BoardSupport.c **** 	
+  79:../Sources/TFC/TFC_BoardSupport.c **** 	DIP_Val = (GPIOE_PDIR>>2) & 0xF;
+ 272              		.loc 1 79 0
+ 273 000c 064B     		ldr	r3, .L16
+ 274 000e 1B69     		ldr	r3, [r3, #16]
+ 275 0010 9B08     		lsr	r3, r3, #2
+ 276 0012 D9B2     		uxtb	r1, r3
+ 277 0014 FB1D     		add	r3, r7, #7
+ 278 0016 0F22     		mov	r2, #15
+ 279 0018 0A40     		and	r2, r1
+ 280 001a 1A70     		strb	r2, [r3]
+  80:../Sources/TFC/TFC_BoardSupport.c **** 
+  81:../Sources/TFC/TFC_BoardSupport.c **** 	return DIP_Val;
+ 281              		.loc 1 81 0
+ 282 001c FB1D     		add	r3, r7, #7
+ 283 001e 1B78     		ldrb	r3, [r3]
+  82:../Sources/TFC/TFC_BoardSupport.c **** }
+ 284              		.loc 1 82 0
+ 285 0020 181C     		mov	r0, r3
+ 286 0022 BD46     		mov	sp, r7
+ 287 0024 02B0     		add	sp, sp, #8
+ 288              		@ sp needed for prologue
+ 289 0026 80BD     		pop	{r7, pc}
+ 290              	.L17:
+ 291              		.align	2
+ 292              	.L16:
+ 293 0028 00F10F40 		.word	1074786560
+ 294              		.cfi_endproc
+ 295              	.LFE2:
+ 297              		.text
+ 298              	.Letext0:
+ 299              		.file 2 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+ 300              		.file 3 "C:/Users/B48861/TFC/TestMode/Project_Headers/MKL25Z4.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 TFC_BoardSupport.c
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:18     .text.TFC_InitGPIO:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:23     .text.TFC_InitGPIO:00000000 TFC_InitGPIO
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:147    .text.TFC_SetBatteryLED_Level:00000000 TFC_SetBatteryLED_Level
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:131    .text.TFC_InitGPIO:00000098 $d
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:142    .text.TFC_SetBatteryLED_Level:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:243    .text.TFC_SetBatteryLED_Level:00000074 $d
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:248    .text.TFC_GetDIP_Switch:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:253    .text.TFC_GetDIP_Switch:00000000 TFC_GetDIP_Switch
+C:\Users\B48861\AppData\Local\Temp\ccWt041l.s:293    .text.TFC_GetDIP_Switch:00000028 $d
+                     .debug_frame:00000010 $d
+
+NO UNDEFINED SYMBOLS

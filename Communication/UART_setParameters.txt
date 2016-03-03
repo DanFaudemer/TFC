@@ -1,0 +1,49 @@
+////////////////////////////////////////////////////////////////////////////////////
+///////////////////////Protocol UART////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+Format :
+Command:Valeur;
+Avec Command = Entête_Paramètre 
+
+//////////////////////////////////////////////////////////////////////////////////
+Direction : Entête DIR 
+Paramètres :
+////PID/////
+P : float
+I : float 
+D : float 
+
+DIfférentiel : Entête DIFF
+Paramètres :
+////PID/////
+P : float
+I : float 
+D : float 
+////MAX////// Valeur absolue max de différence de vitesse entre les deux moteurs 
+MAX : int
+
+
+Vitesse/Freinage : Entête SPE
+////PID/////
+P : float
+I : float 
+D : float 
+//MIN-MAX// Max & Min Speed 
+MIN : int
+MAX : int
+
+Camera : Entête CAM 
+EXPO : int Exposition time 
+
+
+
+
+Refresh : Entête Refresh 
+Pas de paramètre, permet l'actualisation des données sur l'interface python
+
+Tension baterie : entete Vbat 
+
+Position ligne : entete Pos
+
+Position des roues : Pservo

@@ -1,0 +1,999 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"signalProcessing.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.global	seuil_detection
+  18              		.section	.data.seuil_detection,"aw",%progbits
+  19              		.align	1
+  22              	seuil_detection:
+  23 0000 0A00     		.short	10
+  24              		.global	min_d2
+  25              		.section	.bss.min_d2,"aw",%nobits
+  26              		.align	1
+  29              	min_d2:
+  30 0000 0000     		.space	2
+  31              		.global	max_d2
+  32              		.section	.bss.max_d2,"aw",%nobits
+  33              		.align	1
+  36              	max_d2:
+  37 0000 0000     		.space	2
+  38              		.global	copy_nb_line
+  39              		.section	.bss.copy_nb_line,"aw",%nobits
+  42              	copy_nb_line:
+  43 0000 00       		.space	1
+  44              		.comm	copyDerivate,256,4
+  45              		.section	.text.compare,"ax",%progbits
+  46              		.align	2
+  47              		.global	compare
+  48              		.code	16
+  49              		.thumb_func
+  51              	compare:
+  52              	.LFB0:
+  53              		.file 1 "../Sources/signalProcessing.c"
+   1:../Sources/signalProcessing.c **** #include "derivative.h" /* include peripheral declarations */
+   2:../Sources/signalProcessing.c **** #include "TFC\TFC.h"
+   3:../Sources/signalProcessing.c **** #include "constants.h"
+   4:../Sources/signalProcessing.c **** #include "signalProcessing.h"
+   5:../Sources/signalProcessing.c **** 
+   6:../Sources/signalProcessing.c **** #include <cstdlib> 
+   7:../Sources/signalProcessing.c **** #define MEDIAN_SIZE 4
+   8:../Sources/signalProcessing.c **** extern int8_t cur_state;
+   9:../Sources/signalProcessing.c **** uint16_t seuil_detection=10;
+  10:../Sources/signalProcessing.c **** int16_t min_d2 =0, max_d2 =0;
+  11:../Sources/signalProcessing.c **** uint8_t copy_nb_line=0;
+  12:../Sources/signalProcessing.c **** 
+  13:../Sources/signalProcessing.c **** int16_t copyDerivate[128];
+  14:../Sources/signalProcessing.c **** 
+  15:../Sources/signalProcessing.c **** int compare( const void* a, const void* b)
+  16:../Sources/signalProcessing.c **** {
+  54              		.loc 1 16 0
+  55              		.cfi_startproc
+  56 0000 80B5     		push	{r7, lr}
+  57              	.LCFI0:
+  58              		.cfi_def_cfa_offset 8
+  59              		.cfi_offset 7, -8
+  60              		.cfi_offset 14, -4
+  61 0002 84B0     		sub	sp, sp, #16
+  62              	.LCFI1:
+  63              		.cfi_def_cfa_offset 24
+  64 0004 00AF     		add	r7, sp, #0
+  65              	.LCFI2:
+  66              		.cfi_def_cfa_register 7
+  67 0006 7860     		str	r0, [r7, #4]
+  68 0008 3960     		str	r1, [r7]
+  17:../Sources/signalProcessing.c **** 	uint16_t int_a = * ( (uint16_t*) a );
+  69              		.loc 1 17 0
+  70 000a 3B1C     		mov	r3, r7
+  71 000c 0E33     		add	r3, r3, #14
+  72 000e 7A68     		ldr	r2, [r7, #4]
+  73 0010 1288     		ldrh	r2, [r2]
+  74 0012 1A80     		strh	r2, [r3]
+  18:../Sources/signalProcessing.c **** 	uint16_t int_b = * ( (uint16_t*) b );
+  75              		.loc 1 18 0
+  76 0014 3B1C     		mov	r3, r7
+  77 0016 0C33     		add	r3, r3, #12
+  78 0018 3A68     		ldr	r2, [r7]
+  79 001a 1288     		ldrh	r2, [r2]
+  80 001c 1A80     		strh	r2, [r3]
+  19:../Sources/signalProcessing.c **** 
+  20:../Sources/signalProcessing.c ****      if ( int_a == int_b ) return 0;
+  81              		.loc 1 20 0
+  82 001e 3A1C     		mov	r2, r7
+  83 0020 0E32     		add	r2, r2, #14
+  84 0022 3B1C     		mov	r3, r7
+  85 0024 0C33     		add	r3, r3, #12
+  86 0026 1288     		ldrh	r2, [r2]
+  87 0028 1B88     		ldrh	r3, [r3]
+  88 002a 9A42     		cmp	r2, r3
+  89 002c 01D1     		bne	.L2
+  90              		.loc 1 20 0 is_stmt 0
+  91 002e 0023     		mov	r3, #0
+  92 0030 0BE0     		b	.L3
+  93              	.L2:
+  21:../Sources/signalProcessing.c ****      else if ( int_a < int_b ) return -1;
+  94              		.loc 1 21 0 is_stmt 1
+  95 0032 3A1C     		mov	r2, r7
+  96 0034 0E32     		add	r2, r2, #14
+  97 0036 3B1C     		mov	r3, r7
+  98 0038 0C33     		add	r3, r3, #12
+  99 003a 1288     		ldrh	r2, [r2]
+ 100 003c 1B88     		ldrh	r3, [r3]
+ 101 003e 9A42     		cmp	r2, r3
+ 102 0040 02D2     		bcs	.L4
+ 103              		.loc 1 21 0 is_stmt 0
+ 104 0042 0123     		mov	r3, #1
+ 105 0044 5B42     		neg	r3, r3
+ 106 0046 00E0     		b	.L3
+ 107              	.L4:
+  22:../Sources/signalProcessing.c ****      else return 1;
+ 108              		.loc 1 22 0 is_stmt 1
+ 109 0048 0123     		mov	r3, #1
+ 110              	.L3:
+  23:../Sources/signalProcessing.c **** }
+ 111              		.loc 1 23 0
+ 112 004a 181C     		mov	r0, r3
+ 113 004c BD46     		mov	sp, r7
+ 114 004e 04B0     		add	sp, sp, #16
+ 115              		@ sp needed for prologue
+ 116 0050 80BD     		pop	{r7, pc}
+ 117              		.cfi_endproc
+ 118              	.LFE0:
+ 120 0052 C046     		.section	.text.medianFilter,"ax",%progbits
+ 121              		.align	2
+ 122              		.global	medianFilter
+ 123              		.code	16
+ 124              		.thumb_func
+ 126              	medianFilter:
+ 127              	.LFB1:
+  24:../Sources/signalProcessing.c **** 
+  25:../Sources/signalProcessing.c **** void  medianFilter(uint16_t *camera, uint16_t *out)
+  26:../Sources/signalProcessing.c **** {
+ 128              		.loc 1 26 0
+ 129              		.cfi_startproc
+ 130 0000 80B5     		push	{r7, lr}
+ 131              	.LCFI3:
+ 132              		.cfi_def_cfa_offset 8
+ 133              		.cfi_offset 7, -8
+ 134              		.cfi_offset 14, -4
+ 135 0002 86B0     		sub	sp, sp, #24
+ 136              	.LCFI4:
+ 137              		.cfi_def_cfa_offset 32
+ 138 0004 00AF     		add	r7, sp, #0
+ 139              	.LCFI5:
+ 140              		.cfi_def_cfa_register 7
+ 141 0006 7860     		str	r0, [r7, #4]
+ 142 0008 3960     		str	r1, [r7]
+  27:../Sources/signalProcessing.c **** 	uint16_t sub[MEDIAN_SIZE] = {0};
+ 143              		.loc 1 27 0
+ 144 000a 3B1C     		mov	r3, r7
+ 145 000c 0C33     		add	r3, r3, #12
+ 146 000e 0022     		mov	r2, #0
+ 147 0010 1A60     		str	r2, [r3]
+ 148 0012 0022     		mov	r2, #0
+ 149 0014 5A60     		str	r2, [r3, #4]
+  28:../Sources/signalProcessing.c **** 	uint8_t i,j, left, right;
+  29:../Sources/signalProcessing.c **** 	
+  30:../Sources/signalProcessing.c **** 	for(i = 0; i < 128; i++)
+ 150              		.loc 1 30 0
+ 151 0016 3B1C     		mov	r3, r7
+ 152 0018 1733     		add	r3, r3, #23
+ 153 001a 0022     		mov	r2, #0
+ 154 001c 1A70     		strb	r2, [r3]
+ 155 001e 65E0     		b	.L6
+ 156              	.L11:
+  31:../Sources/signalProcessing.c **** 	{
+  32:../Sources/signalProcessing.c **** 		left  = (i-MEDIAN_SIZE > 0) ? (i-MEDIAN_SIZE) : 0;
+ 157              		.loc 1 32 0
+ 158 0020 3B1C     		mov	r3, r7
+ 159 0022 1733     		add	r3, r3, #23
+ 160 0024 1B78     		ldrb	r3, [r3]
+ 161 0026 043B     		sub	r3, r3, #4
+ 162 0028 002B     		cmp	r3, #0
+ 163 002a 00DA     		bge	.L7
+ 164 002c 0023     		mov	r3, #0
+ 165              	.L7:
+ 166 002e 3A1C     		mov	r2, r7
+ 167 0030 1532     		add	r2, r2, #21
+ 168 0032 1370     		strb	r3, [r2]
+  33:../Sources/signalProcessing.c **** 		right = (i+MEDIAN_SIZE < 128) ? (i+MEDIAN_SIZE) : 127;
+ 169              		.loc 1 33 0
+ 170 0034 3B1C     		mov	r3, r7
+ 171 0036 1733     		add	r3, r3, #23
+ 172 0038 1B78     		ldrb	r3, [r3]
+ 173 003a 0433     		add	r3, r3, #4
+ 174 003c 7F2B     		cmp	r3, #127
+ 175 003e 00DD     		ble	.L8
+ 176 0040 7F23     		mov	r3, #127
+ 177              	.L8:
+ 178 0042 3A1C     		mov	r2, r7
+ 179 0044 1432     		add	r2, r2, #20
+ 180 0046 1370     		strb	r3, [r2]
+  34:../Sources/signalProcessing.c **** 		
+  35:../Sources/signalProcessing.c **** 		for(j=left; j < right ; j++)
+ 181              		.loc 1 35 0
+ 182 0048 3B1C     		mov	r3, r7
+ 183 004a 1633     		add	r3, r3, #22
+ 184 004c 3A1C     		mov	r2, r7
+ 185 004e 1532     		add	r2, r2, #21
+ 186 0050 1278     		ldrb	r2, [r2]
+ 187 0052 1A70     		strb	r2, [r3]
+ 188 0054 18E0     		b	.L9
+ 189              	.L10:
+  36:../Sources/signalProcessing.c **** 			sub[j-left] = camera[j];
+ 190              		.loc 1 36 0
+ 191 0056 3B1C     		mov	r3, r7
+ 192 0058 1633     		add	r3, r3, #22
+ 193 005a 1A78     		ldrb	r2, [r3]
+ 194 005c 3B1C     		mov	r3, r7
+ 195 005e 1533     		add	r3, r3, #21
+ 196 0060 1B78     		ldrb	r3, [r3]
+ 197 0062 D21A     		sub	r2, r2, r3
+ 198 0064 3B1C     		mov	r3, r7
+ 199 0066 1633     		add	r3, r3, #22
+ 200 0068 1B78     		ldrb	r3, [r3]
+ 201 006a 5B00     		lsl	r3, r3, #1
+ 202 006c 7968     		ldr	r1, [r7, #4]
+ 203 006e CB18     		add	r3, r1, r3
+ 204 0070 1988     		ldrh	r1, [r3]
+ 205 0072 3B1C     		mov	r3, r7
+ 206 0074 0C33     		add	r3, r3, #12
+ 207 0076 5200     		lsl	r2, r2, #1
+ 208 0078 D152     		strh	r1, [r2, r3]
+  35:../Sources/signalProcessing.c **** 		for(j=left; j < right ; j++)
+ 209              		.loc 1 35 0
+ 210 007a 3B1C     		mov	r3, r7
+ 211 007c 1633     		add	r3, r3, #22
+ 212 007e 3A1C     		mov	r2, r7
+ 213 0080 1632     		add	r2, r2, #22
+ 214 0082 1278     		ldrb	r2, [r2]
+ 215 0084 0132     		add	r2, r2, #1
+ 216 0086 1A70     		strb	r2, [r3]
+ 217              	.L9:
+  35:../Sources/signalProcessing.c **** 		for(j=left; j < right ; j++)
+ 218              		.loc 1 35 0 is_stmt 0
+ 219 0088 3A1C     		mov	r2, r7
+ 220 008a 1632     		add	r2, r2, #22
+ 221 008c 3B1C     		mov	r3, r7
+ 222 008e 1433     		add	r3, r3, #20
+ 223 0090 1278     		ldrb	r2, [r2]
+ 224 0092 1B78     		ldrb	r3, [r3]
+ 225 0094 9A42     		cmp	r2, r3
+ 226 0096 DED3     		bcc	.L10
+  37:../Sources/signalProcessing.c **** 		qsort(sub, right-left, sizeof(uint16_t), compare);
+ 227              		.loc 1 37 0 is_stmt 1
+ 228 0098 3B1C     		mov	r3, r7
+ 229 009a 1433     		add	r3, r3, #20
+ 230 009c 1A78     		ldrb	r2, [r3]
+ 231 009e 3B1C     		mov	r3, r7
+ 232 00a0 1533     		add	r3, r3, #21
+ 233 00a2 1B78     		ldrb	r3, [r3]
+ 234 00a4 D31A     		sub	r3, r2, r3
+ 235 00a6 1A1C     		mov	r2, r3
+ 236 00a8 391C     		mov	r1, r7
+ 237 00aa 0C31     		add	r1, r1, #12
+ 238 00ac 144B     		ldr	r3, .L12
+ 239 00ae 081C     		mov	r0, r1
+ 240 00b0 111C     		mov	r1, r2
+ 241 00b2 0222     		mov	r2, #2
+ 242 00b4 FFF7FEFF 		bl	qsort
+  38:../Sources/signalProcessing.c **** 		out[i] = sub[(right-left)>>1];		
+ 243              		.loc 1 38 0
+ 244 00b8 3B1C     		mov	r3, r7
+ 245 00ba 1733     		add	r3, r3, #23
+ 246 00bc 1B78     		ldrb	r3, [r3]
+ 247 00be 5B00     		lsl	r3, r3, #1
+ 248 00c0 3A68     		ldr	r2, [r7]
+ 249 00c2 D318     		add	r3, r2, r3
+ 250 00c4 3A1C     		mov	r2, r7
+ 251 00c6 1432     		add	r2, r2, #20
+ 252 00c8 1178     		ldrb	r1, [r2]
+ 253 00ca 3A1C     		mov	r2, r7
+ 254 00cc 1532     		add	r2, r2, #21
+ 255 00ce 1278     		ldrb	r2, [r2]
+ 256 00d0 8A1A     		sub	r2, r1, r2
+ 257 00d2 5110     		asr	r1, r2, #1
+ 258 00d4 3A1C     		mov	r2, r7
+ 259 00d6 0C32     		add	r2, r2, #12
+ 260 00d8 4900     		lsl	r1, r1, #1
+ 261 00da 8A5A     		ldrh	r2, [r1, r2]
+ 262 00dc 1A80     		strh	r2, [r3]
+  30:../Sources/signalProcessing.c **** 	for(i = 0; i < 128; i++)
+ 263              		.loc 1 30 0
+ 264 00de 3B1C     		mov	r3, r7
+ 265 00e0 1733     		add	r3, r3, #23
+ 266 00e2 3A1C     		mov	r2, r7
+ 267 00e4 1732     		add	r2, r2, #23
+ 268 00e6 1278     		ldrb	r2, [r2]
+ 269 00e8 0132     		add	r2, r2, #1
+ 270 00ea 1A70     		strb	r2, [r3]
+ 271              	.L6:
+  30:../Sources/signalProcessing.c **** 	for(i = 0; i < 128; i++)
+ 272              		.loc 1 30 0 is_stmt 0
+ 273 00ec 3B1C     		mov	r3, r7
+ 274 00ee 1733     		add	r3, r3, #23
+ 275 00f0 1B78     		ldrb	r3, [r3]
+ 276 00f2 5BB2     		sxtb	r3, r3
+ 277 00f4 002B     		cmp	r3, #0
+ 278 00f6 93DA     		bge	.L11
+  39:../Sources/signalProcessing.c **** 	}
+  40:../Sources/signalProcessing.c **** }
+ 279              		.loc 1 40 0 is_stmt 1
+ 280 00f8 BD46     		mov	sp, r7
+ 281 00fa 06B0     		add	sp, sp, #24
+ 282              		@ sp needed for prologue
+ 283 00fc 80BD     		pop	{r7, pc}
+ 284              	.L13:
+ 285 00fe C046     		.align	2
+ 286              	.L12:
+ 287 0100 00000000 		.word	compare
+ 288              		.cfi_endproc
+ 289              	.LFE1:
+ 291              		.global	__aeabi_ui2f
+ 292              		.global	__aeabi_fdiv
+ 293              		.global	__aeabi_f2uiz
+ 294              		.global	__aeabi_i2f
+ 295              		.global	__aeabi_fmul
+ 296              		.section	.text.gainCorr,"ax",%progbits
+ 297              		.align	2
+ 298              		.global	gainCorr
+ 299              		.code	16
+ 300              		.thumb_func
+ 302              	gainCorr:
+ 303              	.LFB2:
+  41:../Sources/signalProcessing.c **** 
+  42:../Sources/signalProcessing.c **** void  gainCorr(uint16_t *camera, uint16_t *out)
+  43:../Sources/signalProcessing.c **** {
+ 304              		.loc 1 43 0
+ 305              		.cfi_startproc
+ 306 0000 B0B5     		push	{r4, r5, r7, lr}
+ 307              	.LCFI6:
+ 308              		.cfi_def_cfa_offset 16
+ 309              		.cfi_offset 4, -16
+ 310              		.cfi_offset 5, -12
+ 311              		.cfi_offset 7, -8
+ 312              		.cfi_offset 14, -4
+ 313 0002 86B0     		sub	sp, sp, #24
+ 314              	.LCFI7:
+ 315              		.cfi_def_cfa_offset 40
+ 316 0004 00AF     		add	r7, sp, #0
+ 317              	.LCFI8:
+ 318              		.cfi_def_cfa_register 7
+ 319 0006 7860     		str	r0, [r7, #4]
+ 320 0008 3960     		str	r1, [r7]
+  44:../Sources/signalProcessing.c **** 	uint16_t min, max;
+  45:../Sources/signalProcessing.c **** 	uint8_t i;
+  46:../Sources/signalProcessing.c **** 	float corr ;
+  47:../Sources/signalProcessing.c **** 	
+  48:../Sources/signalProcessing.c **** 	/*Get min max */
+  49:../Sources/signalProcessing.c **** 	min = camera[0];
+ 321              		.loc 1 49 0
+ 322 000a 3B1C     		mov	r3, r7
+ 323 000c 1633     		add	r3, r3, #22
+ 324 000e 7A68     		ldr	r2, [r7, #4]
+ 325 0010 1288     		ldrh	r2, [r2]
+ 326 0012 1A80     		strh	r2, [r3]
+  50:../Sources/signalProcessing.c **** 	max = camera[1];
+ 327              		.loc 1 50 0
+ 328 0014 3B1C     		mov	r3, r7
+ 329 0016 1433     		add	r3, r3, #20
+ 330 0018 7A68     		ldr	r2, [r7, #4]
+ 331 001a 5288     		ldrh	r2, [r2, #2]
+ 332 001c 1A80     		strh	r2, [r3]
+  51:../Sources/signalProcessing.c **** 	for(i=1; i < 128 ; i ++)
+ 333              		.loc 1 51 0
+ 334 001e 3B1C     		mov	r3, r7
+ 335 0020 1333     		add	r3, r3, #19
+ 336 0022 0122     		mov	r2, #1
+ 337 0024 1A70     		strb	r2, [r3]
+ 338 0026 32E0     		b	.L15
+ 339              	.L18:
+  52:../Sources/signalProcessing.c **** 	{
+  53:../Sources/signalProcessing.c **** 		if(camera[i] > max)
+ 340              		.loc 1 53 0
+ 341 0028 3B1C     		mov	r3, r7
+ 342 002a 1333     		add	r3, r3, #19
+ 343 002c 1B78     		ldrb	r3, [r3]
+ 344 002e 5B00     		lsl	r3, r3, #1
+ 345 0030 7A68     		ldr	r2, [r7, #4]
+ 346 0032 D318     		add	r3, r2, r3
+ 347 0034 1B88     		ldrh	r3, [r3]
+ 348 0036 3A1C     		mov	r2, r7
+ 349 0038 1432     		add	r2, r2, #20
+ 350 003a 1288     		ldrh	r2, [r2]
+ 351 003c 9A42     		cmp	r2, r3
+ 352 003e 09D2     		bcs	.L16
+  54:../Sources/signalProcessing.c **** 			max = camera[i];
+ 353              		.loc 1 54 0
+ 354 0040 3B1C     		mov	r3, r7
+ 355 0042 1333     		add	r3, r3, #19
+ 356 0044 1B78     		ldrb	r3, [r3]
+ 357 0046 5B00     		lsl	r3, r3, #1
+ 358 0048 7A68     		ldr	r2, [r7, #4]
+ 359 004a D218     		add	r2, r2, r3
+ 360 004c 3B1C     		mov	r3, r7
+ 361 004e 1433     		add	r3, r3, #20
+ 362 0050 1288     		ldrh	r2, [r2]
+ 363 0052 1A80     		strh	r2, [r3]
+ 364              	.L16:
+  55:../Sources/signalProcessing.c **** 		if(camera[i] < min)
+ 365              		.loc 1 55 0
+ 366 0054 3B1C     		mov	r3, r7
+ 367 0056 1333     		add	r3, r3, #19
+ 368 0058 1B78     		ldrb	r3, [r3]
+ 369 005a 5B00     		lsl	r3, r3, #1
+ 370 005c 7A68     		ldr	r2, [r7, #4]
+ 371 005e D318     		add	r3, r2, r3
+ 372 0060 1B88     		ldrh	r3, [r3]
+ 373 0062 3A1C     		mov	r2, r7
+ 374 0064 1632     		add	r2, r2, #22
+ 375 0066 1288     		ldrh	r2, [r2]
+ 376 0068 9A42     		cmp	r2, r3
+ 377 006a 09D9     		bls	.L17
+  56:../Sources/signalProcessing.c **** 			min = camera[i];
+ 378              		.loc 1 56 0
+ 379 006c 3B1C     		mov	r3, r7
+ 380 006e 1333     		add	r3, r3, #19
+ 381 0070 1B78     		ldrb	r3, [r3]
+ 382 0072 5B00     		lsl	r3, r3, #1
+ 383 0074 7A68     		ldr	r2, [r7, #4]
+ 384 0076 D218     		add	r2, r2, r3
+ 385 0078 3B1C     		mov	r3, r7
+ 386 007a 1633     		add	r3, r3, #22
+ 387 007c 1288     		ldrh	r2, [r2]
+ 388 007e 1A80     		strh	r2, [r3]
+ 389              	.L17:
+  51:../Sources/signalProcessing.c **** 	for(i=1; i < 128 ; i ++)
+ 390              		.loc 1 51 0
+ 391 0080 3B1C     		mov	r3, r7
+ 392 0082 1333     		add	r3, r3, #19
+ 393 0084 3A1C     		mov	r2, r7
+ 394 0086 1332     		add	r2, r2, #19
+ 395 0088 1278     		ldrb	r2, [r2]
+ 396 008a 0132     		add	r2, r2, #1
+ 397 008c 1A70     		strb	r2, [r3]
+ 398              	.L15:
+  51:../Sources/signalProcessing.c **** 	for(i=1; i < 128 ; i ++)
+ 399              		.loc 1 51 0 is_stmt 0
+ 400 008e 3B1C     		mov	r3, r7
+ 401 0090 1333     		add	r3, r3, #19
+ 402 0092 1B78     		ldrb	r3, [r3]
+ 403 0094 5BB2     		sxtb	r3, r3
+ 404 0096 002B     		cmp	r3, #0
+ 405 0098 C6DA     		bge	.L18
+  57:../Sources/signalProcessing.c **** 	}
+  58:../Sources/signalProcessing.c **** 	
+  59:../Sources/signalProcessing.c **** 	corr = ((float) ((1<<16)-1))/((float) max);
+ 406              		.loc 1 59 0 is_stmt 1
+ 407 009a 3B1C     		mov	r3, r7
+ 408 009c 1433     		add	r3, r3, #20
+ 409 009e 1B88     		ldrh	r3, [r3]
+ 410 00a0 181C     		mov	r0, r3
+ 411 00a2 FFF7FEFF 		bl	__aeabi_ui2f
+ 412 00a6 031C     		add	r3, r0, #0
+ 413 00a8 1F48     		ldr	r0, .L21
+ 414 00aa 191C     		add	r1, r3, #0
+ 415 00ac FFF7FEFF 		bl	__aeabi_fdiv
+ 416 00b0 031C     		add	r3, r0, #0
+ 417 00b2 FB60     		str	r3, [r7, #12]
+  60:../Sources/signalProcessing.c **** 	for(i=0; i < 128 ; i++)
+ 418              		.loc 1 60 0
+ 419 00b4 3B1C     		mov	r3, r7
+ 420 00b6 1333     		add	r3, r3, #19
+ 421 00b8 0022     		mov	r2, #0
+ 422 00ba 1A70     		strb	r2, [r3]
+ 423 00bc 2BE0     		b	.L19
+ 424              	.L20:
+  61:../Sources/signalProcessing.c **** 	{
+  62:../Sources/signalProcessing.c **** 		out[i] = (uint16_t)corr*((float) camera[i]);
+ 425              		.loc 1 62 0
+ 426 00be 3B1C     		mov	r3, r7
+ 427 00c0 1333     		add	r3, r3, #19
+ 428 00c2 1B78     		ldrb	r3, [r3]
+ 429 00c4 5B00     		lsl	r3, r3, #1
+ 430 00c6 3A68     		ldr	r2, [r7]
+ 431 00c8 D418     		add	r4, r2, r3
+ 432 00ca F868     		ldr	r0, [r7, #12]
+ 433 00cc FFF7FEFF 		bl	__aeabi_f2uiz
+ 434 00d0 031C     		mov	r3, r0
+ 435 00d2 9BB2     		uxth	r3, r3
+ 436 00d4 181C     		mov	r0, r3
+ 437 00d6 FFF7FEFF 		bl	__aeabi_i2f
+ 438 00da 051C     		add	r5, r0, #0
+ 439 00dc 3B1C     		mov	r3, r7
+ 440 00de 1333     		add	r3, r3, #19
+ 441 00e0 1B78     		ldrb	r3, [r3]
+ 442 00e2 5B00     		lsl	r3, r3, #1
+ 443 00e4 7A68     		ldr	r2, [r7, #4]
+ 444 00e6 D318     		add	r3, r2, r3
+ 445 00e8 1B88     		ldrh	r3, [r3]
+ 446 00ea 181C     		mov	r0, r3
+ 447 00ec FFF7FEFF 		bl	__aeabi_ui2f
+ 448 00f0 031C     		add	r3, r0, #0
+ 449 00f2 281C     		add	r0, r5, #0
+ 450 00f4 191C     		add	r1, r3, #0
+ 451 00f6 FFF7FEFF 		bl	__aeabi_fmul
+ 452 00fa 031C     		add	r3, r0, #0
+ 453 00fc 181C     		add	r0, r3, #0
+ 454 00fe FFF7FEFF 		bl	__aeabi_f2uiz
+ 455 0102 031C     		mov	r3, r0
+ 456 0104 9BB2     		uxth	r3, r3
+ 457 0106 2380     		strh	r3, [r4]
+  60:../Sources/signalProcessing.c **** 	for(i=0; i < 128 ; i++)
+ 458              		.loc 1 60 0
+ 459 0108 3B1C     		mov	r3, r7
+ 460 010a 1333     		add	r3, r3, #19
+ 461 010c 3A1C     		mov	r2, r7
+ 462 010e 1332     		add	r2, r2, #19
+ 463 0110 1278     		ldrb	r2, [r2]
+ 464 0112 0132     		add	r2, r2, #1
+ 465 0114 1A70     		strb	r2, [r3]
+ 466              	.L19:
+  60:../Sources/signalProcessing.c **** 	for(i=0; i < 128 ; i++)
+ 467              		.loc 1 60 0 is_stmt 0
+ 468 0116 3B1C     		mov	r3, r7
+ 469 0118 1333     		add	r3, r3, #19
+ 470 011a 1B78     		ldrb	r3, [r3]
+ 471 011c 5BB2     		sxtb	r3, r3
+ 472 011e 002B     		cmp	r3, #0
+ 473 0120 CDDA     		bge	.L20
+  63:../Sources/signalProcessing.c **** 	}
+  64:../Sources/signalProcessing.c **** }
+ 474              		.loc 1 64 0 is_stmt 1
+ 475 0122 BD46     		mov	sp, r7
+ 476 0124 06B0     		add	sp, sp, #24
+ 477              		@ sp needed for prologue
+ 478 0126 B0BD     		pop	{r4, r5, r7, pc}
+ 479              	.L22:
+ 480              		.align	2
+ 481              	.L21:
+ 482 0128 00FF7F47 		.word	1199570688
+ 483              		.cfi_endproc
+ 484              	.LFE2:
+ 486              		.section	.text.derivate_cam,"ax",%progbits
+ 487              		.align	2
+ 488              		.global	derivate_cam
+ 489              		.code	16
+ 490              		.thumb_func
+ 492              	derivate_cam:
+ 493              	.LFB3:
+  65:../Sources/signalProcessing.c **** 
+  66:../Sources/signalProcessing.c **** 
+  67:../Sources/signalProcessing.c **** void  derivate_cam(uint16_t *camera, uint16_t *out)
+  68:../Sources/signalProcessing.c **** {
+ 494              		.loc 1 68 0
+ 495              		.cfi_startproc
+ 496 0000 80B5     		push	{r7, lr}
+ 497              	.LCFI9:
+ 498              		.cfi_def_cfa_offset 8
+ 499              		.cfi_offset 7, -8
+ 500              		.cfi_offset 14, -4
+ 501 0002 84B0     		sub	sp, sp, #16
+ 502              	.LCFI10:
+ 503              		.cfi_def_cfa_offset 24
+ 504 0004 00AF     		add	r7, sp, #0
+ 505              	.LCFI11:
+ 506              		.cfi_def_cfa_register 7
+ 507 0006 7860     		str	r0, [r7, #4]
+ 508 0008 3960     		str	r1, [r7]
+  69:../Sources/signalProcessing.c **** 	uint8_t i;
+  70:../Sources/signalProcessing.c **** 	for(i=0; i < 128-1 ; i++)
+ 509              		.loc 1 70 0
+ 510 000a 3B1C     		mov	r3, r7
+ 511 000c 0F33     		add	r3, r3, #15
+ 512 000e 0022     		mov	r2, #0
+ 513 0010 1A70     		strb	r2, [r3]
+ 514 0012 22E0     		b	.L24
+ 515              	.L26:
+  71:../Sources/signalProcessing.c **** 	{
+  72:../Sources/signalProcessing.c **** 		out[i] = (camera[i+1] - camera[i])/2;
+ 516              		.loc 1 72 0
+ 517 0014 3B1C     		mov	r3, r7
+ 518 0016 0F33     		add	r3, r3, #15
+ 519 0018 1B78     		ldrb	r3, [r3]
+ 520 001a 5B00     		lsl	r3, r3, #1
+ 521 001c 3A68     		ldr	r2, [r7]
+ 522 001e D218     		add	r2, r2, r3
+ 523 0020 3B1C     		mov	r3, r7
+ 524 0022 0F33     		add	r3, r3, #15
+ 525 0024 1B78     		ldrb	r3, [r3]
+ 526 0026 0133     		add	r3, r3, #1
+ 527 0028 5B00     		lsl	r3, r3, #1
+ 528 002a 7968     		ldr	r1, [r7, #4]
+ 529 002c CB18     		add	r3, r1, r3
+ 530 002e 1B88     		ldrh	r3, [r3]
+ 531 0030 191C     		mov	r1, r3
+ 532 0032 3B1C     		mov	r3, r7
+ 533 0034 0F33     		add	r3, r3, #15
+ 534 0036 1B78     		ldrb	r3, [r3]
+ 535 0038 5B00     		lsl	r3, r3, #1
+ 536 003a 7868     		ldr	r0, [r7, #4]
+ 537 003c C318     		add	r3, r0, r3
+ 538 003e 1B88     		ldrh	r3, [r3]
+ 539 0040 CB1A     		sub	r3, r1, r3
+ 540 0042 00D5     		bpl	.L25
+ 541 0044 0133     		add	r3, r3, #1
+ 542              	.L25:
+ 543 0046 5B10     		asr	r3, r3, #1
+ 544 0048 9BB2     		uxth	r3, r3
+ 545 004a 1380     		strh	r3, [r2]
+  70:../Sources/signalProcessing.c **** 	for(i=0; i < 128-1 ; i++)
+ 546              		.loc 1 70 0
+ 547 004c 3B1C     		mov	r3, r7
+ 548 004e 0F33     		add	r3, r3, #15
+ 549 0050 3A1C     		mov	r2, r7
+ 550 0052 0F32     		add	r2, r2, #15
+ 551 0054 1278     		ldrb	r2, [r2]
+ 552 0056 0132     		add	r2, r2, #1
+ 553 0058 1A70     		strb	r2, [r3]
+ 554              	.L24:
+  70:../Sources/signalProcessing.c **** 	for(i=0; i < 128-1 ; i++)
+ 555              		.loc 1 70 0 is_stmt 0
+ 556 005a 3B1C     		mov	r3, r7
+ 557 005c 0F33     		add	r3, r3, #15
+ 558 005e 1B78     		ldrb	r3, [r3]
+ 559 0060 7E2B     		cmp	r3, #126
+ 560 0062 D7D9     		bls	.L26
+  73:../Sources/signalProcessing.c **** 	}
+  74:../Sources/signalProcessing.c **** 	
+  75:../Sources/signalProcessing.c **** }
+ 561              		.loc 1 75 0 is_stmt 1
+ 562 0064 BD46     		mov	sp, r7
+ 563 0066 04B0     		add	sp, sp, #16
+ 564              		@ sp needed for prologue
+ 565 0068 80BD     		pop	{r7, pc}
+ 566              		.cfi_endproc
+ 567              	.LFE3:
+ 569 006a C046     		.section	.text.getPos,"ax",%progbits
+ 570              		.align	2
+ 571              		.global	getPos
+ 572              		.code	16
+ 573              		.thumb_func
+ 575              	getPos:
+ 576              	.LFB4:
+  76:../Sources/signalProcessing.c **** 
+  77:../Sources/signalProcessing.c **** 
+  78:../Sources/signalProcessing.c **** 
+  79:../Sources/signalProcessing.c **** int16_t getPos(uint16_t *camera)
+  80:../Sources/signalProcessing.c **** {
+ 577              		.loc 1 80 0
+ 578              		.cfi_startproc
+ 579 0000 80B5     		push	{r7, lr}
+ 580              	.LCFI12:
+ 581              		.cfi_def_cfa_offset 8
+ 582              		.cfi_offset 7, -8
+ 583              		.cfi_offset 14, -4
+ 584 0002 84B0     		sub	sp, sp, #16
+ 585              	.LCFI13:
+ 586              		.cfi_def_cfa_offset 24
+ 587 0004 00AF     		add	r7, sp, #0
+ 588              	.LCFI14:
+ 589              		.cfi_def_cfa_register 7
+ 590 0006 7860     		str	r0, [r7, #4]
+  81:../Sources/signalProcessing.c **** 	uint8_t i;
+  82:../Sources/signalProcessing.c **** 	for(i=0; i < 128 ; i++)
+ 591              		.loc 1 82 0
+ 592 0008 3B1C     		mov	r3, r7
+ 593 000a 0F33     		add	r3, r3, #15
+ 594 000c 0022     		mov	r2, #0
+ 595 000e 1A70     		strb	r2, [r3]
+ 596 0010 17E0     		b	.L28
+ 597              	.L31:
+  83:../Sources/signalProcessing.c **** 	{
+  84:../Sources/signalProcessing.c **** 		if(abs(camera[i]) > seuil_detection)
+ 598              		.loc 1 84 0
+ 599 0012 3B1C     		mov	r3, r7
+ 600 0014 0F33     		add	r3, r3, #15
+ 601 0016 1B78     		ldrb	r3, [r3]
+ 602 0018 5B00     		lsl	r3, r3, #1
+ 603 001a 7A68     		ldr	r2, [r7, #4]
+ 604 001c D318     		add	r3, r2, r3
+ 605 001e 1B88     		ldrh	r3, [r3]
+ 606 0020 1A1C     		mov	r2, r3
+ 607 0022 0E4B     		ldr	r3, .L32
+ 608 0024 1B88     		ldrh	r3, [r3]
+ 609 0026 9A42     		cmp	r2, r3
+ 610 0028 04DD     		ble	.L29
+  85:../Sources/signalProcessing.c **** 			return i;
+ 611              		.loc 1 85 0
+ 612 002a 3B1C     		mov	r3, r7
+ 613 002c 0F33     		add	r3, r3, #15
+ 614 002e 1B78     		ldrb	r3, [r3]
+ 615 0030 9BB2     		uxth	r3, r3
+ 616 0032 0DE0     		b	.L30
+ 617              	.L29:
+  82:../Sources/signalProcessing.c **** 	for(i=0; i < 128 ; i++)
+ 618              		.loc 1 82 0
+ 619 0034 3B1C     		mov	r3, r7
+ 620 0036 0F33     		add	r3, r3, #15
+ 621 0038 3A1C     		mov	r2, r7
+ 622 003a 0F32     		add	r2, r2, #15
+ 623 003c 1278     		ldrb	r2, [r2]
+ 624 003e 0132     		add	r2, r2, #1
+ 625 0040 1A70     		strb	r2, [r3]
+ 626              	.L28:
+  82:../Sources/signalProcessing.c **** 	for(i=0; i < 128 ; i++)
+ 627              		.loc 1 82 0 is_stmt 0
+ 628 0042 3B1C     		mov	r3, r7
+ 629 0044 0F33     		add	r3, r3, #15
+ 630 0046 1B78     		ldrb	r3, [r3]
+ 631 0048 5BB2     		sxtb	r3, r3
+ 632 004a 002B     		cmp	r3, #0
+ 633 004c E1DA     		bge	.L31
+  86:../Sources/signalProcessing.c **** 	}
+  87:../Sources/signalProcessing.c **** 	return -1;
+ 634              		.loc 1 87 0 is_stmt 1
+ 635 004e 044B     		ldr	r3, .L32+4
+ 636              	.L30:
+ 637 0050 1BB2     		sxth	r3, r3
+  88:../Sources/signalProcessing.c **** }
+ 638              		.loc 1 88 0
+ 639 0052 181C     		mov	r0, r3
+ 640 0054 BD46     		mov	sp, r7
+ 641 0056 04B0     		add	sp, sp, #16
+ 642              		@ sp needed for prologue
+ 643 0058 80BD     		pop	{r7, pc}
+ 644              	.L33:
+ 645 005a C046     		.align	2
+ 646              	.L32:
+ 647 005c 00000000 		.word	seuil_detection
+ 648 0060 FFFF0000 		.word	65535
+ 649              		.cfi_endproc
+ 650              	.LFE4:
+ 652              		.section	.text.getCenterPos,"ax",%progbits
+ 653              		.align	2
+ 654              		.global	getCenterPos
+ 655              		.code	16
+ 656              		.thumb_func
+ 658              	getCenterPos:
+ 659              	.LFB5:
+  89:../Sources/signalProcessing.c **** 
+  90:../Sources/signalProcessing.c **** int16_t getCenterPos( uint16_t  *LineScanImage)
+  91:../Sources/signalProcessing.c **** {
+ 660              		.loc 1 91 0
+ 661              		.cfi_startproc
+ 662 0000 90B5     		push	{r4, r7, lr}
+ 663              	.LCFI15:
+ 664              		.cfi_def_cfa_offset 12
+ 665              		.cfi_offset 4, -12
+ 666              		.cfi_offset 7, -8
+ 667              		.cfi_offset 14, -4
+ 668 0002 194C     		ldr	r4, .L36
+ 669 0004 A544     		add	sp, sp, r4
+ 670              	.LCFI16:
+ 671              		.cfi_def_cfa_offset 800
+ 672 0006 00AF     		add	r7, sp, #0
+ 673              	.LCFI17:
+ 674              		.cfi_def_cfa_register 7
+ 675 0008 7860     		str	r0, [r7, #4]
+  92:../Sources/signalProcessing.c **** 	int16_t posLine, posLine_prev;	
+  93:../Sources/signalProcessing.c **** 	uint16_t medianFilter_out[128], gainCorr_out[128], derivate_out[128];
+  94:../Sources/signalProcessing.c **** 	
+  95:../Sources/signalProcessing.c **** 	
+  96:../Sources/signalProcessing.c **** 	medianFilter(LineScanImage, medianFilter_out);
+ 676              		.loc 1 96 0
+ 677 000a 7A68     		ldr	r2, [r7, #4]
+ 678 000c 8321     		mov	r1, #131
+ 679 000e 8900     		lsl	r1, r1, #2
+ 680 0010 7B18     		add	r3, r7, r1
+ 681 0012 101C     		mov	r0, r2
+ 682 0014 191C     		mov	r1, r3
+ 683 0016 FFF7FEFF 		bl	medianFilter
+  97:../Sources/signalProcessing.c **** 	gainCorr(medianFilter_out, gainCorr_out);
+ 684              		.loc 1 97 0
+ 685 001a 8323     		mov	r3, #131
+ 686 001c 9B00     		lsl	r3, r3, #2
+ 687 001e FA18     		add	r2, r7, r3
+ 688 0020 8621     		mov	r1, #134
+ 689 0022 4900     		lsl	r1, r1, #1
+ 690 0024 7B18     		add	r3, r7, r1
+ 691 0026 101C     		mov	r0, r2
+ 692 0028 191C     		mov	r1, r3
+ 693 002a FFF7FEFF 		bl	gainCorr
+  98:../Sources/signalProcessing.c **** 	derivate_cam(gainCorr_out, derivate_out);
+ 694              		.loc 1 98 0
+ 695 002e 8623     		mov	r3, #134
+ 696 0030 5B00     		lsl	r3, r3, #1
+ 697 0032 FA18     		add	r2, r7, r3
+ 698 0034 3B1C     		mov	r3, r7
+ 699 0036 0C33     		add	r3, r3, #12
+ 700 0038 101C     		mov	r0, r2
+ 701 003a 191C     		mov	r1, r3
+ 702 003c FFF7FEFF 		bl	derivate_cam
+  99:../Sources/signalProcessing.c **** 	posLine = getPos(derivate_out);
+ 703              		.loc 1 99 0
+ 704 0040 0A49     		ldr	r1, .L36+4
+ 705 0042 7C18     		add	r4, r7, r1
+ 706 0044 3B1C     		mov	r3, r7
+ 707 0046 0C33     		add	r3, r3, #12
+ 708 0048 181C     		mov	r0, r3
+ 709 004a FFF7FEFF 		bl	getPos
+ 710 004e 031C     		mov	r3, r0
+ 711 0050 2380     		strh	r3, [r4]
+ 100:../Sources/signalProcessing.c **** 	
+ 101:../Sources/signalProcessing.c **** 	
+ 102:../Sources/signalProcessing.c **** 	return posLine;
+ 712              		.loc 1 102 0
+ 713 0052 064A     		ldr	r2, .L36+4
+ 714 0054 BB18     		add	r3, r7, r2
+ 715 0056 1B88     		ldrh	r3, [r3]
+ 716 0058 1BB2     		sxth	r3, r3
+ 103:../Sources/signalProcessing.c **** 	
+ 104:../Sources/signalProcessing.c **** }
+ 717              		.loc 1 104 0
+ 718 005a 181C     		mov	r0, r3
+ 719 005c BD46     		mov	sp, r7
+ 720 005e C523     		mov	r3, #197
+ 721 0060 9B00     		lsl	r3, r3, #2
+ 722 0062 9D44     		add	sp, sp, r3
+ 723              		@ sp needed for prologue
+ 724 0064 90BD     		pop	{r4, r7, pc}
+ 725              	.L37:
+ 726 0066 C046     		.align	2
+ 727              	.L36:
+ 728 0068 ECFCFFFF 		.word	-788
+ 729 006c 0E030000 		.word	782
+ 730              		.cfi_endproc
+ 731              	.LFE5:
+ 733              		.section	.text.minmaxcam,"ax",%progbits
+ 734              		.align	2
+ 735              		.global	minmaxcam
+ 736              		.code	16
+ 737              		.thumb_func
+ 739              	minmaxcam:
+ 740              	.LFB6:
+ 105:../Sources/signalProcessing.c **** 	
+ 106:../Sources/signalProcessing.c **** 
+ 107:../Sources/signalProcessing.c **** void minmaxcam (int16_t  *table ,int16_t  *min ,int16_t  *max)
+ 108:../Sources/signalProcessing.c **** {
+ 741              		.loc 1 108 0
+ 742              		.cfi_startproc
+ 743 0000 80B5     		push	{r7, lr}
+ 744              	.LCFI18:
+ 745              		.cfi_def_cfa_offset 8
+ 746              		.cfi_offset 7, -8
+ 747              		.cfi_offset 14, -4
+ 748 0002 86B0     		sub	sp, sp, #24
+ 749              	.LCFI19:
+ 750              		.cfi_def_cfa_offset 32
+ 751 0004 00AF     		add	r7, sp, #0
+ 752              	.LCFI20:
+ 753              		.cfi_def_cfa_register 7
+ 754 0006 F860     		str	r0, [r7, #12]
+ 755 0008 B960     		str	r1, [r7, #8]
+ 756 000a 7A60     		str	r2, [r7, #4]
+ 109:../Sources/signalProcessing.c **** 	unsigned char i;
+ 110:../Sources/signalProcessing.c **** 	*min = table[0]; *max = table[0];
+ 757              		.loc 1 110 0
+ 758 000c FB68     		ldr	r3, [r7, #12]
+ 759 000e 1A88     		ldrh	r2, [r3]
+ 760 0010 BB68     		ldr	r3, [r7, #8]
+ 761 0012 1A80     		strh	r2, [r3]
+ 762 0014 FB68     		ldr	r3, [r7, #12]
+ 763 0016 1A88     		ldrh	r2, [r3]
+ 764 0018 7B68     		ldr	r3, [r7, #4]
+ 765 001a 1A80     		strh	r2, [r3]
+ 111:../Sources/signalProcessing.c **** 	
+ 112:../Sources/signalProcessing.c **** 	for(i=1; i <128; i++)
+ 766              		.loc 1 112 0
+ 767 001c 3B1C     		mov	r3, r7
+ 768 001e 1733     		add	r3, r3, #23
+ 769 0020 0122     		mov	r2, #1
+ 770 0022 1A70     		strb	r2, [r3]
+ 771 0024 32E0     		b	.L39
+ 772              	.L42:
+ 113:../Sources/signalProcessing.c **** 	{
+ 114:../Sources/signalProcessing.c **** 		if(table[i] < *min)
+ 773              		.loc 1 114 0
+ 774 0026 3B1C     		mov	r3, r7
+ 775 0028 1733     		add	r3, r3, #23
+ 776 002a 1B78     		ldrb	r3, [r3]
+ 777 002c 5B00     		lsl	r3, r3, #1
+ 778 002e FA68     		ldr	r2, [r7, #12]
+ 779 0030 D318     		add	r3, r2, r3
+ 780 0032 1A88     		ldrh	r2, [r3]
+ 781 0034 BB68     		ldr	r3, [r7, #8]
+ 782 0036 1B88     		ldrh	r3, [r3]
+ 783 0038 12B2     		sxth	r2, r2
+ 784 003a 1BB2     		sxth	r3, r3
+ 785 003c 9A42     		cmp	r2, r3
+ 786 003e 08DA     		bge	.L40
+ 115:../Sources/signalProcessing.c **** 			*min = table[i];
+ 787              		.loc 1 115 0
+ 788 0040 3B1C     		mov	r3, r7
+ 789 0042 1733     		add	r3, r3, #23
+ 790 0044 1B78     		ldrb	r3, [r3]
+ 791 0046 5B00     		lsl	r3, r3, #1
+ 792 0048 FA68     		ldr	r2, [r7, #12]
+ 793 004a D318     		add	r3, r2, r3
+ 794 004c 1A88     		ldrh	r2, [r3]
+ 795 004e BB68     		ldr	r3, [r7, #8]
+ 796 0050 1A80     		strh	r2, [r3]
+ 797              	.L40:
+ 116:../Sources/signalProcessing.c **** 		if(table[i] > *max)
+ 798              		.loc 1 116 0
+ 799 0052 3B1C     		mov	r3, r7
+ 800 0054 1733     		add	r3, r3, #23
+ 801 0056 1B78     		ldrb	r3, [r3]
+ 802 0058 5B00     		lsl	r3, r3, #1
+ 803 005a FA68     		ldr	r2, [r7, #12]
+ 804 005c D318     		add	r3, r2, r3
+ 805 005e 1A88     		ldrh	r2, [r3]
+ 806 0060 7B68     		ldr	r3, [r7, #4]
+ 807 0062 1B88     		ldrh	r3, [r3]
+ 808 0064 12B2     		sxth	r2, r2
+ 809 0066 1BB2     		sxth	r3, r3
+ 810 0068 9A42     		cmp	r2, r3
+ 811 006a 08DD     		ble	.L41
+ 117:../Sources/signalProcessing.c **** 			*max = table[i];
+ 812              		.loc 1 117 0
+ 813 006c 3B1C     		mov	r3, r7
+ 814 006e 1733     		add	r3, r3, #23
+ 815 0070 1B78     		ldrb	r3, [r3]
+ 816 0072 5B00     		lsl	r3, r3, #1
+ 817 0074 FA68     		ldr	r2, [r7, #12]
+ 818 0076 D318     		add	r3, r2, r3
+ 819 0078 1A88     		ldrh	r2, [r3]
+ 820 007a 7B68     		ldr	r3, [r7, #4]
+ 821 007c 1A80     		strh	r2, [r3]
+ 822              	.L41:
+ 112:../Sources/signalProcessing.c **** 	for(i=1; i <128; i++)
+ 823              		.loc 1 112 0
+ 824 007e 3B1C     		mov	r3, r7
+ 825 0080 1733     		add	r3, r3, #23
+ 826 0082 3A1C     		mov	r2, r7
+ 827 0084 1732     		add	r2, r2, #23
+ 828 0086 1278     		ldrb	r2, [r2]
+ 829 0088 0132     		add	r2, r2, #1
+ 830 008a 1A70     		strb	r2, [r3]
+ 831              	.L39:
+ 112:../Sources/signalProcessing.c **** 	for(i=1; i <128; i++)
+ 832              		.loc 1 112 0 is_stmt 0
+ 833 008c 3B1C     		mov	r3, r7
+ 834 008e 1733     		add	r3, r3, #23
+ 835 0090 1B78     		ldrb	r3, [r3]
+ 836 0092 5BB2     		sxtb	r3, r3
+ 837 0094 002B     		cmp	r3, #0
+ 838 0096 C6DA     		bge	.L42
+ 118:../Sources/signalProcessing.c **** 	}
+ 119:../Sources/signalProcessing.c **** 	
+ 120:../Sources/signalProcessing.c **** }
+ 839              		.loc 1 120 0 is_stmt 1
+ 840 0098 BD46     		mov	sp, r7
+ 841 009a 06B0     		add	sp, sp, #24
+ 842              		@ sp needed for prologue
+ 843 009c 80BD     		pop	{r7, pc}
+ 844              		.cfi_endproc
+ 845              	.LFE6:
+ 847 009e C046     		.text
+ 848              	.Letext0:
+ 849              		.file 2 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+DEFINED SYMBOLS
+                            *ABS*:00000000 signalProcessing.c
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:22     .data.seuil_detection:00000000 seuil_detection
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:19     .data.seuil_detection:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:29     .bss.min_d2:00000000 min_d2
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:26     .bss.min_d2:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:36     .bss.max_d2:00000000 max_d2
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:33     .bss.max_d2:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:42     .bss.copy_nb_line:00000000 copy_nb_line
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:43     .bss.copy_nb_line:00000000 $d
+                            *COM*:00000100 copyDerivate
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:46     .text.compare:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:51     .text.compare:00000000 compare
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:121    .text.medianFilter:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:126    .text.medianFilter:00000000 medianFilter
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:287    .text.medianFilter:00000100 $d
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:297    .text.gainCorr:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:302    .text.gainCorr:00000000 gainCorr
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:482    .text.gainCorr:00000128 $d
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:487    .text.derivate_cam:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:492    .text.derivate_cam:00000000 derivate_cam
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:570    .text.getPos:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:575    .text.getPos:00000000 getPos
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:647    .text.getPos:0000005c $d
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:653    .text.getCenterPos:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:658    .text.getCenterPos:00000000 getCenterPos
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:728    .text.getCenterPos:00000068 $d
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:734    .text.minmaxcam:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\cc07hGqz.s:739    .text.minmaxcam:00000000 minmaxcam
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+qsort
+__aeabi_ui2f
+__aeabi_fdiv
+__aeabi_f2uiz
+__aeabi_i2f
+__aeabi_fmul

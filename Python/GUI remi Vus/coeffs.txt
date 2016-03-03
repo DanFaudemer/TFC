@@ -1,0 +1,13 @@
+dir p = 520	596
+dir I = 0	0
+dir D = 370	370
+
+diff P = 20	24
+diff I = 0	0
+diff D = 2	2
+
+
+speed P = 52	93
+speed I = 0 	0
+speed D = 10	10
+ 

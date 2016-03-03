@@ -1,0 +1,14 @@
+Project Outputs Generation Report
+---------------------------------
+Start Output Generation At 1:40:30 PM On 3/22/2013
+
+Output: FRDM-TFC-BOM
+Type  : BOM
+From  : Variant [MAIN_BUILD] of Project [FRDM-TFC.PrjPcb]
+   Generated File[FRDM-TFC-BOM-FRDM-TFC(MAIN_BUILD).xls]
+
+
+Files Generated   : 1
+Documents Printed : 0
+
+Finished Output Generation At 1:41:05 PM On 3/22/2013

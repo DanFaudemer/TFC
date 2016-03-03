@@ -1,0 +1,2 @@
+eclipse.preferences.version=1
+org.eclipse.rse.preferences.order.connections=jeromePC.Local;jeromePC.FRDM-TRC_FLASH_OpenSDA;jeromePC.FRDM-TRC_FLASH_OpenSDA Target;jeromePC.test_FLASH_PnE U-MultiLink;jeromePC.test_FLASH_PnE U-MultiLink Target;jeromePC.test_FLASH_OpenSDA;jeromePC.test_FLASH_OpenSDA Target

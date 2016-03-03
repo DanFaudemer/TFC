@@ -1,0 +1,201 @@
+#include "derivative.h" /* include peripheral declarations */
+#include "TFC\TFC.h"
+#include "constants.h"
+#include "signalProcessing.h"
+#define abs(a) ((a<0) ? (-a) : (a))
+
+#define ButtonA_isPressed TFC_PUSH_BUTTON_0_PRESSED
+
+/* States machine */
+#define DEBUG 0
+#define RUN 1
+/******************/
+
+/* Function Prototypes */
+void State_Debug(void);
+void State_Run(void);
+void Asserv_pos(void);
+/***********************/
+
+/* Global variables and extern */
+extern volatile uint16_t PotADC_Value[2];
+uint16_t posLine;
+int16_t diff;
+int16_t previous = 70;
+int16_t error =0, last_error = 0, derivate, integrate;
+
+/*******************************/
+
+int main(void)
+{
+	uint32_t t,i=0;
+	
+	int8_t cur_state=0;
+	//int8_t next_state=0;
+	int8_t ButtonA_p = 0;
+
+	/* Initialisation */
+	TFC_Init();
+
+	/* Main Loop */
+	for(;;)
+	{	   
+		//TFC_Task must be called in your main loop.  This keeps certain processing happy (I.E. Serial port queue check)
+		TFC_Task();
+
+		switch(cur_state)
+		{
+			case 0: if(ButtonA_isPressed && !ButtonA_p)
+					{
+						TFC_Delay_mS(20);
+						cur_state=RUN;
+					}
+					else
+						State_Debug();
+					break;
+			
+			case 1: if(ButtonA_isPressed && !ButtonA_p) 
+					{
+						TFC_Delay_mS(20);
+						cur_state=DEBUG;
+					}
+					else
+						State_Run();
+					break;
+			default:
+					
+		}
+
+		ButtonA_p = ButtonA_isPressed;
+		
+
+	}
+	return 0;
+}
+
+/***************************************************
+**                                                **
+**           State Machine  Functions             **
+**   									          **
+****************************************************/ 
+void State_Debug(void)
+{
+	uint32_t t,i=0;
+	
+	if(TFC_Ticker[0]>500 && LineScanImageReady==1) // Each 500ms 
+	{
+				TFC_Ticker[0] = 0;
+
+				LineScanImageReady=0;
+				//uint8_t val = TFC_ReadPot(0);
+				//TERMINAL_PRINTF("New Expo Time: 0x%X \n\r", PotADC_Value[0]); //0x000 - 0xFFF
+				TFC_SetLineScanExposureTime((uint32_t) (PotADC_Value[0]+500)*10); //100 to 4095+100
+
+/*  // à faire lorsque le bouton B est appuyé!!!
+				if(t==0)
+					t=3;
+				else
+					t--;
+
+				TFC_SetBatteryLED_Level(t);
+*/
+				
+				Asserv_pos();
+				/* Set Servo Position Maximum range is 35 */
+				TFC_SetServo(0,((float) diff)/35.0);
+				
+				
+				/* Transmit Image */
+				TERMINAL_PRINTF("\r\n");
+				TERMINAL_PRINTF("L:,");
+				for(i=0;i<128;i++)
+				{
+					TERMINAL_PRINTF("0x%X,",LineScanImage1[i]);
+				}
+				TERMINAL_PRINTF("\r\n");
+				
+				/* Transmit Position */
+				TERMINAL_PRINTF("\rposLine : %d\n\r", posLine);
+				
+				/* Transmit Parameters PID */
+				TERMINAL_PRINTF("Angle Correction : %d, diff %d, LineCenter %d\n\r", (int)(((float) diff)/35.0*1000), (int)diff, (int)LINECENTER);
+
+
+
+	}
+}
+
+
+void State_Run(void)
+{
+	uint32_t t,i=0;
+	
+	if(TFC_Ticker[0]>10 && LineScanImageReady==1) // Each 500ms 
+		{
+					TFC_Ticker[0] = 0;
+
+					LineScanImageReady=0;
+					//TFC_SetLineScanExposureTime((uint32_t) (PotADC_Value[0]+500)*10); //100 to 4095+100
+
+	/*  // à faire lorsque le bouton B est appuyé!!!
+					if(t==0)
+						t=3;
+					else
+						t--;
+*/
+					TFC_SetBatteryLED_Level(1);
+	
+					
+					Asserv_pos();
+					
+					/* Set Servo Position Maximum range is 35 */
+					TFC_SetServo(0,((float) diff)/35.0);					
+					
+					/* Set motor speed */
+					if( ((TFC_GetDIP_Switch()>>1)&0x03) == 0)
+					{
+						TFC_HBRIDGE_ENABLE;
+						TFC_SetMotorPWM(TFC_ReadPot(0),TFC_ReadPot(0));
+					}
+					else
+						TFC_HBRIDGE_DISABLE;
+					
+					
+					/* Transmit Position */
+					TERMINAL_PRINTF("\rposLine : %d\n\r", posLine);
+					
+					/* Transmit Parameters PID */
+					TERMINAL_PRINTF("Angle Correction : %d, diff %d, LineCenter %d\n\r", (int)(((float) diff)/35.0*1000), (int)diff, (int)LINECENTER);
+
+		}
+	
+}
+
+/***************************************************
+**                                                **
+**           Other  Functions                     **
+**   									          **
+****************************************************/ 
+void Asserv_pos(void)
+{
+	previous = posLine;
+	posLine = getLinePos(LineScanImage1);
+
+	if(posLine == 0) // Line not found 
+			posLine = previous; //Wheel position has not change 
+	
+	/* Error */
+	last_error = error;
+	error = LINECENTER  - posLine;
+	
+	derivate = error - last_error;
+	integrate += error;
+	if(integrate > 20) integrate=20;
+	else if(integrate <-20) integrate=-20;
+	
+	/* PID */
+	diff = COEFF_P*(error) + COEFF_D*(derivate) + COEFF_I*(integrate); //Derivate is bad it's on the error 
+	if(diff > 35)	diff = 35;
+	else if (diff < -35) diff = -35;
+	
+}

@@ -1,0 +1,675 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"TFC_Queue.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.bss.StringBuffer,"aw",%nobits
+  18              		.align	2
+  21              	StringBuffer:
+  22 0000 00000000 		.space	256
+  22      00000000 
+  22      00000000 
+  22      00000000 
+  22      00000000 
+  23              		.section	.text.InitByteQueue,"ax",%progbits
+  24              		.align	2
+  25              		.global	InitByteQueue
+  26              		.code	16
+  27              		.thumb_func
+  29              	InitByteQueue:
+  30              	.LFB0:
+  31              		.file 1 "../Sources/TFC/TFC_Queue.c"
+   1:../Sources/TFC/TFC_Queue.c **** #include "TFC\TFC.h"
+   2:../Sources/TFC/TFC_Queue.c **** 
+   3:../Sources/TFC/TFC_Queue.c **** static char StringBuffer[256];
+   4:../Sources/TFC/TFC_Queue.c **** 
+   5:../Sources/TFC/TFC_Queue.c **** void InitByteQueue(ByteQueue *BQ,uint16_t Size,uint8_t * Storage) {
+  32              		.loc 1 5 0
+  33              		.cfi_startproc
+  34 0000 80B5     		push	{r7, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 7, -8
+  38              		.cfi_offset 14, -4
+  39 0002 86B0     		sub	sp, sp, #24
+  40              	.LCFI1:
+  41              		.cfi_def_cfa_offset 32
+  42 0004 00AF     		add	r7, sp, #0
+  43              	.LCFI2:
+  44              		.cfi_def_cfa_register 7
+  45 0006 F860     		str	r0, [r7, #12]
+  46 0008 7A60     		str	r2, [r7, #4]
+  47 000a 3B1C     		mov	r3, r7
+  48 000c 0A33     		add	r3, r3, #10
+  49 000e 0A1C     		add	r2, r1, #0
+  50 0010 1A80     		strh	r2, [r3]
+   6:../Sources/TFC/TFC_Queue.c ****     uint16_t i;
+   7:../Sources/TFC/TFC_Queue.c **** 
+   8:../Sources/TFC/TFC_Queue.c ****     BQ->QueueSize = Size;
+  51              		.loc 1 8 0
+  52 0012 FB68     		ldr	r3, [r7, #12]
+  53 0014 3A1C     		mov	r2, r7
+  54 0016 0A32     		add	r2, r2, #10
+  55 0018 1288     		ldrh	r2, [r2]
+  56 001a 9A80     		strh	r2, [r3, #4]
+   9:../Sources/TFC/TFC_Queue.c ****     BQ->ReadPtr=0;
+  57              		.loc 1 9 0
+  58 001c FB68     		ldr	r3, [r7, #12]
+  59 001e 0022     		mov	r2, #0
+  60 0020 1A80     		strh	r2, [r3]
+  10:../Sources/TFC/TFC_Queue.c ****     BQ->WritePtr=0;
+  61              		.loc 1 10 0
+  62 0022 FB68     		ldr	r3, [r7, #12]
+  63 0024 0022     		mov	r2, #0
+  64 0026 5A80     		strh	r2, [r3, #2]
+  11:../Sources/TFC/TFC_Queue.c ****     BQ->QueueStorage = Storage;
+  65              		.loc 1 11 0
+  66 0028 FB68     		ldr	r3, [r7, #12]
+  67 002a 7A68     		ldr	r2, [r7, #4]
+  68 002c 9A60     		str	r2, [r3, #8]
+  12:../Sources/TFC/TFC_Queue.c **** 
+  13:../Sources/TFC/TFC_Queue.c ****     for (i=0;i<BQ->QueueSize;i++) {
+  69              		.loc 1 13 0
+  70 002e 3B1C     		mov	r3, r7
+  71 0030 1633     		add	r3, r3, #22
+  72 0032 0022     		mov	r2, #0
+  73 0034 1A80     		strh	r2, [r3]
+  74 0036 0EE0     		b	.L2
+  75              	.L3:
+  14:../Sources/TFC/TFC_Queue.c ****         BQ->QueueStorage[i] = 0;
+  76              		.loc 1 14 0
+  77 0038 FB68     		ldr	r3, [r7, #12]
+  78 003a 9A68     		ldr	r2, [r3, #8]
+  79 003c 3B1C     		mov	r3, r7
+  80 003e 1633     		add	r3, r3, #22
+  81 0040 1B88     		ldrh	r3, [r3]
+  82 0042 D318     		add	r3, r2, r3
+  83 0044 0022     		mov	r2, #0
+  84 0046 1A70     		strb	r2, [r3]
+  13:../Sources/TFC/TFC_Queue.c ****     for (i=0;i<BQ->QueueSize;i++) {
+  85              		.loc 1 13 0
+  86 0048 3B1C     		mov	r3, r7
+  87 004a 1633     		add	r3, r3, #22
+  88 004c 3A1C     		mov	r2, r7
+  89 004e 1632     		add	r2, r2, #22
+  90 0050 1288     		ldrh	r2, [r2]
+  91 0052 0132     		add	r2, r2, #1
+  92 0054 1A80     		strh	r2, [r3]
+  93              	.L2:
+  13:../Sources/TFC/TFC_Queue.c ****     for (i=0;i<BQ->QueueSize;i++) {
+  94              		.loc 1 13 0 is_stmt 0
+  95 0056 FB68     		ldr	r3, [r7, #12]
+  96 0058 9B88     		ldrh	r3, [r3, #4]
+  97 005a 3A1C     		mov	r2, r7
+  98 005c 1632     		add	r2, r2, #22
+  99 005e 1288     		ldrh	r2, [r2]
+ 100 0060 9A42     		cmp	r2, r3
+ 101 0062 E9D3     		bcc	.L3
+  15:../Sources/TFC/TFC_Queue.c ****     }
+  16:../Sources/TFC/TFC_Queue.c **** }
+ 102              		.loc 1 16 0 is_stmt 1
+ 103 0064 BD46     		mov	sp, r7
+ 104 0066 06B0     		add	sp, sp, #24
+ 105              		@ sp needed for prologue
+ 106 0068 80BD     		pop	{r7, pc}
+ 107              		.cfi_endproc
+ 108              	.LFE0:
+ 110 006a C046     		.section	.text.BytesInQueue,"ax",%progbits
+ 111              		.align	2
+ 112              		.global	BytesInQueue
+ 113              		.code	16
+ 114              		.thumb_func
+ 116              	BytesInQueue:
+ 117              	.LFB1:
+  17:../Sources/TFC/TFC_Queue.c **** 
+  18:../Sources/TFC/TFC_Queue.c **** uint16_t BytesInQueue(ByteQueue *BQ) {
+ 118              		.loc 1 18 0
+ 119              		.cfi_startproc
+ 120 0000 80B5     		push	{r7, lr}
+ 121              	.LCFI3:
+ 122              		.cfi_def_cfa_offset 8
+ 123              		.cfi_offset 7, -8
+ 124              		.cfi_offset 14, -4
+ 125 0002 82B0     		sub	sp, sp, #8
+ 126              	.LCFI4:
+ 127              		.cfi_def_cfa_offset 16
+ 128 0004 00AF     		add	r7, sp, #0
+ 129              	.LCFI5:
+ 130              		.cfi_def_cfa_register 7
+ 131 0006 7860     		str	r0, [r7, #4]
+  19:../Sources/TFC/TFC_Queue.c ****     if (BQ->ReadPtr > BQ->WritePtr) {
+ 132              		.loc 1 19 0
+ 133 0008 7B68     		ldr	r3, [r7, #4]
+ 134 000a 1A88     		ldrh	r2, [r3]
+ 135 000c 7B68     		ldr	r3, [r7, #4]
+ 136 000e 5B88     		ldrh	r3, [r3, #2]
+ 137 0010 9A42     		cmp	r2, r3
+ 138 0012 0AD9     		bls	.L5
+  20:../Sources/TFC/TFC_Queue.c ****         return (BQ->QueueSize - BQ->ReadPtr + BQ->WritePtr);
+ 139              		.loc 1 20 0
+ 140 0014 7B68     		ldr	r3, [r7, #4]
+ 141 0016 9A88     		ldrh	r2, [r3, #4]
+ 142 0018 7B68     		ldr	r3, [r7, #4]
+ 143 001a 1B88     		ldrh	r3, [r3]
+ 144 001c D31A     		sub	r3, r2, r3
+ 145 001e 9AB2     		uxth	r2, r3
+ 146 0020 7B68     		ldr	r3, [r7, #4]
+ 147 0022 5B88     		ldrh	r3, [r3, #2]
+ 148 0024 D318     		add	r3, r2, r3
+ 149 0026 9BB2     		uxth	r3, r3
+ 150 0028 0DE0     		b	.L6
+ 151              	.L5:
+  21:../Sources/TFC/TFC_Queue.c ****     } else if (BQ->WritePtr > BQ->ReadPtr) {
+ 152              		.loc 1 21 0
+ 153 002a 7B68     		ldr	r3, [r7, #4]
+ 154 002c 5A88     		ldrh	r2, [r3, #2]
+ 155 002e 7B68     		ldr	r3, [r7, #4]
+ 156 0030 1B88     		ldrh	r3, [r3]
+ 157 0032 9A42     		cmp	r2, r3
+ 158 0034 06D9     		bls	.L7
+  22:../Sources/TFC/TFC_Queue.c ****         return     (BQ->WritePtr - BQ->ReadPtr);
+ 159              		.loc 1 22 0
+ 160 0036 7B68     		ldr	r3, [r7, #4]
+ 161 0038 5A88     		ldrh	r2, [r3, #2]
+ 162 003a 7B68     		ldr	r3, [r7, #4]
+ 163 003c 1B88     		ldrh	r3, [r3]
+ 164 003e D31A     		sub	r3, r2, r3
+ 165 0040 9BB2     		uxth	r3, r3
+ 166 0042 00E0     		b	.L6
+ 167              	.L7:
+  23:../Sources/TFC/TFC_Queue.c ****     } else {
+  24:../Sources/TFC/TFC_Queue.c ****         return 0;
+ 168              		.loc 1 24 0
+ 169 0044 0023     		mov	r3, #0
+ 170              	.L6:
+  25:../Sources/TFC/TFC_Queue.c ****     }
+  26:../Sources/TFC/TFC_Queue.c **** }
+ 171              		.loc 1 26 0
+ 172 0046 181C     		mov	r0, r3
+ 173 0048 BD46     		mov	sp, r7
+ 174 004a 02B0     		add	sp, sp, #8
+ 175              		@ sp needed for prologue
+ 176 004c 80BD     		pop	{r7, pc}
+ 177              		.cfi_endproc
+ 178              	.LFE1:
+ 180 004e C046     		.section	.text.ByteEnqueue,"ax",%progbits
+ 181              		.align	2
+ 182              		.global	ByteEnqueue
+ 183              		.code	16
+ 184              		.thumb_func
+ 186              	ByteEnqueue:
+ 187              	.LFB2:
+  27:../Sources/TFC/TFC_Queue.c **** 
+  28:../Sources/TFC/TFC_Queue.c **** int16_t ByteEnqueue(ByteQueue *BQ,uint8_t Val) {
+ 188              		.loc 1 28 0
+ 189              		.cfi_startproc
+ 190 0000 80B5     		push	{r7, lr}
+ 191              	.LCFI6:
+ 192              		.cfi_def_cfa_offset 8
+ 193              		.cfi_offset 7, -8
+ 194              		.cfi_offset 14, -4
+ 195 0002 82B0     		sub	sp, sp, #8
+ 196              	.LCFI7:
+ 197              		.cfi_def_cfa_offset 16
+ 198 0004 00AF     		add	r7, sp, #0
+ 199              	.LCFI8:
+ 200              		.cfi_def_cfa_register 7
+ 201 0006 7860     		str	r0, [r7, #4]
+ 202 0008 0A1C     		mov	r2, r1
+ 203 000a FB1C     		add	r3, r7, #3
+ 204 000c 1A70     		strb	r2, [r3]
+  29:../Sources/TFC/TFC_Queue.c ****     if (BytesInQueue(BQ) == BQ->QueueSize) {
+ 205              		.loc 1 29 0
+ 206 000e 7B68     		ldr	r3, [r7, #4]
+ 207 0010 181C     		mov	r0, r3
+ 208 0012 FFF7FEFF 		bl	BytesInQueue
+ 209 0016 031C     		mov	r3, r0
+ 210 0018 1A1C     		mov	r2, r3
+ 211 001a 7B68     		ldr	r3, [r7, #4]
+ 212 001c 9B88     		ldrh	r3, [r3, #4]
+ 213 001e 9A42     		cmp	r2, r3
+ 214 0020 01D1     		bne	.L9
+  30:../Sources/TFC/TFC_Queue.c ****         return QUEUE_FULL;
+ 215              		.loc 1 30 0
+ 216 0022 0F4B     		ldr	r3, .L12
+ 217 0024 17E0     		b	.L10
+ 218              	.L9:
+  31:../Sources/TFC/TFC_Queue.c ****     } else {
+  32:../Sources/TFC/TFC_Queue.c ****         BQ->QueueStorage[BQ->WritePtr] = Val;
+ 219              		.loc 1 32 0
+ 220 0026 7B68     		ldr	r3, [r7, #4]
+ 221 0028 9A68     		ldr	r2, [r3, #8]
+ 222 002a 7B68     		ldr	r3, [r7, #4]
+ 223 002c 5B88     		ldrh	r3, [r3, #2]
+ 224 002e D318     		add	r3, r2, r3
+ 225 0030 FA1C     		add	r2, r7, #3
+ 226 0032 1278     		ldrb	r2, [r2]
+ 227 0034 1A70     		strb	r2, [r3]
+  33:../Sources/TFC/TFC_Queue.c ****         BQ->WritePtr++;
+ 228              		.loc 1 33 0
+ 229 0036 7B68     		ldr	r3, [r7, #4]
+ 230 0038 5B88     		ldrh	r3, [r3, #2]
+ 231 003a 0133     		add	r3, r3, #1
+ 232 003c 9AB2     		uxth	r2, r3
+ 233 003e 7B68     		ldr	r3, [r7, #4]
+ 234 0040 5A80     		strh	r2, [r3, #2]
+  34:../Sources/TFC/TFC_Queue.c **** 
+  35:../Sources/TFC/TFC_Queue.c ****         if (BQ->WritePtr >= BQ->QueueSize) {
+ 235              		.loc 1 35 0
+ 236 0042 7B68     		ldr	r3, [r7, #4]
+ 237 0044 5A88     		ldrh	r2, [r3, #2]
+ 238 0046 7B68     		ldr	r3, [r7, #4]
+ 239 0048 9B88     		ldrh	r3, [r3, #4]
+ 240 004a 9A42     		cmp	r2, r3
+ 241 004c 02D3     		bcc	.L11
+  36:../Sources/TFC/TFC_Queue.c ****             BQ->WritePtr = 0;
+ 242              		.loc 1 36 0
+ 243 004e 7B68     		ldr	r3, [r7, #4]
+ 244 0050 0022     		mov	r2, #0
+ 245 0052 5A80     		strh	r2, [r3, #2]
+ 246              	.L11:
+  37:../Sources/TFC/TFC_Queue.c ****         }
+  38:../Sources/TFC/TFC_Queue.c ****         return QUEUE_OK;
+ 247              		.loc 1 38 0
+ 248 0054 0023     		mov	r3, #0
+ 249              	.L10:
+ 250 0056 1BB2     		sxth	r3, r3
+  39:../Sources/TFC/TFC_Queue.c ****     }
+  40:../Sources/TFC/TFC_Queue.c **** }
+ 251              		.loc 1 40 0
+ 252 0058 181C     		mov	r0, r3
+ 253 005a BD46     		mov	sp, r7
+ 254 005c 02B0     		add	sp, sp, #8
+ 255              		@ sp needed for prologue
+ 256 005e 80BD     		pop	{r7, pc}
+ 257              	.L13:
+ 258              		.align	2
+ 259              	.L12:
+ 260 0060 FFFF0000 		.word	65535
+ 261              		.cfi_endproc
+ 262              	.LFE2:
+ 264              		.section	.text.ByteArrayEnqueue,"ax",%progbits
+ 265              		.align	2
+ 266              		.global	ByteArrayEnqueue
+ 267              		.code	16
+ 268              		.thumb_func
+ 270              	ByteArrayEnqueue:
+ 271              	.LFB3:
+  41:../Sources/TFC/TFC_Queue.c **** 
+  42:../Sources/TFC/TFC_Queue.c **** int16_t ByteArrayEnqueue(ByteQueue *BQ,uint8_t *Buf,uint16_t Len) {
+ 272              		.loc 1 42 0
+ 273              		.cfi_startproc
+ 274 0000 80B5     		push	{r7, lr}
+ 275              	.LCFI9:
+ 276              		.cfi_def_cfa_offset 8
+ 277              		.cfi_offset 7, -8
+ 278              		.cfi_offset 14, -4
+ 279 0002 86B0     		sub	sp, sp, #24
+ 280              	.LCFI10:
+ 281              		.cfi_def_cfa_offset 32
+ 282 0004 00AF     		add	r7, sp, #0
+ 283              	.LCFI11:
+ 284              		.cfi_def_cfa_register 7
+ 285 0006 F860     		str	r0, [r7, #12]
+ 286 0008 B960     		str	r1, [r7, #8]
+ 287 000a BB1D     		add	r3, r7, #6
+ 288 000c 1A80     		strh	r2, [r3]
+  43:../Sources/TFC/TFC_Queue.c ****     uint16_t i;
+  44:../Sources/TFC/TFC_Queue.c ****     for (i=0;i<Len;i++) {
+ 289              		.loc 1 44 0
+ 290 000e 3B1C     		mov	r3, r7
+ 291 0010 1633     		add	r3, r3, #22
+ 292 0012 0022     		mov	r2, #0
+ 293 0014 1A80     		strh	r2, [r3]
+ 294 0016 11E0     		b	.L15
+ 295              	.L16:
+  45:../Sources/TFC/TFC_Queue.c ****         ByteEnqueue(BQ,Buf[i]);
+ 296              		.loc 1 45 0
+ 297 0018 3B1C     		mov	r3, r7
+ 298 001a 1633     		add	r3, r3, #22
+ 299 001c 1B88     		ldrh	r3, [r3]
+ 300 001e BA68     		ldr	r2, [r7, #8]
+ 301 0020 D318     		add	r3, r2, r3
+ 302 0022 1B78     		ldrb	r3, [r3]
+ 303 0024 FA68     		ldr	r2, [r7, #12]
+ 304 0026 101C     		mov	r0, r2
+ 305 0028 191C     		mov	r1, r3
+ 306 002a FFF7FEFF 		bl	ByteEnqueue
+  44:../Sources/TFC/TFC_Queue.c ****     for (i=0;i<Len;i++) {
+ 307              		.loc 1 44 0
+ 308 002e 3B1C     		mov	r3, r7
+ 309 0030 1633     		add	r3, r3, #22
+ 310 0032 3A1C     		mov	r2, r7
+ 311 0034 1632     		add	r2, r2, #22
+ 312 0036 1288     		ldrh	r2, [r2]
+ 313 0038 0132     		add	r2, r2, #1
+ 314 003a 1A80     		strh	r2, [r3]
+ 315              	.L15:
+  44:../Sources/TFC/TFC_Queue.c ****     for (i=0;i<Len;i++) {
+ 316              		.loc 1 44 0 is_stmt 0
+ 317 003c 3A1C     		mov	r2, r7
+ 318 003e 1632     		add	r2, r2, #22
+ 319 0040 BB1D     		add	r3, r7, #6
+ 320 0042 1288     		ldrh	r2, [r2]
+ 321 0044 1B88     		ldrh	r3, [r3]
+ 322 0046 9A42     		cmp	r2, r3
+ 323 0048 E6D3     		bcc	.L16
+  46:../Sources/TFC/TFC_Queue.c ****     }
+  47:../Sources/TFC/TFC_Queue.c ****     return QUEUE_OK;
+ 324              		.loc 1 47 0 is_stmt 1
+ 325 004a 0023     		mov	r3, #0
+ 326 004c 1BB2     		sxth	r3, r3
+  48:../Sources/TFC/TFC_Queue.c **** }
+ 327              		.loc 1 48 0
+ 328 004e 181C     		mov	r0, r3
+ 329 0050 BD46     		mov	sp, r7
+ 330 0052 06B0     		add	sp, sp, #24
+ 331              		@ sp needed for prologue
+ 332 0054 80BD     		pop	{r7, pc}
+ 333              		.cfi_endproc
+ 334              	.LFE3:
+ 336 0056 C046     		.section	.text.Qprintf,"ax",%progbits
+ 337              		.align	2
+ 338              		.global	Qprintf
+ 339              		.code	16
+ 340              		.thumb_func
+ 342              	Qprintf:
+ 343              	.LFB4:
+  49:../Sources/TFC/TFC_Queue.c **** 
+  50:../Sources/TFC/TFC_Queue.c **** 
+  51:../Sources/TFC/TFC_Queue.c **** int16_t Qprintf(ByteQueue *BQ, const char *FormatString,...)
+  52:../Sources/TFC/TFC_Queue.c **** {
+ 344              		.loc 1 52 0
+ 345              		.cfi_startproc
+ 346 0000 0EB4     		push	{r1, r2, r3}
+ 347              	.LCFI12:
+ 348              		.cfi_def_cfa_offset 12
+ 349 0002 80B5     		push	{r7, lr}
+ 350              	.LCFI13:
+ 351              		.cfi_def_cfa_offset 20
+ 352              		.cfi_offset 7, -20
+ 353              		.cfi_offset 14, -16
+ 354 0004 85B0     		sub	sp, sp, #20
+ 355              	.LCFI14:
+ 356              		.cfi_def_cfa_offset 40
+ 357 0006 00AF     		add	r7, sp, #0
+ 358              	.LCFI15:
+ 359              		.cfi_def_cfa_register 7
+ 360 0008 7860     		str	r0, [r7, #4]
+  53:../Sources/TFC/TFC_Queue.c ****  
+  54:../Sources/TFC/TFC_Queue.c ****      va_list argptr; 
+  55:../Sources/TFC/TFC_Queue.c ****      va_start(argptr,FormatString); 
+ 361              		.loc 1 55 0
+ 362 000a 3B1C     		mov	r3, r7
+ 363 000c 2033     		add	r3, r3, #32
+ 364 000e FB60     		str	r3, [r7, #12]
+  56:../Sources/TFC/TFC_Queue.c ****      vsprintf((char *)StringBuffer,FormatString,argptr);
+ 365              		.loc 1 56 0
+ 366 0010 0E49     		ldr	r1, .L20
+ 367 0012 FA69     		ldr	r2, [r7, #28]
+ 368 0014 FB68     		ldr	r3, [r7, #12]
+ 369 0016 081C     		mov	r0, r1
+ 370 0018 111C     		mov	r1, r2
+ 371 001a 1A1C     		mov	r2, r3
+ 372 001c FFF7FEFF 		bl	vsprintf
+  57:../Sources/TFC/TFC_Queue.c ****      va_end(argptr);   
+  58:../Sources/TFC/TFC_Queue.c ****            
+  59:../Sources/TFC/TFC_Queue.c ****     return ByteArrayEnqueue(BQ,(uint8_t *)StringBuffer,strlen(StringBuffer));
+ 373              		.loc 1 59 0
+ 374 0020 0A4B     		ldr	r3, .L20
+ 375 0022 181C     		mov	r0, r3
+ 376 0024 FFF7FEFF 		bl	strlen
+ 377 0028 031C     		mov	r3, r0
+ 378 002a 9BB2     		uxth	r3, r3
+ 379 002c 7968     		ldr	r1, [r7, #4]
+ 380 002e 074A     		ldr	r2, .L20
+ 381 0030 081C     		mov	r0, r1
+ 382 0032 111C     		mov	r1, r2
+ 383 0034 1A1C     		mov	r2, r3
+ 384 0036 FFF7FEFF 		bl	ByteArrayEnqueue
+ 385 003a 031C     		mov	r3, r0
+  60:../Sources/TFC/TFC_Queue.c **** }
+ 386              		.loc 1 60 0
+ 387 003c 181C     		mov	r0, r3
+ 388 003e BD46     		mov	sp, r7
+ 389 0040 05B0     		add	sp, sp, #20
+ 390              		@ sp needed for prologue
+ 391 0042 80BC     		pop	{r7}
+ 392 0044 08BC     		pop	{r3}
+ 393 0046 03B0     		add	sp, sp, #12
+ 394 0048 1847     		bx	r3
+ 395              	.L21:
+ 396 004a C046     		.align	2
+ 397              	.L20:
+ 398 004c 00000000 		.word	StringBuffer
+ 399              		.cfi_endproc
+ 400              	.LFE4:
+ 402              		.section	.text.ByteDequeue,"ax",%progbits
+ 403              		.align	2
+ 404              		.global	ByteDequeue
+ 405              		.code	16
+ 406              		.thumb_func
+ 408              	ByteDequeue:
+ 409              	.LFB5:
+  61:../Sources/TFC/TFC_Queue.c **** 
+  62:../Sources/TFC/TFC_Queue.c **** 
+  63:../Sources/TFC/TFC_Queue.c **** int16_t ByteDequeue(ByteQueue *BQ,uint8_t *Val) {
+ 410              		.loc 1 63 0
+ 411              		.cfi_startproc
+ 412 0000 80B5     		push	{r7, lr}
+ 413              	.LCFI16:
+ 414              		.cfi_def_cfa_offset 8
+ 415              		.cfi_offset 7, -8
+ 416              		.cfi_offset 14, -4
+ 417 0002 82B0     		sub	sp, sp, #8
+ 418              	.LCFI17:
+ 419              		.cfi_def_cfa_offset 16
+ 420 0004 00AF     		add	r7, sp, #0
+ 421              	.LCFI18:
+ 422              		.cfi_def_cfa_register 7
+ 423 0006 7860     		str	r0, [r7, #4]
+ 424 0008 3960     		str	r1, [r7]
+  64:../Sources/TFC/TFC_Queue.c **** 
+  65:../Sources/TFC/TFC_Queue.c ****     if (BytesInQueue(BQ) == 0) {
+ 425              		.loc 1 65 0
+ 426 000a 7B68     		ldr	r3, [r7, #4]
+ 427 000c 181C     		mov	r0, r3
+ 428 000e FFF7FEFF 		bl	BytesInQueue
+ 429 0012 031C     		mov	r3, r0
+ 430 0014 002B     		cmp	r3, #0
+ 431 0016 01D1     		bne	.L23
+  66:../Sources/TFC/TFC_Queue.c ****         return QUEUE_EMPTY;
+ 432              		.loc 1 66 0
+ 433 0018 0F4B     		ldr	r3, .L26
+ 434 001a 17E0     		b	.L24
+ 435              	.L23:
+  67:../Sources/TFC/TFC_Queue.c ****     } else {
+  68:../Sources/TFC/TFC_Queue.c ****         *Val  = BQ->QueueStorage[BQ->ReadPtr];
+ 436              		.loc 1 68 0
+ 437 001c 7B68     		ldr	r3, [r7, #4]
+ 438 001e 9A68     		ldr	r2, [r3, #8]
+ 439 0020 7B68     		ldr	r3, [r7, #4]
+ 440 0022 1B88     		ldrh	r3, [r3]
+ 441 0024 D318     		add	r3, r2, r3
+ 442 0026 1A78     		ldrb	r2, [r3]
+ 443 0028 3B68     		ldr	r3, [r7]
+ 444 002a 1A70     		strb	r2, [r3]
+  69:../Sources/TFC/TFC_Queue.c **** 
+  70:../Sources/TFC/TFC_Queue.c ****         BQ->ReadPtr++;
+ 445              		.loc 1 70 0
+ 446 002c 7B68     		ldr	r3, [r7, #4]
+ 447 002e 1B88     		ldrh	r3, [r3]
+ 448 0030 0133     		add	r3, r3, #1
+ 449 0032 9AB2     		uxth	r2, r3
+ 450 0034 7B68     		ldr	r3, [r7, #4]
+ 451 0036 1A80     		strh	r2, [r3]
+  71:../Sources/TFC/TFC_Queue.c **** 
+  72:../Sources/TFC/TFC_Queue.c ****         if (BQ->ReadPtr >= BQ->QueueSize) {
+ 452              		.loc 1 72 0
+ 453 0038 7B68     		ldr	r3, [r7, #4]
+ 454 003a 1A88     		ldrh	r2, [r3]
+ 455 003c 7B68     		ldr	r3, [r7, #4]
+ 456 003e 9B88     		ldrh	r3, [r3, #4]
+ 457 0040 9A42     		cmp	r2, r3
+ 458 0042 02D3     		bcc	.L25
+  73:../Sources/TFC/TFC_Queue.c ****             BQ->ReadPtr = 0;
+ 459              		.loc 1 73 0
+ 460 0044 7B68     		ldr	r3, [r7, #4]
+ 461 0046 0022     		mov	r2, #0
+ 462 0048 1A80     		strh	r2, [r3]
+ 463              	.L25:
+  74:../Sources/TFC/TFC_Queue.c ****         }
+  75:../Sources/TFC/TFC_Queue.c ****         return QUEUE_OK;
+ 464              		.loc 1 75 0
+ 465 004a 0023     		mov	r3, #0
+ 466              	.L24:
+ 467 004c 1BB2     		sxth	r3, r3
+  76:../Sources/TFC/TFC_Queue.c ****     }
+  77:../Sources/TFC/TFC_Queue.c **** }
+ 468              		.loc 1 77 0
+ 469 004e 181C     		mov	r0, r3
+ 470 0050 BD46     		mov	sp, r7
+ 471 0052 02B0     		add	sp, sp, #8
+ 472              		@ sp needed for prologue
+ 473 0054 80BD     		pop	{r7, pc}
+ 474              	.L27:
+ 475 0056 C046     		.align	2
+ 476              	.L26:
+ 477 0058 FEFF0000 		.word	65534
+ 478              		.cfi_endproc
+ 479              	.LFE5:
+ 481              		.section	.text.ForcedByteDequeue,"ax",%progbits
+ 482              		.align	2
+ 483              		.global	ForcedByteDequeue
+ 484              		.code	16
+ 485              		.thumb_func
+ 487              	ForcedByteDequeue:
+ 488              	.LFB6:
+  78:../Sources/TFC/TFC_Queue.c **** 
+  79:../Sources/TFC/TFC_Queue.c **** uint8_t ForcedByteDequeue(ByteQueue *BQ)
+  80:../Sources/TFC/TFC_Queue.c **** {
+ 489              		.loc 1 80 0
+ 490              		.cfi_startproc
+ 491 0000 80B5     		push	{r7, lr}
+ 492              	.LCFI19:
+ 493              		.cfi_def_cfa_offset 8
+ 494              		.cfi_offset 7, -8
+ 495              		.cfi_offset 14, -4
+ 496 0002 84B0     		sub	sp, sp, #16
+ 497              	.LCFI20:
+ 498              		.cfi_def_cfa_offset 24
+ 499 0004 00AF     		add	r7, sp, #0
+ 500              	.LCFI21:
+ 501              		.cfi_def_cfa_register 7
+ 502 0006 7860     		str	r0, [r7, #4]
+  81:../Sources/TFC/TFC_Queue.c **** 	uint8_t RetVal;
+  82:../Sources/TFC/TFC_Queue.c **** 
+  83:../Sources/TFC/TFC_Queue.c ****     if (BytesInQueue(BQ) == 0) {
+ 503              		.loc 1 83 0
+ 504 0008 7B68     		ldr	r3, [r7, #4]
+ 505 000a 181C     		mov	r0, r3
+ 506 000c FFF7FEFF 		bl	BytesInQueue
+ 507 0010 031C     		mov	r3, r0
+ 508 0012 002B     		cmp	r3, #0
+ 509 0014 01D1     		bne	.L29
+  84:../Sources/TFC/TFC_Queue.c ****         return 0;
+ 510              		.loc 1 84 0
+ 511 0016 0023     		mov	r3, #0
+ 512 0018 1AE0     		b	.L30
+ 513              	.L29:
+  85:../Sources/TFC/TFC_Queue.c ****     } else {
+  86:../Sources/TFC/TFC_Queue.c ****     	RetVal  = BQ->QueueStorage[BQ->ReadPtr];
+ 514              		.loc 1 86 0
+ 515 001a 7B68     		ldr	r3, [r7, #4]
+ 516 001c 9A68     		ldr	r2, [r3, #8]
+ 517 001e 7B68     		ldr	r3, [r7, #4]
+ 518 0020 1B88     		ldrh	r3, [r3]
+ 519 0022 D218     		add	r2, r2, r3
+ 520 0024 3B1C     		mov	r3, r7
+ 521 0026 0F33     		add	r3, r3, #15
+ 522 0028 1278     		ldrb	r2, [r2]
+ 523 002a 1A70     		strb	r2, [r3]
+  87:../Sources/TFC/TFC_Queue.c **** 
+  88:../Sources/TFC/TFC_Queue.c ****         BQ->ReadPtr++;
+ 524              		.loc 1 88 0
+ 525 002c 7B68     		ldr	r3, [r7, #4]
+ 526 002e 1B88     		ldrh	r3, [r3]
+ 527 0030 0133     		add	r3, r3, #1
+ 528 0032 9AB2     		uxth	r2, r3
+ 529 0034 7B68     		ldr	r3, [r7, #4]
+ 530 0036 1A80     		strh	r2, [r3]
+  89:../Sources/TFC/TFC_Queue.c **** 
+  90:../Sources/TFC/TFC_Queue.c ****         if (BQ->ReadPtr >= BQ->QueueSize) {
+ 531              		.loc 1 90 0
+ 532 0038 7B68     		ldr	r3, [r7, #4]
+ 533 003a 1A88     		ldrh	r2, [r3]
+ 534 003c 7B68     		ldr	r3, [r7, #4]
+ 535 003e 9B88     		ldrh	r3, [r3, #4]
+ 536 0040 9A42     		cmp	r2, r3
+ 537 0042 02D3     		bcc	.L31
+  91:../Sources/TFC/TFC_Queue.c ****             BQ->ReadPtr = 0;
+ 538              		.loc 1 91 0
+ 539 0044 7B68     		ldr	r3, [r7, #4]
+ 540 0046 0022     		mov	r2, #0
+ 541 0048 1A80     		strh	r2, [r3]
+ 542              	.L31:
+  92:../Sources/TFC/TFC_Queue.c ****         }
+  93:../Sources/TFC/TFC_Queue.c ****         return RetVal;
+ 543              		.loc 1 93 0
+ 544 004a 3B1C     		mov	r3, r7
+ 545 004c 0F33     		add	r3, r3, #15
+ 546 004e 1B78     		ldrb	r3, [r3]
+ 547              	.L30:
+  94:../Sources/TFC/TFC_Queue.c ****     }
+  95:../Sources/TFC/TFC_Queue.c **** }
+ 548              		.loc 1 95 0
+ 549 0050 181C     		mov	r0, r3
+ 550 0052 BD46     		mov	sp, r7
+ 551 0054 04B0     		add	sp, sp, #16
+ 552              		@ sp needed for prologue
+ 553 0056 80BD     		pop	{r7, pc}
+ 554              		.cfi_endproc
+ 555              	.LFE6:
+ 557              		.text
+ 558              	.Letext0:
+ 559              		.file 2 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+ 560              		.file 3 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/va_list.h"
+ 561              		.file 4 "C:/Users/B48861/TFC/TestMode/Project_Headers/TFC\\TFC_Queue.h"
+ 562              		.file 5 "<built-in>"
+DEFINED SYMBOLS
+                            *ABS*:00000000 TFC_Queue.c
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:18     .bss.StringBuffer:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:21     .bss.StringBuffer:00000000 StringBuffer
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:24     .text.InitByteQueue:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:29     .text.InitByteQueue:00000000 InitByteQueue
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:111    .text.BytesInQueue:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:116    .text.BytesInQueue:00000000 BytesInQueue
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:181    .text.ByteEnqueue:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:186    .text.ByteEnqueue:00000000 ByteEnqueue
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:260    .text.ByteEnqueue:00000060 $d
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:265    .text.ByteArrayEnqueue:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:270    .text.ByteArrayEnqueue:00000000 ByteArrayEnqueue
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:337    .text.Qprintf:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:342    .text.Qprintf:00000000 Qprintf
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:398    .text.Qprintf:0000004c $d
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:403    .text.ByteDequeue:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:408    .text.ByteDequeue:00000000 ByteDequeue
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:477    .text.ByteDequeue:00000058 $d
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:482    .text.ForcedByteDequeue:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccq6VliL.s:487    .text.ForcedByteDequeue:00000000 ForcedByteDequeue
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+vsprintf
+strlen

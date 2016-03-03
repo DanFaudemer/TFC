@@ -1,0 +1,286 @@
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"TFC_ARM_SysTick.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.section	.bss.DelayTimerTick,"aw",%nobits
+  18              		.align	2
+  21              	DelayTimerTick:
+  22 0000 00000000 		.space	4
+  23              		.comm	TFC_Ticker,16,4
+  24              		.section	.text.TFC_InitSysTick,"ax",%progbits
+  25              		.align	2
+  26              		.global	TFC_InitSysTick
+  27              		.code	16
+  28              		.thumb_func
+  30              	TFC_InitSysTick:
+  31              	.LFB0:
+  32              		.file 1 "../Sources/TFC/TFC_ARM_SysTick.c"
+   1:../Sources/TFC/TFC_ARM_SysTick.c **** #include "TFC\TFC.h"
+   2:../Sources/TFC/TFC_ARM_SysTick.c **** 
+   3:../Sources/TFC/TFC_ARM_SysTick.c **** static volatile unsigned int DelayTimerTick = 0;
+   4:../Sources/TFC/TFC_ARM_SysTick.c **** volatile uint32_t TFC_Ticker[NUM_TFC_TICKERS];
+   5:../Sources/TFC/TFC_ARM_SysTick.c **** 
+   6:../Sources/TFC/TFC_ARM_SysTick.c **** 
+   7:../Sources/TFC/TFC_ARM_SysTick.c **** //Since this SysTick is part of the Cortex M0 Core,   you need to look in the 
+   8:../Sources/TFC/TFC_ARM_SysTick.c **** //Cortex M0 Generic users Guide
+   9:../Sources/TFC/TFC_ARM_SysTick.c **** 
+  10:../Sources/TFC/TFC_ARM_SysTick.c **** //See Section 4.4
+  11:../Sources/TFC/TFC_ARM_SysTick.c **** void TFC_InitSysTick()
+  12:../Sources/TFC/TFC_ARM_SysTick.c **** {
+  33              		.loc 1 12 0
+  34              		.cfi_startproc
+  35 0000 80B5     		push	{r7, lr}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 8
+  38              		.cfi_offset 7, -8
+  39              		.cfi_offset 14, -4
+  40 0002 82B0     		sub	sp, sp, #8
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_offset 16
+  43 0004 00AF     		add	r7, sp, #0
+  44              	.LCFI2:
+  45              		.cfi_def_cfa_register 7
+  13:../Sources/TFC/TFC_ARM_SysTick.c **** 	uint8_t i;
+  14:../Sources/TFC/TFC_ARM_SysTick.c **** 	
+  15:../Sources/TFC/TFC_ARM_SysTick.c **** 	for(i=0;i<NUM_TFC_TICKERS;i++)
+  46              		.loc 1 15 0
+  47 0006 FB1D     		add	r3, r7, #7
+  48 0008 0022     		mov	r2, #0
+  49 000a 1A70     		strb	r2, [r3]
+  50 000c 0AE0     		b	.L2
+  51              	.L3:
+  16:../Sources/TFC/TFC_ARM_SysTick.c **** 		TFC_Ticker[i] = 0;
+  52              		.loc 1 16 0
+  53 000e FB1D     		add	r3, r7, #7
+  54 0010 1A78     		ldrb	r2, [r3]
+  55 0012 0B4B     		ldr	r3, .L4
+  56 0014 9200     		lsl	r2, r2, #2
+  57 0016 0021     		mov	r1, #0
+  58 0018 D150     		str	r1, [r2, r3]
+  15:../Sources/TFC/TFC_ARM_SysTick.c **** 	for(i=0;i<NUM_TFC_TICKERS;i++)
+  59              		.loc 1 15 0
+  60 001a FB1D     		add	r3, r7, #7
+  61 001c FA1D     		add	r2, r7, #7
+  62 001e 1278     		ldrb	r2, [r2]
+  63 0020 0132     		add	r2, r2, #1
+  64 0022 1A70     		strb	r2, [r3]
+  65              	.L2:
+  15:../Sources/TFC/TFC_ARM_SysTick.c **** 	for(i=0;i<NUM_TFC_TICKERS;i++)
+  66              		.loc 1 15 0 is_stmt 0
+  67 0024 FB1D     		add	r3, r7, #7
+  68 0026 1B78     		ldrb	r3, [r3]
+  69 0028 032B     		cmp	r3, #3
+  70 002a F0D9     		bls	.L3
+  17:../Sources/TFC/TFC_ARM_SysTick.c **** 	
+  18:../Sources/TFC/TFC_ARM_SysTick.c **** 	SYST_RVR = CORE_CLOCK/SYSTICK_FREQUENCY;
+  71              		.loc 1 18 0 is_stmt 1
+  72 002c 054B     		ldr	r3, .L4+4
+  73 002e 064A     		ldr	r2, .L4+8
+  74 0030 5A60     		str	r2, [r3, #4]
+  19:../Sources/TFC/TFC_ARM_SysTick.c **** 	SYST_CSR = SysTick_CSR_ENABLE_MASK | SysTick_CSR_TICKINT_MASK | SysTick_CSR_CLKSOURCE_MASK;
+  75              		.loc 1 19 0
+  76 0032 044B     		ldr	r3, .L4+4
+  77 0034 0722     		mov	r2, #7
+  78 0036 1A60     		str	r2, [r3]
+  20:../Sources/TFC/TFC_ARM_SysTick.c **** 
+  21:../Sources/TFC/TFC_ARM_SysTick.c **** 	//Important!  Since the Systick is part of the Cortex core and NOT a kinetis peripheral
+  22:../Sources/TFC/TFC_ARM_SysTick.c **** 	// its Interrupt line is not passed through NVIC.   You need to make sure that
+  23:../Sources/TFC/TFC_ARM_SysTick.c **** 	//the SysTickIRQ function is poopulated in the vector table.  See the kinetis_sysinit.c file
+  24:../Sources/TFC/TFC_ARM_SysTick.c **** }
+  79              		.loc 1 24 0
+  80 0038 BD46     		mov	sp, r7
+  81 003a 02B0     		add	sp, sp, #8
+  82              		@ sp needed for prologue
+  83 003c 80BD     		pop	{r7, pc}
+  84              	.L5:
+  85 003e C046     		.align	2
+  86              	.L4:
+  87 0040 00000000 		.word	TFC_Ticker
+  88 0044 10E000E0 		.word	-536813552
+  89 0048 80BB0000 		.word	48000
+  90              		.cfi_endproc
+  91              	.LFE0:
+  93              		.section	.text.SysTick_Handler,"ax",%progbits
+  94              		.align	2
+  95              		.global	SysTick_Handler
+  96              		.code	16
+  97              		.thumb_func
+  99              	SysTick_Handler:
+ 100              	.LFB1:
+  25:../Sources/TFC/TFC_ARM_SysTick.c **** 
+  26:../Sources/TFC/TFC_ARM_SysTick.c **** void SysTick_Handler() // s'execute toutes les ms
+  27:../Sources/TFC/TFC_ARM_SysTick.c **** {
+ 101              		.loc 1 27 0
+ 102              		.cfi_startproc
+ 103 0000 80B5     		push	{r7, lr}
+ 104              	.LCFI3:
+ 105              		.cfi_def_cfa_offset 8
+ 106              		.cfi_offset 7, -8
+ 107              		.cfi_offset 14, -4
+ 108 0002 82B0     		sub	sp, sp, #8
+ 109              	.LCFI4:
+ 110              		.cfi_def_cfa_offset 16
+ 111 0004 00AF     		add	r7, sp, #0
+ 112              	.LCFI5:
+ 113              		.cfi_def_cfa_register 7
+  28:../Sources/TFC/TFC_ARM_SysTick.c **** 	uint8_t i;
+  29:../Sources/TFC/TFC_ARM_SysTick.c **** 
+  30:../Sources/TFC/TFC_ARM_SysTick.c **** 	if(DelayTimerTick<0xFFFFFFFF)
+ 114              		.loc 1 30 0
+ 115 0006 144B     		ldr	r3, .L11
+ 116 0008 1B68     		ldr	r3, [r3]
+ 117 000a 0133     		add	r3, r3, #1
+ 118 000c 04D0     		beq	.L7
+  31:../Sources/TFC/TFC_ARM_SysTick.c **** 	{
+  32:../Sources/TFC/TFC_ARM_SysTick.c **** 		DelayTimerTick++;
+ 119              		.loc 1 32 0
+ 120 000e 124B     		ldr	r3, .L11
+ 121 0010 1B68     		ldr	r3, [r3]
+ 122 0012 5A1C     		add	r2, r3, #1
+ 123 0014 104B     		ldr	r3, .L11
+ 124 0016 1A60     		str	r2, [r3]
+ 125              	.L7:
+  33:../Sources/TFC/TFC_ARM_SysTick.c **** 	}
+  34:../Sources/TFC/TFC_ARM_SysTick.c **** 	
+  35:../Sources/TFC/TFC_ARM_SysTick.c **** 	for(i=0;i<NUM_TFC_TICKERS;i++)
+ 126              		.loc 1 35 0
+ 127 0018 FB1D     		add	r3, r7, #7
+ 128 001a 0022     		mov	r2, #0
+ 129 001c 1A70     		strb	r2, [r3]
+ 130 001e 14E0     		b	.L8
+ 131              	.L10:
+  36:../Sources/TFC/TFC_ARM_SysTick.c **** 		if(TFC_Ticker[i]<0xFFFFFFFF)
+ 132              		.loc 1 36 0
+ 133 0020 FB1D     		add	r3, r7, #7
+ 134 0022 1A78     		ldrb	r2, [r3]
+ 135 0024 0D4B     		ldr	r3, .L11+4
+ 136 0026 9200     		lsl	r2, r2, #2
+ 137 0028 D358     		ldr	r3, [r2, r3]
+ 138 002a 0133     		add	r3, r3, #1
+ 139 002c 08D0     		beq	.L9
+  37:../Sources/TFC/TFC_ARM_SysTick.c **** 			TFC_Ticker[i]++;
+ 140              		.loc 1 37 0
+ 141 002e FB1D     		add	r3, r7, #7
+ 142 0030 1B78     		ldrb	r3, [r3]
+ 143 0032 0A4A     		ldr	r2, .L11+4
+ 144 0034 9900     		lsl	r1, r3, #2
+ 145 0036 8A58     		ldr	r2, [r1, r2]
+ 146 0038 511C     		add	r1, r2, #1
+ 147 003a 084A     		ldr	r2, .L11+4
+ 148 003c 9B00     		lsl	r3, r3, #2
+ 149 003e 9950     		str	r1, [r3, r2]
+ 150              	.L9:
+  35:../Sources/TFC/TFC_ARM_SysTick.c **** 	for(i=0;i<NUM_TFC_TICKERS;i++)
+ 151              		.loc 1 35 0
+ 152 0040 FB1D     		add	r3, r7, #7
+ 153 0042 FA1D     		add	r2, r7, #7
+ 154 0044 1278     		ldrb	r2, [r2]
+ 155 0046 0132     		add	r2, r2, #1
+ 156 0048 1A70     		strb	r2, [r3]
+ 157              	.L8:
+  35:../Sources/TFC/TFC_ARM_SysTick.c **** 	for(i=0;i<NUM_TFC_TICKERS;i++)
+ 158              		.loc 1 35 0 is_stmt 0
+ 159 004a FB1D     		add	r3, r7, #7
+ 160 004c 1B78     		ldrb	r3, [r3]
+ 161 004e 032B     		cmp	r3, #3
+ 162 0050 E6D9     		bls	.L10
+  38:../Sources/TFC/TFC_ARM_SysTick.c **** }
+ 163              		.loc 1 38 0 is_stmt 1
+ 164 0052 BD46     		mov	sp, r7
+ 165 0054 02B0     		add	sp, sp, #8
+ 166              		@ sp needed for prologue
+ 167 0056 80BD     		pop	{r7, pc}
+ 168              	.L12:
+ 169              		.align	2
+ 170              	.L11:
+ 171 0058 00000000 		.word	DelayTimerTick
+ 172 005c 00000000 		.word	TFC_Ticker
+ 173              		.cfi_endproc
+ 174              	.LFE1:
+ 176              		.section	.text.TFC_Delay_mS,"ax",%progbits
+ 177              		.align	2
+ 178              		.global	TFC_Delay_mS
+ 179              		.code	16
+ 180              		.thumb_func
+ 182              	TFC_Delay_mS:
+ 183              	.LFB2:
+  39:../Sources/TFC/TFC_ARM_SysTick.c **** 
+  40:../Sources/TFC/TFC_ARM_SysTick.c **** void TFC_Delay_mS(unsigned int TicksIn_mS)
+  41:../Sources/TFC/TFC_ARM_SysTick.c **** {
+ 184              		.loc 1 41 0
+ 185              		.cfi_startproc
+ 186 0000 80B5     		push	{r7, lr}
+ 187              	.LCFI6:
+ 188              		.cfi_def_cfa_offset 8
+ 189              		.cfi_offset 7, -8
+ 190              		.cfi_offset 14, -4
+ 191 0002 82B0     		sub	sp, sp, #8
+ 192              	.LCFI7:
+ 193              		.cfi_def_cfa_offset 16
+ 194 0004 00AF     		add	r7, sp, #0
+ 195              	.LCFI8:
+ 196              		.cfi_def_cfa_register 7
+ 197 0006 7860     		str	r0, [r7, #4]
+  42:../Sources/TFC/TFC_ARM_SysTick.c **** 	DelayTimerTick = 0;
+ 198              		.loc 1 42 0
+ 199 0008 054B     		ldr	r3, .L15
+ 200 000a 0022     		mov	r2, #0
+ 201 000c 1A60     		str	r2, [r3]
+  43:../Sources/TFC/TFC_ARM_SysTick.c **** 
+  44:../Sources/TFC/TFC_ARM_SysTick.c **** 	while(DelayTimerTick<TicksIn_mS)
+ 202              		.loc 1 44 0
+ 203 000e C046     		mov	r8, r8
+ 204              	.L14:
+ 205              		.loc 1 44 0 is_stmt 0
+ 206 0010 034B     		ldr	r3, .L15
+ 207 0012 1A68     		ldr	r2, [r3]
+ 208 0014 7B68     		ldr	r3, [r7, #4]
+ 209 0016 9A42     		cmp	r2, r3
+ 210 0018 FAD3     		bcc	.L14
+  45:../Sources/TFC/TFC_ARM_SysTick.c **** 	{
+  46:../Sources/TFC/TFC_ARM_SysTick.c **** 	}
+  47:../Sources/TFC/TFC_ARM_SysTick.c **** }
+ 211              		.loc 1 47 0 is_stmt 1
+ 212 001a BD46     		mov	sp, r7
+ 213 001c 02B0     		add	sp, sp, #8
+ 214              		@ sp needed for prologue
+ 215 001e 80BD     		pop	{r7, pc}
+ 216              	.L16:
+ 217              		.align	2
+ 218              	.L15:
+ 219 0020 00000000 		.word	DelayTimerTick
+ 220              		.cfi_endproc
+ 221              	.LFE2:
+ 223              		.text
+ 224              	.Letext0:
+ 225              		.file 2 "C:/Freescale/CW MCU v10.6/MCU/ARM_GCC_Support/ewl/EWL_C/include/cstdint"
+ 226              		.file 3 "C:/Users/B48861/TFC/Carcode/Project_Headers/MKL25Z4.h"
+DEFINED SYMBOLS
+                            *ABS*:00000000 TFC_ARM_SysTick.c
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:18     .bss.DelayTimerTick:00000000 $d
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:21     .bss.DelayTimerTick:00000000 DelayTimerTick
+                            *COM*:00000010 TFC_Ticker
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:25     .text.TFC_InitSysTick:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:30     .text.TFC_InitSysTick:00000000 TFC_InitSysTick
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:87     .text.TFC_InitSysTick:00000040 $d
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:94     .text.SysTick_Handler:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:99     .text.SysTick_Handler:00000000 SysTick_Handler
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:171    .text.SysTick_Handler:00000058 $d
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:177    .text.TFC_Delay_mS:00000000 $t
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:182    .text.TFC_Delay_mS:00000000 TFC_Delay_mS
+C:\Users\B48861\AppData\Local\Temp\ccgLjHNU.s:219    .text.TFC_Delay_mS:00000020 $d
+                     .debug_frame:00000010 $d
+
+NO UNDEFINED SYMBOLS
