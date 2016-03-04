@@ -6,6 +6,10 @@
 
 
 
+#include "telemetry/driver.h"
+#include "telemetry/telemetry_core.h"
+#include "telemetry/telemetry_utils.h"
+
 /******************/
 
 /* Function Prototypes */
@@ -50,11 +54,26 @@ int main(void)
 	int8_t ButtonA_isPressed = 0;
 	/* Initialisation */
 	
+	TM_transport transport;
+	transport.read = read;
+	transport.write = write;
+	transport.readable = readable;
+	transport.writeable = writeable;
+
+	init_telemetry(&transport);
 	
 	
 	TFC_Init();
 
-
+	 // Initialize telemetry
+	  
+	  
+	 
+	  while (1) {
+		  TFC_Task();
+	      update_telemetry(0);
+	      publish("Hello","world!");
+	  }
 
 		
 	/* Main Loop */
