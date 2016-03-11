@@ -10,8 +10,11 @@ uint16_t seuil_detection=10;
 int16_t min_d2 =0, max_d2 =0;
 uint8_t copy_nb_line=0;
 
-int16_t copyDerivate[128];
+uint16_t *copymedianFilter;
+uint16_t *copygainCorr;
+int16_t *copyderivate_cam;
 
+uint16_t medianFilter_out[128], gainCorr_out[128], derivate_out[128];
 int compare( const void* a, const void* b)
 {
 	uint16_t int_a = * ( (uint16_t*) a );
@@ -24,7 +27,7 @@ int compare( const void* a, const void* b)
 
 void  medianFilter(uint16_t *camera, uint16_t *out)
 {
-	uint16_t sub[MEDIAN_SIZE] = {0};
+	uint16_t sub[MEDIAN_SIZE*2] = {0};
 	uint8_t i,j, left, right;
 	
 	for(i = 0; i < 128; i++)
@@ -34,6 +37,8 @@ void  medianFilter(uint16_t *camera, uint16_t *out)
 		
 		for(j=left; j < right ; j++)
 			sub[j-left] = camera[j];
+		
+		j++;
 		qsort(sub, right-left, sizeof(uint16_t), compare);
 		out[i] = sub[(right-left)>>1];		
 	}
@@ -56,20 +61,20 @@ void  gainCorr(uint16_t *camera, uint16_t *out)
 			min = camera[i];
 	}
 	
-	corr = ((float) ((1<<16)-1))/((float) max);
+	corr = ((float) ((1<<10)-1))/((float) max);
 	for(i=0; i < 128 ; i++)
 	{
-		out[i] = (uint16_t)corr*((float) camera[i]);
+		out[i] = (uint16_t)(corr*((float) camera[i]));
 	}
 }
 
 
-void  derivate_cam(uint16_t *camera, uint16_t *out)
+void  derivate_cam(uint16_t *camera, int16_t *out)
 {
 	uint8_t i;
 	for(i=0; i < 128-1 ; i++)
 	{
-		out[i] = (camera[i+1] - camera[i])/2;
+		out[i] = ((int16_t) (camera[i+1]) - (int16_t) (camera[i]))/2;
 	}
 	
 }
@@ -90,12 +95,17 @@ int16_t getPos(uint16_t *camera)
 int16_t getCenterPos( uint16_t  *LineScanImage)
 {
 	int16_t posLine, posLine_prev;	
-	uint16_t medianFilter_out[128], gainCorr_out[128], derivate_out[128];
+
 	
+
+
 	
 	medianFilter(LineScanImage, medianFilter_out);
+	copymedianFilter = medianFilter_out,
 	gainCorr(medianFilter_out, gainCorr_out);
+	copygainCorr = gainCorr_out;
 	derivate_cam(gainCorr_out, derivate_out);
+	copyderivate_cam = derivate_out;
 	posLine = getPos(derivate_out);
 		
 	

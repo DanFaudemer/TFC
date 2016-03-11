@@ -46,6 +46,10 @@ uint32_t TFC_Ticker_0_copy = 0;
 extern int16_t offsetServo;
 /*******************************/
 
+
+
+
+
 int main(void)
 {
 
@@ -60,77 +64,45 @@ int main(void)
 	transport.readable = readable;
 	transport.writeable = writeable;
 
+	TFC_Init();
+	
 	init_telemetry(&transport);
 	
+	subscribe(getTelem);
 	
-	TFC_Init();
+	
 
 	 // Initialize telemetry
 	  
-	  
-	 
-	  while (1) {
-		  TFC_Task();
-	      update_telemetry(0);
-	      publish("Hello","world!");
-	  }
+
 
 		
 	/* Main Loop */
 	
 	//Read only register -> 0
-/*	register_scalar(&Run_F, UINT8, 1, "Run_F");
-	register_scalar(&vitesseG, INT16,0, "VitesseG");
-	register_scalar(&vitesseD, INT16,0, "VitesseD");
-    register_scalar(&pid_speedCopy, INT16,0,"PID Speed");
-    register_scalar(&pid_diffCopy, INT16,0,"PID Diff");
-	
-	register_scalar(&posCenter, INT16,0, "Center position");
-	
-	register_scalar(&lineError, INT16,0, "Line error");
-	
-	register_scalar(&PWM_lights, INT16,1, "Lights PWM");
-	register_scalar(&diff, INT16,1, "Commande servo");
-	
-	register_scalar(&copy_nb_line, UINT8, 0, "Nombre de lignes");
-	//Line 
-	register_array(LineScanImage1,128,UINT16,0,"line");
-	register_array(LineScanBufferCopyFiltered,128,UINT16,0,"line filtered");
-	register_array(copyDerivate,128,INT16,0,"line derivate");
-	
-	register_scalar(&TFC_Ticker_0_copy, UINT32, 0, "Ticker 0");
-		
-	register_scalar(&coeff_dir_P,INT16,1, "coeff_dir_P");
-	register_scalar(&coeff_dir_D,INT16,1, "coeff_dir_D");
-	register_scalar(&coeff_dir_I,INT16,1, "coeff_dir_I");
-	register_scalar(&coeff_diff_P,INT16,1, "coeff_diff_P");
-	register_scalar(&coeff_diff_I,INT16,1, "coeff_diff_I");
-	register_scalar(&coeff_diff_D,INT16,1, "coeff_diff_D");
-	register_scalar(&coeff_speed_P,INT16,1, "coeff_speed_P");
-	register_scalar(&coeff_speed_I,INT16,1, "coeff_speed_I");
-	register_scalar(&coeff_speed_D,INT16,1, "coeff_speed_D");
-	
-	register_scalar(&offsetServo, INT16,1,"offsetServo");
-	
-	
-	register_scalar(&vit_max,INT16,1, "vit_max");
-	register_scalar(&vit_min,INT16,1, "vit_min");
-	register_scalar(&seuil_detection,UINT16,1, "seuil_detection");
-*/
+
 	
 	             
 	for(;;)
 	{	   
 		//TFC_Task must be called in your main loop.  This keeps certain processing happy (I.E. Serial port queue check)
 		TFC_Task();
-
+		update_telemetry(0);
+		//All 100ms publish
+		if(TFC_Ticker[2] >= 500)
+		{
+			TFC_Ticker[2] = 0;
+			publish_vars();
+		}
+	
 		//TERMINAL_PRINTF("Hello \r\n");
 		ButtonA_isPressed = TFC_PUSH_BUTTON_0_PRESSED;
 
 		/* Proceed Data from UART */
 		switch(cur_state)
 		{
-		case DEBUG: if(ButtonA_isPressed && !ButtonA_p)
+		case DEBUG: 
+			if(ButtonA_isPressed && !ButtonA_p)
 		{
 			TFC_Delay_mS(200);
 			cur_state=RUN;
@@ -145,8 +117,10 @@ int main(void)
 				TFC_HBRIDGE_DISABLE;
 			
 		}
-		else
-			State_Debug();
+			else
+			{
+				State_Debug();
+			}
 		break;
 
 		case RUN: if(ButtonA_isPressed && !ButtonA_p) 
@@ -166,6 +140,8 @@ int main(void)
 
 
 	}
+	
+	
 	return 0;
 }
 
@@ -200,7 +176,7 @@ void State_Debug(void)
 		/* Set Servo Position Maximum range is 1000 */
 		TFC_SetServo(0,diff);
 
-		TERMINAL_PRINTF("Pos Serv : %d \r\n",diff);
+		//TERMINAL_PRINTF("Pos Serv : %d \r\n",diff);
 		vitesseG = (int16_t) (TFC_ReadPot(1)*1000);
 		vitesseD = vitesseG;
 		if( ((TFC_GetDIP_Switch()>>1)&0x03) == 0) // les deux du milieu
@@ -224,17 +200,17 @@ void State_Debug(void)
             TFC_SetServoDutyCycle(1, 0); 
 
 		/* Transmit Image */
-		TERMINAL_PRINTF("\r\n");
+		//TERMINAL_PRINTF("\r\n");
 
-		TERMINAL_PRINTF("L:,");
-		for(i=0;i<128;i++)
+		//TERMINAL_PRINTF("L:,");
+		/*for(i=0;i<128;i++)
 		{
 			TERMINAL_PRINTF("0x%X,",LineScanImage1[i]);
-		}
-		TERMINAL_PRINTF("\r\n");
+		}*/
+		//TERMINAL_PRINTF("\r\n");
 
 		/* Transmit Position &  Parameters PID */
-		TERMINAL_PRINTF(" posCenter : %d, AngleCorr : %d, diff: %d, LCenter: %d,", posCenter, diff*35, diff, (int)LINECENTER);
+		//TERMINAL_PRINTF(" posCenter : %d, AngleCorr : %d, diff: %d, LCenter: %d,", posCenter, diff*35, diff, (int)LINECENTER);
 
 		/* Transmit Vitesse */
 		//TERMINAL_PRINTF(" vitD: %d, vitG: %d\n\r", (int)vitesseD,(int)vitesseG);
@@ -248,7 +224,6 @@ void State_Debug(void)
 void State_Run(void)
 {	
 	uint8_t j =0;
-
 	
 	
 	
