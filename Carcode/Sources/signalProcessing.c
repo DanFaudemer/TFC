@@ -4,7 +4,7 @@
 #include "signalProcessing.h"
 
 #include <cstdlib> 
-#define MEDIAN_SIZE 4
+#define MEDIAN_SIZE 1
 extern int8_t cur_state;
 uint16_t seuil_detection=10;
 int16_t min_d2 =0, max_d2 =0;
@@ -14,7 +14,9 @@ uint16_t *copymedianFilter;
 uint16_t *copygainCorr;
 int16_t *copyderivate_cam;
 
-uint16_t medianFilter_out[128], gainCorr_out[128], derivate_out[128];
+uint16_t medianFilter_out[128], gainCorr_out[128];
+
+int16_t derivate_out[128];
 int compare( const void* a, const void* b)
 {
 	uint16_t int_a = * ( (uint16_t*) a );
@@ -81,15 +83,26 @@ void  derivate_cam(uint16_t *camera, int16_t *out)
 
 
 
-int16_t getPos(uint16_t *camera)
+int16_t getPos(int16_t *camera)
 {
 	uint8_t i;
-	for(i=0; i < 128 ; i++)
+	int16_t i_max = -1;
+	int16_t max = 0;
+	for(i=LIMITCAMMIN; i < LIMITCAMMAX ; i++)
 	{
-		if(abs(camera[i]) > seuil_detection)
-			return i;
+		if(abs(camera[i]) > abs(max))
+		{
+			max = camera[i];
+			i_max = i;
+		}
 	}
-	return -1;
+	
+	if(i_max > -1)
+	{
+		return ((i_max <= 64) ? i_max + LINE_SIZE/2 : i_max - LINE_SIZE/2) - 64;
+	}
+	else
+		return -1;
 }
 
 int16_t getCenterPos( uint16_t  *LineScanImage)

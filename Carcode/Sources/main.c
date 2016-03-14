@@ -89,7 +89,7 @@ int main(void)
 		TFC_Task();
 		update_telemetry(0);
 		//All 100ms publish
-		if(TFC_Ticker[2] >= 500)
+		if(TFC_Ticker[2] >= 100)
 		{
 			TFC_Ticker[2] = 0;
 			publish_vars();
@@ -155,7 +155,7 @@ void State_Debug(void)
 	uint32_t t,i=0;
 	uint8_t j =0;
 	TFC_HBRIDGE_DISABLE;
-	if(TFC_Ticker[0]>1000 && LineScanImageReady==1) // Each 1s 
+	if(TFC_Ticker[0]>100 && LineScanImageReady==1) // Each 1s 
 	{
 		/* Copy line scan for logs*/
 		

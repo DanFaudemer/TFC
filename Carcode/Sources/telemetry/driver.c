@@ -41,21 +41,22 @@ void publish_vars()
 	int i;
 	static int bol =0;
 	char buffer[50];
-    publish("Hello","world!");
-    publish("Hello2","world!");
-    publish_i32("Hello4", 44);
-    for(i=0 ; i < 127 ; i++)
+	
+	publish_i16("p", posCenter); 
+    /*for(i=0 ; i < 127 ; i++)
     {
+    	if(bol == 0)
+		{
+    		sprintf(buffer, "c:%d",i);
+    		publish_i16(buffer,LineScanImage1[i]);
+		}
     	/*
-    	sprintf(buffer, "c:%d",i);
-    	publish_i16(buffer,LineScanImage1[i]);
-    	
     	sprintf(buffer, "m:%d",i);
 		publish_i16(buffer,copymedianFilter[i]);
     	
-    	*/
     	
-    	if(bol)
+    	
+    	else if(bol ==1)
     	{
     		sprintf(buffer, "g:%d",i);
 			publish_u16(buffer,copygainCorr[i]);
@@ -65,7 +66,7 @@ void publish_vars()
     		sprintf(buffer, "d:%d",i);
 			publish_i16(buffer,copyderivate_cam[i]);
     	}
-    	bol = (bol+1)%2;
+    	bol = (bol+1)%3;
     }
     
     /*
