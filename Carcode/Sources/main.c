@@ -25,6 +25,8 @@ extern volatile uint16_t PotADC_Value[2];
 extern uint16_t seuil_detection ;
 extern uint8_t copy_nb_line;
 extern uint16_t seuil_detection;
+
+extern int16_t deadBand;
 int16_t posCenter;
 int16_t diff;
 int16_t PWM_lights = 15000; //50% DC sur 50Hz...
@@ -89,11 +91,7 @@ int main(void)
 		TFC_Task();
 		update_telemetry(0);
 		//All 100ms publish
-		if(TFC_Ticker[2] >= 100)
-		{
-			TFC_Ticker[2] = 0;
-			publish_vars();
-		}
+
 	
 		//TERMINAL_PRINTF("Hello \r\n");
 		ButtonA_isPressed = TFC_PUSH_BUTTON_0_PRESSED;
@@ -101,7 +99,13 @@ int main(void)
 		/* Proceed Data from UART */
 		switch(cur_state)
 		{
-		case DEBUG: 
+		case DEBUG:
+			
+			if(TFC_Ticker[2] >= 400)
+			{
+				TFC_Ticker[2] = 0;
+				publish_vars();
+			}
 			if(ButtonA_isPressed && !ButtonA_p)
 		{
 			TFC_Delay_mS(200);
@@ -123,7 +127,14 @@ int main(void)
 			}
 		break;
 
-		case RUN: if(ButtonA_isPressed && !ButtonA_p) 
+		case RUN:
+			
+		if(TFC_Ticker[2] >= 100)
+		{
+			TFC_Ticker[2] = 0;
+			publish_vars();
+		}
+		if(ButtonA_isPressed && !ButtonA_p) 
 		{
 			TFC_Delay_mS(200);
 			cur_state=DEBUG;
@@ -337,8 +348,6 @@ int16_t Asserv_pos(void)
 	// -> comment tu calcules 35? Je l'ai mesuré :D  
 	// -> problème range : effective => 65 - 80 (lorsque que posline = 65 ou 80, servo à fond!)
 	
-	//TERMINAL_PRINTF("Difference %f, posCenter %d : \r\n", difference, posCenter);
-
 	
 	lineError = error; //Just for the log  
 	
@@ -353,8 +362,13 @@ void Asserv_vit(void)
 	int16_t  derivate, integrate =0;
 	int16_t pid_speed, pid_diff;
 	last_error = error;
-	error = posCenter;
-
+	
+	if(abs(posCenter) > deadBand)
+		error = posCenter;
+	else 
+		error = 0;
+	
+	
 	derivate = error - last_error;
 	integrate += error;	
 
@@ -397,55 +411,6 @@ void Asserv_vit(void)
 	if(vitesseD > 1000) vitesseD=1000;
 	else if(vitesseD < 0) vitesseD = 0;
 	
-	/*
-	
-	if( abs(error) <= 2 )
-	{
-		vitesseG = vit_max;
-		vitesseD = vit_max;
-	}
-	*/
-	
-	//Pour débug utiliser : 
-	
-	
-
-	/* Jerome Proportionnel et intégrer à la commande de la direction*/
-	/*
-	float offset=0; 
-	float differentiel=diff/(35*4), temp=0;// entre -0.25 et 0.25
-	static float I_differentiel=0.0;
-
-	I_differentiel += differentiel;
-
-	if(I_differentiel > 10.0) I_differentiel = 10.0;
-	else if (I_differentiel < -10.0) I_differentiel = -10.0;
-	// vitesse moyenne en fonction du potar
-/*	if( offset < VITMIN) offset = 0.3; //min
-	else if(offset > 0.75) offset = 0.75; // max 0.75
-	 */
-	/*
-	if(I_differentiel < 0) temp = I_differentiel * (-1.0) *0.1;
-	else  temp = I_differentiel * 0.1;
-	//vitesse moyenne en fonction de l'integrale de la position(diff) et vitesse max = potar
-	offset = TFC_ReadPot(1)-temp;
-
-	/* bornes offset */
-	/*
-	if(offset < VITMIN) offset = VITMIN; //0.3
-	else if(offset > 0.9) offset = 0.9;
-
-	vitesseG=offset+differentiel;
-	vitesseD=offset-differentiel;
-
-	TERMINAL_PRINTF("\rI_diff: %d\ntemp: %d\npotar: %d\noffset: %d\nvitG : %d\nvitD : %d\n\r",(int)(I_differentiel*1000.0),
-			(int) (temp*1000.0), (int)(TFC_ReadPot(1)*1000.0), (int)(offset*1000.0), (int)(vitesseG*1000.0), (int)(vitesseD*1000.0));
-
-	if(vitesseG > 1.0) vitesseG=1.0;
-	else if(vitesseG < 0.0) vitesseG = 0.0;
-
-	if(vitesseD > 1.0) vitesseD=1.0;
-	else if(vitesseD < 0.0) vitesseD = 0.0;*/
 
 }
 

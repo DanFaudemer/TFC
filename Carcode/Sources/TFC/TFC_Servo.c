@@ -10,7 +10,9 @@
 /**********************************************************************************************/
 
 
-int16_t offsetServo = 200;
+int16_t offsetServo = -350;
+int16_t SERVOMIN  = -1000;
+int16_t SERVOMAX = 1200;
 //Position is -1000 to 1000 : pos in % *1000 (ex: 0.5*1000=500 -> 50% * 90°).  //  Use SERVO_X_MIN_DUTY_CYCLE and SERVO_MAX_DUTY_CYCLE  to calibrate the extremes
 //          => -90° to 90°
 void TFC_SetServo(uint8_t ServoNumber, int16_t Position)

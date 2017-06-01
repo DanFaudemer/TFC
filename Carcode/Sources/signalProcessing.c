@@ -90,7 +90,7 @@ int16_t getPos(int16_t *camera)
 	int16_t max = 0;
 	for(i=LIMITCAMMIN; i < LIMITCAMMAX ; i++)
 	{
-		if(abs(camera[i]) > abs(max))
+		if(abs(camera[i]) > abs(max) &&  abs(camera[i]) > seuil_detection)
 		{
 			max = camera[i];
 			i_max = i;
@@ -108,9 +108,6 @@ int16_t getPos(int16_t *camera)
 int16_t getCenterPos( uint16_t  *LineScanImage)
 {
 	int16_t posLine, posLine_prev;	
-
-	
-
 
 	
 	medianFilter(LineScanImage, medianFilter_out);

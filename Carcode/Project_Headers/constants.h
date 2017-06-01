@@ -18,8 +18,7 @@
 #define SEUIL_DETECTION_3 (seuil_detection-seuil_detection/4)
 #define SEUIL_DETECTION_4 (seuil_detection)
 
-#define SERVOMIN -500 // -34.0% * 90°
-#define SERVOMAX 1200 // 80.0% * 90°
+
 
 
 //#define abs(a) ((a<0) ? (-a) : (a))
